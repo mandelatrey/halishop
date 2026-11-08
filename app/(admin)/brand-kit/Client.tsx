@@ -213,6 +213,18 @@ export default function BrandKitClient({ initialBrand }: { initialBrand: BrandKi
           </p>
         </aside>
       </div>
+
+      {/* Phones: the header's Save scrolls out of reach, so pin one to the bottom
+          whenever there's something to save. */}
+      {(dirty || isPending) && (
+        <div className="ad-savebar" role="region" aria-label="Unsaved changes">
+          <span className="ad-savebar-note">Unsaved changes</span>
+          <Button variant="sec" onClick={revert} disabled={isPending}>Revert</Button>
+          <Button onClick={save} disabled={isPending}>
+            {isPending ? "Saving…" : "Save changes"}
+          </Button>
+        </div>
+      )}
     </main>
   );
 }

@@ -416,6 +416,14 @@ export default function TemplateEditorClient({
           <DesignInstructions />
         </div>
       </div>
+
+      {/* Phones: keep Save within reach while scrolling the long form */}
+      <div className="ad-savebar">
+        <Link href="/templates" className="ad-back">← All templates</Link>
+        <Button onClick={save} disabled={isPending}>
+          {isPending ? "Saving…" : "Save template"}
+        </Button>
+      </div>
     </main>
   );
 }
