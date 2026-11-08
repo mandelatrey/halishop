@@ -70,15 +70,18 @@ export default function DropOutputClient({
 
   const setActiveVariant = useCallback(
     (code: string, variant: CaptionVariantKind) => {
-      setItems((prev) => {
-        const next = prev.map((it) => (it.code === code ? { ...it, activeCaption: variant } : it));
-        startTransition(async () => {
-          await updateDropItems(drop.id, next);
-        });
-        return next;
+      // Compute `next` from the current render's items rather than inside a
+      // setState updater: updaters run during React's render phase and must be
+      // pure, so starting a transition / server action from one throws
+      // "Cannot call startTransition while rendering" (and double-fires the
+      // save under StrictMode).
+      const next = items.map((it) => (it.code === code ? { ...it, activeCaption: variant } : it));
+      setItems(next);
+      startTransition(async () => {
+        await updateDropItems(drop.id, next);
       });
     },
-    [drop.id]
+    [drop.id, items]
   );
 
   async function saveOne(code: string) {
