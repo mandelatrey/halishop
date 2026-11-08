@@ -466,3 +466,26 @@
   .lp-hero-note { display: none; }
   .lp-float-left { margin-bottom: 80px; }
 }
+
+/* ---------- Motion support (see LandingMotion.tsx) ---------- */
+/* Headline lines reveal from behind a mask; padding keeps descenders unclipped */
+.lp-line { display: block; overflow: hidden; padding-bottom: 0.1em; margin-bottom: -0.1em; }
+.lp-line-in { display: inline-block; }
+
+/* Statement words: soft words carry the faded tone via opacity (animated) */
+.lp-word { display: inline; }
+.lp-word[data-soft] { opacity: 0.42; }
+
+.lp-float-right { background: none; box-shadow: none; padding: 0; }
+.lp-float-bob { will-change: transform; }
+
+/* Hide hero intro elements until GSAP reveals them — only when motion is
+ * allowed, and only once JS has hydrated the wrapper (.lp-motion). */
+@media (prefers-reduced-motion: no-preference) {
+  .lp-motion .lp-hero .lp-pill,
+  .lp-motion .lp-lede,
+  .lp-motion .lp-hero .lp-ctas,
+  .lp-motion .lp-card,
+  .lp-motion .lp-float,
+  .lp-motion .lp-hero-note { visibility: hidden; }
+}

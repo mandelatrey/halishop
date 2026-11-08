@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import "./landing.css";
+import LandingMotion from "./LandingMotion";
 
 export const metadata: Metadata = {
   title: "Haali — commerce for social sellers",
@@ -11,11 +12,28 @@ export const metadata: Metadata = {
 const SHOP_SLUG = process.env.NEXT_PUBLIC_SHOP_SLUG || "shania";
 
 /** Product facts, not vanity metrics — every number here is true of the app. */
-const STATS = [
+const STATS: { value: string; count?: number; suffix?: string; label: string }[] = [
   { value: "9:16", label: "Status-ready cards, sized for stories" },
-  { value: "3", label: "Caption styles for every card" },
-  { value: "1 tap", label: "From your status to a WhatsApp order" },
+  { value: "3", count: 3, label: "Caption styles for every card" },
+  { value: "1 tap", count: 1, suffix: " tap", label: "From your status to a WhatsApp order" },
 ];
+
+const STATEMENT_MAIN =
+  "Haali gives social sellers one place to manage their catalogue, post drops that look like a brand,";
+const STATEMENT_SOFT = "and turn every status view into an order they can actually fulfil.";
+
+/** Split a sentence into word spans so GSAP can light them up one by one. */
+function Words({ text, soft = false }: { text: string; soft?: boolean }) {
+  return (
+    <>
+      {text.split(" ").map((w, i) => (
+        <span key={i} className="lp-word" data-soft={soft ? "1" : undefined}>
+          {w}{" "}
+        </span>
+      ))}
+    </>
+  );
+}
 
 const STEPS = [
   {
@@ -108,16 +126,21 @@ function StatusCardMock() {
 
 export default function Landing() {
   return (
-    <main className="lp">
+    <LandingMotion>
       {/* ---------------- Hero ---------------- */}
       <section className="lp-hero">
         <CircuitLines />
         <div className="lp-hero-copy">
           <Pill>Built for WhatsApp sellers</Pill>
           <h1 className="lp-h1">
-            Sell from your status.
-            <br />
-            <span className="lp-soft">Take orders on</span> WhatsApp.
+            <span className="lp-line">
+              <span className="lp-line-in">Sell from your status.</span>
+            </span>
+            <span className="lp-line">
+              <span className="lp-line-in">
+                <span className="lp-soft">Take orders on</span> WhatsApp.
+              </span>
+            </span>
           </h1>
           <p className="lp-lede">
             Branded status cards, one link to shop from, and every order sent straight into your WhatsApp,
@@ -135,6 +158,7 @@ export default function Landing() {
 
         <div className="lp-stage" aria-hidden>
           <div className="lp-float lp-float-left">
+            <div className="lp-float-bob">
             <div className="lp-float-k">Drop · 6 cards ready</div>
             <div className="lp-float-row">
               <span className="lp-chip on">Default</span>
@@ -144,16 +168,19 @@ export default function Landing() {
             <p className="lp-float-text">
               🔥 Hoodie grey is back. Sizes S–L, only 3 left. Tap to order: haali.app/o/C4
             </p>
+            </div>
           </div>
 
           <StatusCardMock />
 
-          <div className="lp-float lp-float-right lp-bubble">
-            <div className="lp-bubble-k">New order · WhatsApp</div>
-            <p>
-              Hi! I&apos;d like to order <b>Hoodie grey</b> (size M), code <b>C4</b>. Deliver to Ntinda, please.
-            </p>
-            <div className="lp-bubble-time">18:24 ✓✓</div>
+          <div className="lp-float lp-float-right">
+            <div className="lp-float-bob lp-bubble">
+              <div className="lp-bubble-k">New order · WhatsApp</div>
+              <p>
+                Hi! I&apos;d like to order <b>Hoodie grey</b> (size M), code <b>C4</b>. Deliver to Ntinda, please.
+              </p>
+              <div className="lp-bubble-time">18:24 ✓✓</div>
+            </div>
           </div>
         </div>
 
@@ -168,14 +195,23 @@ export default function Landing() {
       <section className="lp-dark">
         <div className="lp-inner lp-center">
           <Pill dark>What Haali does</Pill>
-          <p className="lp-statement">
-            Haali gives social sellers one place to manage their catalogue, post drops that look like a brand,{" "}
-            <span className="lp-fade">and turn every status view into an order they can actually fulfil.</span>
+          <p className="lp-statement" aria-label={`${STATEMENT_MAIN} ${STATEMENT_SOFT}`}>
+            <Words text={STATEMENT_MAIN} />
+            <Words text={STATEMENT_SOFT} soft />
           </p>
           <div className="lp-stats">
             {STATS.map((s) => (
               <div key={s.value} className="lp-stat">
-                <div className="lp-stat-v">{s.value}</div>
+                <div className="lp-stat-v">
+                  {s.count !== undefined ? (
+                    <>
+                      <span data-count={s.count}>{s.count}</span>
+                      {s.suffix}
+                    </>
+                  ) : (
+                    s.value
+                  )}
+                </div>
                 <div className="lp-stat-l">{s.label}</div>
               </div>
             ))}
@@ -263,7 +299,7 @@ export default function Landing() {
 
       {/* ---------------- How it works ---------------- */}
       <section className="lp-section lp-inner">
-        <div className="lp-center">
+        <div className="lp-center lp-steps-head">
           <Pill>How it works</Pill>
           <h2 className="lp-h2">
             From catalogue to <span className="lp-soft">confirmed order</span>
@@ -305,6 +341,6 @@ export default function Landing() {
         <span>Haali</span>
         <span>Made for social sellers in Kampala and beyond</span>
       </footer>
-    </main>
+    </LandingMotion>
   );
 }
