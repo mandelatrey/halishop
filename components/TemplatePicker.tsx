@@ -21,8 +21,8 @@ type Props = {
   showUploadTile?: boolean;
 };
 
-const TILE_W = 46;
-const TILE_H = 82;
+const TILE_W = 72;
+const TILE_H = 128;
 
 export default function TemplatePicker({
   product,
@@ -60,7 +60,7 @@ export default function TemplatePicker({
       ))}
       {showUploadTile && (
         <Link href="/templates" className="upload-tile" title="Upload your own">
-          + UPLOAD
+          + Upload
         </Link>
       )}
     </div>
@@ -129,16 +129,16 @@ function TemplateTile({
         }
         .tile-edit {
           position: absolute;
-          top: 4px;
-          right: 4px;
-          width: 18px;
-          height: 18px;
+          top: 6px;
+          right: 6px;
+          width: 24px;
+          height: 24px;
           border-radius: 999px;
           background: color-mix(in srgb, #ffffff 92%, transparent);
           color: var(--color-text);
           display: grid;
           place-items: center;
-          font: 600 10px/1 "DM Sans", sans-serif;
+          font: 600 12px/1 "DM Sans", sans-serif;
           text-decoration: none;
           border: 1px solid var(--stroke-soft);
           transition: background 0.15s ease, transform 0.15s ease, color 0.15s ease;

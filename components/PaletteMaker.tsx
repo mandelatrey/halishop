@@ -44,11 +44,11 @@ export default function PaletteMaker({ value, onChange }: Props) {
   const contrastAccent = contrastRatio(derived.accent, derived.accentFg);
 
   return (
-    <div className="col" style={{ gap: 18 }}>
+    <div className="col" style={{ gap: 24 }}>
       {/* Primary picker */}
-      <div className="col" style={{ gap: 8 }}>
+      <div className="col" style={{ gap: 10 }}>
         <span className="k">Brand colour</span>
-        <div className="row" style={{ gap: 12 }}>
+        <div className="row" style={{ gap: 14 }}>
           <button
             type="button"
             className="pm-well"
@@ -63,14 +63,14 @@ export default function PaletteMaker({ value, onChange }: Props) {
             onChange={(e) => onChange({ ...value, primary: normalizeHex(e.target.value) })}
             style={{ position: "absolute", opacity: 0, pointerEvents: "none", width: 0, height: 0 }}
           />
-          <div className="col" style={{ gap: 4 }}>
+          <div className="col" style={{ gap: 6, minWidth: 0 }}>
             <input
               className="inp"
               value={primary.toUpperCase()}
               onChange={(e) => onChange({ ...value, primary: normalizeHex(e.target.value) })}
-              style={{ width: 118, fontFamily: "ui-monospace, Menlo, monospace" }}
+              style={{ width: 132, fontFamily: "ui-monospace, Menlo, monospace" }}
             />
-            <span className="s" style={{ fontSize: 10.5 }}>
+            <span className="s">
               Card footer background · text is auto-picked for contrast
             </span>
           </div>
@@ -78,7 +78,7 @@ export default function PaletteMaker({ value, onChange }: Props) {
       </div>
 
       {/* Harmony strategy */}
-      <div className="col" style={{ gap: 6 }}>
+      <div className="col" style={{ gap: 10 }}>
         <span className="k">Harmony</span>
         <div className="pm-harmony">
           {HARMONIES.map((h) => (
@@ -107,7 +107,7 @@ export default function PaletteMaker({ value, onChange }: Props) {
       </div>
 
       {/* Accent suggestions from the wheel */}
-      <div className="col" style={{ gap: 8 }}>
+      <div className="col" style={{ gap: 10 }}>
         <div className="pm-accent-header">
           <span className="k">Accent (price / CTAs)</span>
           <span className="s pm-accent-hint">
@@ -147,7 +147,7 @@ export default function PaletteMaker({ value, onChange }: Props) {
       </div>
 
       {/* Live palette preview */}
-      <div ref={previewRef} className="col" style={{ gap: 8, scrollMarginTop: 80 }}>
+      <div ref={previewRef} className="col" style={{ gap: 10, scrollMarginTop: 96 }}>
         <span className="k">Preview</span>
         <div className="pm-preview">
           <div className="pm-swatch" style={{ background: derived.primary, color: derived.primaryFg }}>
@@ -194,16 +194,16 @@ export default function PaletteMaker({ value, onChange }: Props) {
         .pm-harmony {
           display: flex;
           flex-wrap: wrap;
-          gap: 6px;
+          gap: 8px;
         }
         .pm-harmony-chip {
           flex: 0 0 auto;
-          padding: 7px 12px;
+          padding: 8px 14px;
           border: 1px solid var(--stroke-soft);
-          background: transparent;
+          background: #fff;
           border-radius: 999px;
-          font: 600 10.5px/1 "DM Sans", sans-serif;
-          letter-spacing: 0.01em;
+          font: 500 13px/1 "DM Sans", sans-serif;
+          letter-spacing: 0;
           color: var(--color-mute);
           cursor: pointer;
           transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
@@ -211,6 +211,12 @@ export default function PaletteMaker({ value, onChange }: Props) {
         .pm-harmony-chip:hover {
           color: var(--color-text);
           border-color: var(--stroke-strong);
+        }
+        .pm-harmony-chip:focus-visible,
+        .pm-well:focus-visible,
+        .pm-chip:focus-visible {
+          outline: 2px solid var(--color-accent);
+          outline-offset: 2px;
         }
         .pm-harmony-chip.on {
           background: var(--color-text);
@@ -276,6 +282,10 @@ export default function PaletteMaker({ value, onChange }: Props) {
           height: 30px;
           border-radius: 999px;
         }
+        .pm-custom:focus-within {
+          outline: 2px solid var(--color-accent);
+          outline-offset: 2px;
+        }
         .pm-custom-icon {
           position: absolute;
           right: -2px;
@@ -299,27 +309,27 @@ export default function PaletteMaker({ value, onChange }: Props) {
           .pm-preview { grid-template-columns: 1fr; }
         }
         .pm-swatch {
-          border-radius: 8px;
-          padding: 14px;
+          border-radius: 12px;
+          padding: 16px;
           display: flex;
           flex-direction: column;
-          gap: 4px;
-          min-height: 108px;
+          gap: 6px;
+          min-height: 116px;
           border: 1px solid rgba(32, 30, 29, 0.08);
         }
         .pm-swatch-role {
-          font: 700 8.5px/1 ui-monospace, Menlo, monospace;
-          letter-spacing: 0.14em;
+          font: 600 10.5px/1 ui-monospace, Menlo, monospace;
+          letter-spacing: 0.1em;
           text-transform: uppercase;
           opacity: 0.78;
         }
         .pm-swatch-hex {
-          font: 700 12px/1 ui-monospace, Menlo, monospace;
+          font: 600 14px/1 ui-monospace, Menlo, monospace;
           letter-spacing: 0.02em;
         }
         .pm-swatch-contrast {
-          font: 400 10px/1.3 ui-monospace, Menlo, monospace;
-          opacity: 0.7;
+          font: 400 11.5px/1.3 ui-monospace, Menlo, monospace;
+          opacity: 0.75;
           margin-top: auto;
         }
       `}</style>

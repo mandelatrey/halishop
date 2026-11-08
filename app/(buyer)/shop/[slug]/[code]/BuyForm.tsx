@@ -68,11 +68,16 @@ export default function BuyForm({ shop, product }: { shop: Shop; product: Produc
   }
 
   return (
-    <div>
-      <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start", gap: 12, padding: "16px 14px 12px", borderBottom: "1px solid var(--stroke-hair)" }}>
-        <div className="col" style={{ gap: 6 }}>
-          <div className="bp-title">{product.title}</div>
-          <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
+    <div className="by-form">
+      <div className="by-form-head">
+        <h1 className="by-h1 by-h1-sm">{product.title}</h1>
+        <div className="by-price">
+          <small>{product.currency}</small>
+          {product.price.toLocaleString()}
+        </div>
+        {((typeof product.stock === "number" && product.stock > 0) ||
+          (product.category && product.category !== "general")) && (
+          <div className="by-tags">
             {typeof product.stock === "number" && product.stock > 0 && (
               <span className={product.stock <= 2 ? "tag acc" : "tag"}>
                 {product.stock <= 2 ? `Only ${product.stock} left` : `${product.stock} in stock`}
@@ -82,21 +87,16 @@ export default function BuyForm({ shop, product }: { shop: Shop; product: Produc
               <span className="tag">{product.category}</span>
             )}
           </div>
-        </div>
-        <div className="bp-price">
-          {product.currency}
-          <br />
-          {product.price.toLocaleString()}
-        </div>
+        )}
       </div>
 
       {showCompact ? (
         // Screen 1h — compact returning-buyer layout
-        <div className="col" style={{ gap: 12, padding: "16px 14px" }}>
+        <div className="by-form-body">
           {variants.length > 0 && (
-            <div className="col" style={{ gap: 6 }}>
-              <span className="k">Size</span>
-              <div className="seg">
+            <div className="by-field">
+              <span className="by-label">Size</span>
+              <div className="seg by-sizes">
                 {variants.map((v) => (
                   <button
                     key={v}
@@ -111,10 +111,10 @@ export default function BuyForm({ shop, product }: { shop: Shop; product: Produc
             </div>
           )}
 
-          <div className="row" style={{ justifyContent: "space-between", padding: "10px 12px", background: "var(--color-surface)", borderRadius: 8 }}>
-            <div className="col" style={{ gap: 2 }}>
-              <span className="k">Sending as</span>
-              <span className="t2">
+          <div className="by-recall">
+            <div className="by-field" style={{ gap: 6 }}>
+              <span className="by-label">Sending as</span>
+              <span className="by-recall-v">
                 {recall?.whatsapp}
                 {recall?.area ? ` · ${recall.area}` : ""}
               </span>
@@ -126,34 +126,34 @@ export default function BuyForm({ shop, product }: { shop: Shop; product: Produc
                 setExpanded(true);
                 clear();
               }}
-              style={{ padding: "4px 8px" }}
             >
               Change
             </button>
           </div>
 
-          <a
-            href={orderLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={handleOrder}
-            className="btn"
-            style={{ display: "block", textAlign: "center" }}
-          >
-            Order — 1 tap · {formatPrice(product.price * qty, product.currency)}
-          </a>
+          <div className="by-cta">
+            <a
+              href={orderLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={handleOrder}
+              className="btn by-order"
+            >
+              Order — 1 tap · {formatPrice(product.price * qty, product.currency)}
+            </a>
 
-          <a href={askLink} target="_blank" rel="noopener noreferrer" className="btn gh" style={{ textAlign: "center", width: "auto" }}>
-            Ask a question first →
-          </a>
+            <a href={askLink} target="_blank" rel="noopener noreferrer" className="btn gh">
+              Ask a question first →
+            </a>
+          </div>
         </div>
       ) : (
         // Screen 1f + 1g — full form + message preview
-        <div className="col" style={{ gap: 16, padding: "16px 14px" }}>
+        <div className="by-form-body">
           {variants.length > 0 && (
-            <div className="col" style={{ gap: 6 }}>
-              <span className="k">{product.variantLabel ?? "Size"}</span>
-              <div className="seg">
+            <div className="by-field">
+              <span className="by-label">{product.variantLabel ?? "Size"}</span>
+              <div className="seg by-sizes">
                 {variants.map((v) => (
                   <button
                     key={v}
@@ -168,97 +168,70 @@ export default function BuyForm({ shop, product }: { shop: Shop; product: Produc
             </div>
           )}
 
-          <div className="row" style={{ gap: 12 }}>
-            <div className="col" style={{ gap: 6 }}>
-              <span className="k">Quantity</span>
-              <div className="seg" style={{ width: "auto" }}>
-                <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} style={{ padding: "7px 14px", flex: "none" }}>
+          <div className="by-field-row">
+            <div className="by-field">
+              <span className="by-label">Quantity</span>
+              <div className="seg by-qty">
+                <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} aria-label="One fewer">
                   −
                 </button>
-                <button type="button" className="on" style={{ padding: "7px 16px", flex: "none" }}>
+                <button type="button" className="on" aria-live="polite">
                   {qty}
                 </button>
-                <button type="button" onClick={() => setQty((q) => q + 1)} style={{ padding: "7px 14px", flex: "none" }}>
+                <button type="button" onClick={() => setQty((q) => q + 1)} aria-label="One more">
                   +
                 </button>
               </div>
             </div>
-            <div className="col" style={{ gap: 6, flex: 1 }}>
-              <span className="k">Delivery area</span>
+            <label className="by-field">
+              <span className="by-label">Delivery area</span>
               <input
                 className="inp"
                 value={area}
                 onChange={(e) => setArea(e.target.value)}
                 placeholder={shop.contact.area ?? "Ntinda"}
               />
-            </div>
+            </label>
           </div>
 
-          <div className="col" style={{ gap: 6 }}>
-            <span className="k">Your WhatsApp number *</span>
+          <div className="by-field">
+            <span className="by-label">Your WhatsApp number *</span>
             <PhoneInput
               value={whatsapp}
               onChange={setWhatsapp}
               placeholder="772 145 908"
             />
-            <div className="p" style={{ fontSize: 11 }}>
+            <p className="by-hint">
               Only {shop.brandKit.shopName.split(/\s+/)[0]} sees this. Saved on this phone for next time.
+            </p>
+          </div>
+
+          {/* Screen 1g — message preview, shown as the WhatsApp bubble it becomes */}
+          <div className="by-chat">
+            <span className="by-label">What gets sent</span>
+            <div className="by-bubble">
+              {orderText}
+              <div className="by-bubble-time">✓✓</div>
             </div>
           </div>
 
-          {/* Screen 1g — message preview */}
-          <div
-            className="col"
-            style={{
-              gap: 6,
-              padding: 12,
-              background: "var(--color-surface)",
-              borderLeft: "2px solid var(--color-accent)",
-              borderRadius: 4,
-            }}
-          >
-            <span className="k">What gets sent</span>
-            <div className="p" style={{ fontSize: 12.5, color: "var(--color-text)" }}>{orderText}</div>
-          </div>
-
-          <div className="col" style={{ gap: 8 }}>
+          <div className="by-cta">
             <a
               href={orderLink || "#"}
               target="_blank"
               rel="noopener noreferrer"
               onClick={handleOrder}
-              className="btn"
-              style={{ display: "block", textAlign: "center" }}
+              className="btn by-order"
               aria-disabled={!effectiveWhatsapp}
             >
               Order on WhatsApp — {formatPrice(product.price * qty, product.currency)}
             </a>
-            <a
-              href={askLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn gh"
-              style={{ textAlign: "center", width: "auto", alignSelf: "flex-start" }}
-            >
+            <a href={askLink} target="_blank" rel="noopener noreferrer" className="btn gh">
               Or just ask a question first →
             </a>
           </div>
         </div>
       )}
-
-      <style>{`
-        .bp-title {
-          font: 800 21px/1.05 "DM Sans", sans-serif;
-          letter-spacing: -0.02em;
-          text-transform: uppercase;
-        }
-        .bp-price {
-          font: 800 22px/1 "DM Sans", sans-serif;
-          letter-spacing: -0.02em;
-          text-align: right;
-        }
-        .seg > button.on { background: var(--color-accent); color: #fff; }
-      `}</style>
     </div>
   );
 }

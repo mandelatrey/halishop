@@ -9,6 +9,7 @@ type Props = {
   children: ReactNode;
 };
 
+/** Rounded phone-style frame (v2 direction) — used to stage the card generator. */
 export default function Frame({
   title = "MAKE STATUS CARDS",
   time = "13:58",
@@ -16,8 +17,8 @@ export default function Frame({
   children,
 }: Props) {
   return (
-    <div className="fr" style={{ width }}>
-      <div className="sb">
+    <div className="ad-phone" style={{ width }}>
+      <div className="ad-phone-bar">
         <span>{time}</span>
         <span>{title}</span>
       </div>

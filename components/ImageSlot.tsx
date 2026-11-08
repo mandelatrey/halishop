@@ -28,41 +28,23 @@ export default function ImageSlot({
   }
 
   return (
-    <div className="col" style={{ gap: 6 }}>
+    <div className="ad-field">
       <label htmlFor={id} className="k">{label}</label>
-      <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-        <div
+      <div className="ad-slot">
+        <button
+          type="button"
           onClick={() => inputRef.current?.click()}
-          style={{
-            width,
-            height,
-            border: "2px solid #201e1d",
-            background: value ? "#fff" : undefined,
-            overflow: "hidden",
-            cursor: "pointer",
-            display: "grid",
-            placeItems: "center",
-          }}
-          className={value ? "" : "ph"}
+          style={{ width, height }}
+          className={`ad-slot-box${value ? " filled" : ""}`}
+          aria-label={value ? `Replace ${label}` : `Upload ${label}`}
         >
           {value ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={value}
-              alt=""
-              style={{
-                maxWidth: "82%",
-                maxHeight: "82%",
-                width: "auto",
-                height: "auto",
-                objectFit: "contain",
-                display: "block",
-              }}
-            />
+            <img src={value} alt="" />
           ) : (
-            <span>tap to<br />upload</span>
+            <span className="ad-slot-empty"><b>+</b>Upload</span>
           )}
-        </div>
+        </button>
         {value && (
           <button type="button" className="btn gh" onClick={() => onChange(undefined)}>
             Remove

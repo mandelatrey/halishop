@@ -1,3 +1,5 @@
+import "./buyer.css";
+
 // All buyer pages read from MongoDB; skip prerender.
 export const dynamic = "force-dynamic";
 
