@@ -142,7 +142,7 @@ input, textarea, select { font-family: inherit; }
 
 /* metadata-key: small caps mono for field labels — 12% letter-spacing */
 .k {
-  font: 700 9.5px/1 ui-monospace, Menlo, monospace;
+  font: 700 10px/1 ui-monospace, Menlo, monospace;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--color-mute-2);
@@ -764,7 +764,7 @@ input, textarea, select { font-family: inherit; }
 .panel-dark {
   position: relative;
   background:
-    radial-gradient(110% 80% at 100% 0%, rgba(19, 90, 237, 0.5) 0%, rgba(19, 90, 237, 0) 55%),
+    radial-gradient(farthest-corner at 100% 0%, rgba(19, 90, 237, 0.45) 0%, rgba(19, 90, 237, 0.12) 35%, rgba(19, 90, 237, 0) 70%),
     var(--color-text);
   color: var(--color-on-dark);
   border-radius: var(--radius-lg);
