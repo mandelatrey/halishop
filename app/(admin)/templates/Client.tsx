@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { v4 as uuidv4 } from "uuid";
 import Button from "@/components/Button";
+import PageHeader from "@/components/PageHeader";
 import { removeCustomTemplate, upsertCustomTemplate } from "@/lib/actions/templates";
 import type { CustomTemplate } from "@/lib/types";
 
@@ -44,50 +45,47 @@ export default function TemplatesClient({ initialTemplates }: { initialTemplates
   }
 
   return (
-    <main className="page">
-      <h1>Custom templates</h1>
-      <p className="subtitle">
-        Upload your own backgrounds, overlays, or full designs. The app burns product code, price,
-        shop name, and shop URL on top so every card stays trackable.
-      </p>
-
-      <div style={{ marginBottom: 20 }}>
-        <Button onClick={createNew} className="sm" variant="sm" disabled={isPending}>
-          {isPending ? "Creating…" : "+ New template"}
-        </Button>
-      </div>
+    <main className="page ad-page">
+      <PageHeader
+        label="Templates"
+        title="Custom"
+        soft="templates"
+        subtitle="Upload your own backgrounds, overlays, or full designs. The app burns product code, price, shop name, and shop URL on top so every card stays trackable."
+        actions={
+          <Button onClick={createNew} disabled={isPending}>
+            {isPending ? "Creating…" : "+ New template"}
+          </Button>
+        }
+      />
 
       {templates.length === 0 ? (
-        <div className="dinstr">
-          <h3>Nothing here yet</h3>
-          <p style={{ margin: 0 }}>
-            Tap <strong>+ New template</strong> to upload an image and configure the text zone.
+        <section className="panel ad-empty">
+          <h2 className="section-title">Nothing here yet</h2>
+          <p>
+            Tap <strong style={{ color: "var(--color-text)", fontWeight: 600 }}>+ New template</strong> to upload an image and configure the text zone.
             You&rsquo;ll see a live preview using a sample product before you save.
           </p>
-        </div>
+        </section>
       ) : (
-        <div className="tlist">
+        <div className="ad-tlist">
           {templates.map((t) => (
-            <Link key={t.id} href={`/templates/${t.id}`}>
-              <div className="previewbox">
+            <Link key={t.id} href={`/templates/${t.id}`} className="ad-tcard">
+              <div className="ad-tcard-img">
                 {t.image ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={t.image} alt="" />
                 ) : (
-                  <div className="ph" style={{ width: "100%", height: "100%" }}>
-                    no image
-                  </div>
+                  <div className="ad-empty-ph">No image yet</div>
                 )}
               </div>
-              <div className="row" style={{ justifyContent: "space-between", gap: 8 }}>
-                <div className="col" style={{ gap: 2 }}>
+              <div className="ad-tcard-meta">
+                <div className="col">
                   <span className="t2">{t.name}</span>
                   <span className="s">{t.composition}</span>
                 </div>
                 <button
                   type="button"
-                  className="btn gh"
-                  style={{ width: "auto", padding: "4px 6px" }}
+                  className="btn gh danger"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();

@@ -11,6 +11,7 @@ import type {
 } from "@/lib/types";
 import Button from "@/components/Button";
 import ImageSlot from "@/components/ImageSlot";
+import PageHeader from "@/components/PageHeader";
 import PaletteMaker from "@/components/PaletteMaker";
 import PhoneInput from "@/components/PhoneInput";
 import SegmentedControl from "@/components/SegmentedControl";
@@ -80,189 +81,138 @@ export default function BrandKitClient({ initialBrand }: { initialBrand: BrandKi
   }
 
   return (
-    <main className="page">
-      <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: 12 }}>
-        <div>
-          <h1>Brand Kit</h1>
-          <p className="subtitle">
-            Pick a brand colour. Save to push the palette to every template.
-          </p>
-        </div>
-        <div className="row" style={{ gap: 8 }}>
-          {flash === "saved" && <span className="k saved-flash">Saved</span>}
-          {dirty && (
-            <Button variant="sec" onClick={revert}>Revert</Button>
-          )}
-          <Button onClick={save} disabled={!dirty || isPending} style={{ minWidth: 140 }}>
-            {isPending ? "Saving…" : dirty ? "Save changes" : "Saved"}
-          </Button>
-        </div>
-      </div>
+    <main className="page ad-page">
+      <PageHeader
+        label="Brand"
+        title="Brand"
+        soft="kit"
+        subtitle="Pick a brand colour. Save to push the palette to every template."
+        actions={
+          <>
+            {flash === "saved" && <span className="ad-flash" role="status">Saved ✓</span>}
+            {dirty && (
+              <Button variant="sec" onClick={revert}>Revert</Button>
+            )}
+            <Button onClick={save} disabled={!dirty || isPending} style={{ minWidth: 148 }}>
+              {isPending ? "Saving…" : dirty ? "Save changes" : "Saved"}
+            </Button>
+          </>
+        }
+      />
 
-      <div className="brand-kit-layout">
-        <div className="col brand-kit-form" style={{ gap: 22 }}>
-        <ImageSlot
-          value={draft.logo}
-          onChange={(v) => setDraft({ ...draft, logo: v })}
-          label="Logo"
-          width={72}
-          height={72}
-        />
-
-        <label className="col" style={{ gap: 6 }}>
-          <span className="k">Shop name</span>
-          <input
-            className="inp"
-            value={draft.shopName}
-            onChange={(e) => setDraft({ ...draft, shopName: e.target.value })}
-            placeholder="SHANIA COLLECTIONS"
-          />
-        </label>
-
-        <label className="col" style={{ gap: 6 }}>
-          <span className="k">Shop URL</span>
-          <input
-            className="inp"
-            value={draft.shopUrl}
-            onChange={(e) => setDraft({ ...draft, shopUrl: e.target.value })}
-            placeholder="shop.app/shania"
-          />
-        </label>
-
-        <div className="col" style={{ gap: 6 }}>
-          <span className="k">WhatsApp number</span>
-          <PhoneInput
-            value={draft.whatsapp ?? ""}
-            onChange={(next) => setDraft({ ...draft, whatsapp: next || undefined })}
-            placeholder="772 000 000"
-          />
-          <span className="s">
-            Used for buyer &ldquo;Order on WhatsApp&rdquo; links. Pick a country then type the number.
-          </span>
-        </div>
-
-        <div className="col" style={{ gap: 6 }}>
-          <span className="k">Palette maker</span>
-          <PaletteMaker
-            value={draft.palette}
-            onChange={(p) => setDraft({ ...draft, palette: p })}
-          />
-        </div>
-
-        <div className="col" style={{ gap: 6 }}>
-          <span className="k">Frame style</span>
-          <SegmentedControl
-            value={draft.frame}
-            options={FRAME_OPTIONS}
-            onChange={(v) => setDraft({ ...draft, frame: v })}
-          />
-        </div>
-
-        <div className="col" style={{ gap: 6 }}>
-          <span className="k">Always show</span>
-          <div className="fields">
-            {ALWAYS_SHOW_KEYS.map(({ key, label }) => (
-              <label key={key}>
-                <input
-                  type="checkbox"
-                  checked={draft.alwaysShow[key]}
-                  onChange={(e) =>
-                    setDraft({
-                      ...draft,
-                      alwaysShow: { ...draft.alwaysShow, [key]: e.target.checked },
-                    })
-                  }
-                />
-                {label}
-              </label>
-            ))}
-          </div>
-        </div>
-        </div>
-
-        <aside className="brand-kit-preview" aria-label="Status card preview">
-          <div className="brand-kit-preview-inner">
-            <span className="k preview-label">Live preview</span>
-            <div className="preview-card-well">
-              <StatusCard
-                product={PREVIEW_PRODUCT}
-                brand={draft}
-                config={PREVIEW_CONFIG}
-                template={{
-                  kind: "builtin",
-                  id: FRAME_TO_TEMPLATE_ID[draft.frame],
-                  label: FRAME_TO_TEMPLATE_ID[draft.frame],
-                }}
-                width={200}
+      <div className="ad-split">
+        <div className="ad-stack">
+          <section className="panel">
+            <h2 className="section-title">Shop details</h2>
+            <div className="ad-form">
+              <ImageSlot
+                value={draft.logo}
+                onChange={(v) => setDraft({ ...draft, logo: v })}
+                label="Logo"
+                width={80}
+                height={80}
               />
+
+              <div className="ad-grid-2">
+                <label className="ad-field">
+                  <span className="k">Shop name</span>
+                  <input
+                    className="inp"
+                    value={draft.shopName}
+                    onChange={(e) => setDraft({ ...draft, shopName: e.target.value })}
+                    placeholder="SHANIA COLLECTIONS"
+                  />
+                </label>
+
+                <label className="ad-field">
+                  <span className="k">Shop URL</span>
+                  <input
+                    className="inp"
+                    value={draft.shopUrl}
+                    onChange={(e) => setDraft({ ...draft, shopUrl: e.target.value })}
+                    placeholder="shop.app/shania"
+                  />
+                </label>
+              </div>
+
+              <div className="ad-field">
+                <span className="k">WhatsApp number</span>
+                <PhoneInput
+                  value={draft.whatsapp ?? ""}
+                  onChange={(next) => setDraft({ ...draft, whatsapp: next || undefined })}
+                  placeholder="772 000 000"
+                />
+                <span className="ad-hint">
+                  Used for buyer &ldquo;Order on WhatsApp&rdquo; links. Pick a country then type the number.
+                </span>
+              </div>
             </div>
-            <span className="anno preview-anno">
-              Updates as you edit — save to apply to every card.
-            </span>
+          </section>
+
+          <section className="panel">
+            <h2 className="section-title">Palette maker</h2>
+            <PaletteMaker
+              value={draft.palette}
+              onChange={(p) => setDraft({ ...draft, palette: p })}
+            />
+          </section>
+
+          <section className="panel">
+            <h2 className="section-title">Card layout</h2>
+            <div className="ad-form">
+              <div className="ad-field">
+                <span className="k">Frame style</span>
+                <SegmentedControl
+                  value={draft.frame}
+                  options={FRAME_OPTIONS}
+                  onChange={(v) => setDraft({ ...draft, frame: v })}
+                />
+              </div>
+
+              <div className="ad-field">
+                <span className="k">Always show</span>
+                <div className="fields">
+                  {ALWAYS_SHOW_KEYS.map(({ key, label }) => (
+                    <label key={key}>
+                      <input
+                        type="checkbox"
+                        checked={draft.alwaysShow[key]}
+                        onChange={(e) =>
+                          setDraft({
+                            ...draft,
+                            alwaysShow: { ...draft.alwaysShow, [key]: e.target.checked },
+                          })
+                        }
+                      />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <aside className="ad-aside panel" aria-label="Status card preview">
+          <h2 className="section-title">Live preview</h2>
+          <div className="ad-well">
+            <StatusCard
+              product={PREVIEW_PRODUCT}
+              brand={draft}
+              config={PREVIEW_CONFIG}
+              template={{
+                kind: "builtin",
+                id: FRAME_TO_TEMPLATE_ID[draft.frame],
+                label: FRAME_TO_TEMPLATE_ID[draft.frame],
+              }}
+              width={200}
+            />
           </div>
+          <p className="ad-hint" style={{ margin: "14px 0 0", textAlign: "center" }}>
+            Updates as you edit — save to apply to every card.
+          </p>
         </aside>
       </div>
-
-      <style jsx>{`
-        .saved-flash {
-          background: rgba(19, 90, 237, 0.12);
-          color: #004fda;
-          padding: 6px 10px;
-          border-radius: 999px;
-          font: 700 10px/1 ui-monospace, Menlo, monospace;
-          letter-spacing: 0.14em;
-          animation: pop 0.24s ease;
-        }
-        @keyframes pop {
-          0% { transform: scale(0.85); opacity: 0; }
-          100% { transform: scale(1); opacity: 1; }
-        }
-        .brand-kit-layout {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr) auto;
-          gap: 32px;
-          margin-top: 16px;
-          align-items: start;
-        }
-        .brand-kit-form {
-          max-width: 640px;
-          min-width: 0;
-        }
-        .brand-kit-preview {
-          position: sticky;
-          top: 24px;
-          width: 232px;
-        }
-        .brand-kit-preview-inner {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-        .preview-label {
-          padding-left: 2px;
-        }
-        .preview-card-well {
-          display: flex;
-          justify-content: center;
-          padding: 16px;
-          background: var(--color-surface);
-          border: 1px solid var(--stroke-soft);
-          border-radius: var(--radius);
-        }
-        .preview-anno {
-          text-align: center;
-        }
-        @media (max-width: 860px) {
-          .brand-kit-layout {
-            grid-template-columns: minmax(0, 1fr);
-          }
-          .brand-kit-preview {
-            position: static;
-            width: 100%;
-            justify-self: start;
-          }
-        }
-      `}</style>
     </main>
   );
 }

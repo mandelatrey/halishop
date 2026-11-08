@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import Button from "@/components/Button";
+import PageHeader from "@/components/PageHeader";
 import SegmentedControl from "@/components/SegmentedControl";
 import TextZonePicker from "@/components/TextZonePicker";
 import StatusCard from "@/components/StatusCard";
@@ -98,164 +99,178 @@ export default function TemplateEditorClient({
   }
 
   return (
-    <main className="page">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-        <h1>Edit template</h1>
-        <Link href="/templates" className="k">← All templates</Link>
-      </div>
-
-      <div className="two-col">
-        {/* Left: config */}
-        <div className="col" style={{ gap: 18 }}>
-          <label className="col" style={{ gap: 6 }}>
-            <span className="k">Name</span>
-            <input
-              className="inp"
-              value={draft.name}
-              onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-            />
-          </label>
-
-          <div className="col" style={{ gap: 6 }}>
-            <span className="k">Image</span>
-            <div
-              ref={dropRef}
-              className={`drop${dragging ? " on" : ""}`}
-              onClick={() => document.getElementById("tpl-file")?.click()}
-              onDragOver={(e) => {
-                e.preventDefault();
-                setDragging(true);
-              }}
-              onDragLeave={() => setDragging(false)}
-              onDrop={(e) => {
-                e.preventDefault();
-                setDragging(false);
-                handleFile(e.dataTransfer.files?.[0]);
-              }}
-            >
-              {draft.image ? (
-                <>
-                  <span>Click or drop to replace</span>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img className="thumb" src={draft.image} alt="preview" />
-                </>
-              ) : (
-                <span>
-                  Drop a 9:16 PNG or JPG here — or click to choose a file.
-                </span>
-              )}
-              <input
-                id="tpl-file"
-                type="file"
-                accept="image/png,image/jpeg"
-                style={{ display: "none" }}
-                onChange={(e) => handleFile(e.target.files?.[0])}
-              />
-            </div>
-            {aspectWarn && <div className="dinstr warn">{aspectWarn}</div>}
-          </div>
-
-          <div className="col" style={{ gap: 6 }}>
-            <span className="k">Composition</span>
-            <SegmentedControl
-              value={draft.composition}
-              options={COMPOSITION_OPTIONS}
-              onChange={(v) => setDraft({ ...draft, composition: v })}
-            />
-            <span className="s">
-              {draft.composition === "background" &&
-                "Your image sits behind the product photo; product photo remains the star."}
-              {draft.composition === "overlay" &&
-                "Your image sits on top of the product photo. Use a PNG with transparency."}
-              {draft.composition === "full" &&
-                "Your image is the whole card. Product photo is skipped; only your design + programmatic text."}
-            </span>
-          </div>
-
-          <div className="col" style={{ gap: 6 }}>
-            <span className="k">Text zone</span>
-            <TextZonePicker
-              value={draft.textZone}
-              onChange={(z) => setDraft({ ...draft, textZone: z })}
-            />
-            <span className="s">Tap where the app should anchor the programmatic text stack.</span>
-          </div>
-
-          <div className="row" style={{ gap: 16, alignItems: "flex-start" }}>
-            <div className="col" style={{ gap: 6, flex: 1 }}>
-              <span className="k">Text color</span>
-              <input
-                type="color"
-                value={draft.textColor}
-                onChange={(e) => setDraft({ ...draft, textColor: e.target.value })}
-                style={{ width: 60, height: 32, border: "1px solid var(--stroke-soft)", padding: 0 }}
-              />
-            </div>
-            <div className="col" style={{ gap: 6, flex: 1 }}>
-              <span className="k">Accent (price)</span>
-              <input
-                type="color"
-                value={draft.accentColor}
-                onChange={(e) => setDraft({ ...draft, accentColor: e.target.value })}
-                style={{ width: 60, height: 32, border: "1px solid var(--stroke-soft)", padding: 0 }}
-              />
-            </div>
-          </div>
-
-          <div className="col" style={{ gap: 6 }}>
-            <span className="k">Fields to render</span>
-            <div className="fields">
-              {FIELD_KEYS.map(({ key, label }) => (
-                <label key={key}>
-                  <input
-                    type="checkbox"
-                    checked={draft.fields[key]}
-                    onChange={(e) =>
-                      setDraft({
-                        ...draft,
-                        fields: { ...draft.fields, [key]: e.target.checked },
-                      })
-                    }
-                  />
-                  {label}
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {draft.composition !== "full" && (
-            <div className="col" style={{ gap: 6 }}>
-              <span className="k">Product image</span>
-              <SegmentedControl
-                value={draft.productImageMode}
-                options={PIMG_OPTIONS}
-                onChange={(v) => setDraft({ ...draft, productImageMode: v })}
-              />
-            </div>
-          )}
-
-          <div className="row" style={{ gap: 8 }}>
+    <main className="page ad-page">
+      <PageHeader
+        label="Templates"
+        title="Edit"
+        soft="template"
+        subtitle="Upload a 9:16 design, pick where the text sits, and check the live preview before you save."
+        actions={
+          <>
+            <Link href="/templates" className="ad-back">← All templates</Link>
+            <Button variant="sec" onClick={del} disabled={isPending}>Delete</Button>
             <Button onClick={save} disabled={isPending}>
               {isPending ? "Saving…" : "Save template"}
             </Button>
-            <Button variant="sec" onClick={del} disabled={isPending}>Delete</Button>
-          </div>
+          </>
+        }
+      />
+
+      <div className="ad-split wide-aside">
+        {/* Left: config */}
+        <div className="ad-stack">
+          <section className="panel">
+            <h2 className="section-title">Design</h2>
+            <div className="ad-form">
+              <label className="ad-field">
+                <span className="k">Name</span>
+                <input
+                  className="inp"
+                  value={draft.name}
+                  onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+                />
+              </label>
+
+              <div className="ad-field">
+                <span className="k">Image</span>
+                <div
+                  ref={dropRef}
+                  className={`drop${dragging ? " on" : ""}`}
+                  onClick={() => document.getElementById("tpl-file")?.click()}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setDragging(true);
+                  }}
+                  onDragLeave={() => setDragging(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setDragging(false);
+                    handleFile(e.dataTransfer.files?.[0]);
+                  }}
+                >
+                  {draft.image ? (
+                    <>
+                      <span>Click or drop to replace</span>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img className="thumb" src={draft.image} alt="preview" />
+                    </>
+                  ) : (
+                    <span>
+                      Drop a 9:16 PNG or JPG here — or click to choose a file.
+                    </span>
+                  )}
+                  <input
+                    id="tpl-file"
+                    type="file"
+                    accept="image/png,image/jpeg"
+                    style={{ display: "none" }}
+                    onChange={(e) => handleFile(e.target.files?.[0])}
+                  />
+                </div>
+                {aspectWarn && <div className="dinstr warn">{aspectWarn}</div>}
+              </div>
+
+              <div className="ad-field">
+                <span className="k">Composition</span>
+                <SegmentedControl
+                  value={draft.composition}
+                  options={COMPOSITION_OPTIONS}
+                  onChange={(v) => setDraft({ ...draft, composition: v })}
+                />
+                <span className="ad-hint">
+                  {draft.composition === "background" &&
+                    "Your image sits behind the product photo; product photo remains the star."}
+                  {draft.composition === "overlay" &&
+                    "Your image sits on top of the product photo. Use a PNG with transparency."}
+                  {draft.composition === "full" &&
+                    "Your image is the whole card. Product photo is skipped; only your design + programmatic text."}
+                </span>
+              </div>
+
+              {draft.composition !== "full" && (
+                <div className="ad-field">
+                  <span className="k">Product image</span>
+                  <SegmentedControl
+                    value={draft.productImageMode}
+                    options={PIMG_OPTIONS}
+                    onChange={(v) => setDraft({ ...draft, productImageMode: v })}
+                  />
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className="panel">
+            <h2 className="section-title">Text</h2>
+            <div className="ad-form">
+              <div className="ad-row" style={{ gap: 20 }}>
+                <TextZonePicker
+                  value={draft.textZone}
+                  onChange={(z) => setDraft({ ...draft, textZone: z })}
+                />
+                <div className="ad-field" style={{ flex: "1 1 180px" }}>
+                  <span className="k">Text zone</span>
+                  <span className="ad-hint">Tap where the app should anchor the programmatic text stack.</span>
+                </div>
+              </div>
+
+              <div className="ad-row" style={{ gap: 16 }}>
+                <div className="ad-field" style={{ flex: "1 1 140px" }}>
+                  <span className="k">Text color</span>
+                  <label className="ad-color">
+                    <input
+                      type="color"
+                      value={draft.textColor}
+                      onChange={(e) => setDraft({ ...draft, textColor: e.target.value })}
+                    />
+                    <span>{draft.textColor}</span>
+                  </label>
+                </div>
+                <div className="ad-field" style={{ flex: "1 1 140px" }}>
+                  <span className="k">Accent (price)</span>
+                  <label className="ad-color">
+                    <input
+                      type="color"
+                      value={draft.accentColor}
+                      onChange={(e) => setDraft({ ...draft, accentColor: e.target.value })}
+                    />
+                    <span>{draft.accentColor}</span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="ad-field">
+                <span className="k">Fields to render</span>
+                <div className="fields">
+                  {FIELD_KEYS.map(({ key, label }) => (
+                    <label key={key}>
+                      <input
+                        type="checkbox"
+                        checked={draft.fields[key]}
+                        onChange={(e) =>
+                          setDraft({
+                            ...draft,
+                            fields: { ...draft.fields, [key]: e.target.checked },
+                          })
+                        }
+                      />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
 
         {/* Right: preview + design instructions */}
-        <div className="col" style={{ gap: 16 }}>
-          <div>
-            <div className="section-title">Live preview (sample: {sampleProduct.code} · {sampleProduct.title})</div>
-            <div
-              style={{
-                background: "#f3f2f1",
-                border: "1px solid var(--stroke-hair)",
-                padding: 24,
-                display: "grid",
-                placeItems: "center",
-                borderRadius: 12,
-              }}
-            >
+        <div className="ad-stack">
+          <section className="panel">
+            <div className="ad-panel-head">
+              <h2 className="section-title">Live preview</h2>
+              <span className="s">Sample: {sampleProduct.code} · {sampleProduct.title}</span>
+            </div>
+            <div className="ad-well">
               {draft.image ? (
                 <div
                   onDragStart={(e) => e.preventDefault()}
@@ -324,26 +339,25 @@ export default function TemplateEditorClient({
                   />
                 </div>
               ) : (
-                <div className="ph" style={{ width: 220, height: 391 }}>
-                  upload an image
+                <div className="ad-empty-ph" style={{ width: 220, height: 391, borderRadius: 10, border: "1px dashed var(--stroke-strong)", textAlign: "center" }}>
+                  Upload an image
                   <br />
-                  to see preview
+                  to see the preview
                 </div>
               )}
             </div>
 
             {draft.composition !== "full" && draft.productImageMode !== "hidden" && (
-              <>
-                <div className="col" style={{ gap: 6, marginTop: 12 }}>
-                  <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
+              <div className="ad-form" style={{ marginTop: 24 }}>
+                <div className="ad-field">
+                  <div className="ad-meter">
                     <span className="k">Product image scale</span>
-                    <span className="s" style={{ fontVariantNumeric: "tabular-nums" }}>
-                      {(draft.productScale ?? 1).toFixed(2)}×
-                    </span>
+                    <span className="s">{(draft.productScale ?? 1).toFixed(2)}×</span>
                   </div>
                   <div className="row" style={{ gap: 8, alignItems: "center" }}>
                     <input
                       type="range"
+                      className="ad-range"
                       min={0.5}
                       max={2}
                       step={0.01}
@@ -362,22 +376,22 @@ export default function TemplateEditorClient({
                       Reset
                     </button>
                   </div>
-                  <span className="s">
+                  <span className="ad-hint">
                     Baked into the template — product photos land at this scale from the centre, so
                     uploads of any size share the same crop.
                   </span>
                 </div>
 
-                <div className="col" style={{ gap: 6, marginTop: 12 }}>
-                  <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
+                <div className="ad-field">
+                  <div className="ad-meter">
                     <span className="k">Product image position</span>
-                    <span className="s" style={{ fontVariantNumeric: "tabular-nums" }}>
+                    <span className="s">
                       {((draft.productOffsetX ?? 0) * 100).toFixed(0)}%,{" "}
                       {((draft.productOffsetY ?? 0) * 100).toFixed(0)}%
                     </span>
                   </div>
                   <div className="row" style={{ gap: 8, alignItems: "center" }}>
-                    <span className="s" style={{ flex: 1 }}>
+                    <span className="ad-hint" style={{ flex: 1 }}>
                       Drag the preview to reposition the product photo.
                     </span>
                     <button
@@ -395,9 +409,9 @@ export default function TemplateEditorClient({
                     </button>
                   </div>
                 </div>
-              </>
+              </div>
             )}
-          </div>
+          </section>
 
           <DesignInstructions />
         </div>
@@ -408,7 +422,8 @@ export default function TemplateEditorClient({
 
 function DesignInstructions() {
   return (
-    <div className="dinstr">
+    <section className="panel ad-guide">
+      <h2 className="section-title">Design guide</h2>
       <h3>How the app will lay out your design</h3>
       <dl>
         <dt>Aspect ratio</dt>
@@ -417,7 +432,7 @@ function DesignInstructions() {
         <dd>PNG (keep transparency for overlays) · JPG or PNG for backgrounds and full designs</dd>
       </dl>
 
-      <h3 style={{ marginTop: 12 }}>Fields the app will render on top</h3>
+      <h3>Fields the app will render on top</h3>
       <ul>
         <li>
           <strong>SHOP NAME</strong> — small monospace caps
@@ -437,13 +452,13 @@ function DesignInstructions() {
         </li>
       </ul>
 
-      <h3 style={{ marginTop: 12 }}>Where the text goes</h3>
-      <p style={{ margin: 0, font: "400 10.5px/1.5 'DM Sans', sans-serif" }}>
+      <h3>Where the text goes</h3>
+      <p>
         Pick a zone in the 3×3 grid at left. The app anchors the text stack in a ~160-pixel-wide
         safe area at that corner. Leave that region uncluttered in your design.
       </p>
 
-      <h3 style={{ marginTop: 12 }}>Product photo behaviour</h3>
+      <h3>Product photo behaviour</h3>
       <ul>
         <li>
           <strong>Background</strong> — your image sits behind the product photo, which stays centred.
@@ -459,6 +474,6 @@ function DesignInstructions() {
       <div className="warn">
         The tracking code is burned into the exported PNG. Don&rsquo;t cover it with your design.
       </div>
-    </div>
+    </section>
   );
 }

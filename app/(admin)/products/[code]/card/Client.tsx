@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRef, useState } from "react";
 import Button from "@/components/Button";
 import Frame from "@/components/Frame";
+import PageHeader from "@/components/PageHeader";
 import SegmentedControl from "@/components/SegmentedControl";
 import StatusCard from "@/components/StatusCard";
 import TemplatePicker from "@/components/TemplatePicker";
@@ -49,57 +50,59 @@ export default function CardGeneratorClient({
   }
 
   return (
-    <main className="page">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-        <h1>Card generator</h1>
-        <Link href="/products" className="k">← Products</Link>
-      </div>
+    <main className="page ad-page">
+      <PageHeader
+        label={`Product · ${product.code}`}
+        title="Card"
+        soft="generator"
+        subtitle={<>Make a status card for <strong style={{ fontWeight: 600, color: "var(--color-text)" }}>{product.title}</strong>. The code is burned into the image so every order traces back.</>}
+        actions={<Link href="/products" className="btn sec">← Products</Link>}
+      />
 
-      <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 24px" }}>
-        <Frame title="MAKE STATUS CARDS">
-          <div
-            className="row"
-            style={{
-              justifyContent: "space-between",
-              padding: "11px 12px",
-              borderBottom: "1px solid var(--stroke-soft)",
-            }}
-          >
-            <div className="t">CARD · {product.title.toUpperCase()}</div>
+      <div className="ad-split left-aside">
+        <div className="ad-aside" style={{ display: "flex", justifyContent: "center" }}>
+          <Frame title="Status preview" width={340}>
+            <div
+              className="col"
+              style={{
+                alignItems: "center",
+                padding: "16px 20px 28px",
+              }}
+            >
+              <div className="ad-well" style={{ width: "100%" }}>
+                <StatusCard
+                  ref={cardRef}
+                  product={product}
+                  brand={brand}
+                  config={config}
+                  template={template}
+                  width={200}
+                />
+              </div>
+            </div>
+          </Frame>
+        </div>
+
+        <section className="panel">
+          <div className="ad-panel-head">
+            <h2 className="section-title">Card · {product.title}</h2>
             <span className="tag">{product.code}</span>
           </div>
 
-          <div
-            className="col"
-            style={{
-              alignItems: "center",
-              padding: 20,
-              background: "#f3f2f1",
-              borderBottom: "1px solid var(--stroke-hair)",
-            }}
-          >
-            <StatusCard
-              ref={cardRef}
-              product={product}
-              brand={brand}
-              config={config}
-              template={template}
-              width={200}
-            />
-          </div>
+          <div className="ad-form">
+            <div className="ad-field">
+              <span className="k">Template</span>
+              <TemplatePicker
+                product={product}
+                brand={brand}
+                config={config}
+                customs={customs}
+                onSelect={(id) => setConfig((c) => ({ ...c, templateId: id }))}
+              />
+            </div>
 
-          <div className="col" style={{ gap: 9, padding: 12 }}>
-            <span className="k">Template</span>
-            <TemplatePicker
-              product={product}
-              brand={brand}
-              config={config}
-              customs={customs}
-              onSelect={(id) => setConfig((c) => ({ ...c, templateId: id }))}
-            />
-
-            <div className="row" style={{ gap: 8, marginTop: 4 }}>
-              <div className="col" style={{ gap: 4, flex: 1 }}>
+            <div className="ad-grid-2">
+              <div className="ad-field">
                 <span className="k">Show price</span>
                 <SegmentedControl
                   value={config.showPrice ? "Yes" : "No"}
@@ -112,7 +115,7 @@ export default function CardGeneratorClient({
                   }
                 />
               </div>
-              <div className="col" style={{ gap: 4, flex: 1 }}>
+              <div className="ad-field">
                 <span className="k">Code</span>
                 <SegmentedControl
                   value={config.codeFormat}
@@ -125,14 +128,18 @@ export default function CardGeneratorClient({
               </div>
             </div>
 
-            <Button onClick={save} disabled={exporting}>
-              {exporting ? "Rendering…" : "Save to gallery, then post"}
-            </Button>
-            <div className="anno">
-              code burned into the image — survives screenshots and re-shares
+            <hr className="ad-divider" />
+
+            <div className="ad-field">
+              <Button onClick={save} disabled={exporting}>
+                {exporting ? "Rendering…" : "Save to gallery, then post"}
+              </Button>
+              <span className="ad-hint">
+                Code burned into the image — survives screenshots and re-shares.
+              </span>
             </div>
           </div>
-        </Frame>
+        </section>
       </div>
     </main>
   );

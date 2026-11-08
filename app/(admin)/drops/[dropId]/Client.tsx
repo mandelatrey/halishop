@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useMemo, useRef, useState, useTransition } from "react";
 import Button from "@/components/Button";
+import PageHeader from "@/components/PageHeader";
 import StatusCard from "@/components/StatusCard";
 import { downloadCardAsPng } from "@/lib/render-card";
 import { updateDropItems } from "@/lib/actions/drops";
@@ -114,33 +115,66 @@ export default function DropOutputClient({
     }
   }
 
+  const posted = new Date(drop.postedAt);
+  const postedAt = `${String(posted.getHours()).padStart(2, "0")}:${String(posted.getMinutes()).padStart(2, "0")}`;
+  const expiryValue =
+    drop.expiry.kind === "eod" ? "23:59" : drop.expiry.kind === "hours" ? "24h" : "Never";
+  const expiryLabel =
+    drop.expiry.kind === "eod"
+      ? "off the page tonight"
+      : drop.expiry.kind === "hours"
+      ? "off the page in 24 hours"
+      : "does not expire";
+  const templateName = template.kind === "custom" ? template.name : template.label;
+
   return (
-    <main className="page">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-        <h1>{drop.name}</h1>
-        <Link href="/drops/new" className="k">+ Another drop</Link>
-      </div>
+    <main className="page ad-page">
+      <PageHeader
+        label="Drop"
+        title={drop.name}
+        soft="is ready"
+        subtitle={expiryLine(drop)}
+        actions={<Link href="/drops/new" className="btn sec">+ Another drop</Link>}
+      />
 
-      <div
-        className="col"
-        style={{
-          gap: 4,
-          padding: "12px 14px",
-          background: "var(--color-accent)",
-          color: "#fff",
-          borderRadius: 8,
-          marginTop: 8,
-        }}
-      >
-        <div style={{ font: "700 15px/1.1 'DM Sans', sans-serif", letterSpacing: "-0.01em", textTransform: "uppercase" }}>
-          {items.length} card{items.length === 1 ? "" : "s"} ready
+      <section className="panel-dark ad-hero">
+        <div className="ad-hero-top">
+          <span className="pill dark">Drop summary</span>
         </div>
-        <div style={{ font: "600 10px/1.4 ui-monospace, Menlo, monospace", letterSpacing: "0.1em", textTransform: "uppercase", opacity: 0.9 }}>
-          {expiryLine(drop)}
+        <div className="stat-row">
+          <div>
+            <div className="stat-v">{items.length}</div>
+            <div className="stat-l">card{items.length === 1 ? "" : "s"} ready</div>
+          </div>
+          <div>
+            <div className="stat-v">{postedAt}</div>
+            <div className="stat-l">posted</div>
+          </div>
+          <div>
+            <div className="stat-v">{expiryValue}</div>
+            <div className="stat-l">{expiryLabel}</div>
+          </div>
+          <div>
+            <div className="stat-v text">{templateName}</div>
+            <div className="stat-l">template</div>
+          </div>
         </div>
-      </div>
+        <div className="ad-hero-foot">
+          <div className="ad-actions">
+            <Button onClick={saveAll} disabled={savingAll || items.length === 0}>
+              {savingAll ? "Saving all…" : `Save all ${items.length} to gallery`}
+            </Button>
+            <Button variant="sec" disabled title="Coming soon">
+              Share cards to another reseller
+            </Button>
+          </div>
+          <div className="anno">
+            Shared copies will point at their shop link, not yours — coming soon.
+          </div>
+        </div>
+      </section>
 
-      <div className="drop-grid">
+      <div className="ad-drop-grid">
         {items.map((it) => {
           const product = productByCode.get(it.code);
           if (!product) return null;
@@ -151,18 +185,8 @@ export default function DropOutputClient({
           const trackedLink = trackedLinkFor(it.code);
           const copied = copiedCode === it.code;
           return (
-            <div
-              key={it.code}
-              className="col"
-              style={{
-                gap: 10,
-                padding: 14,
-                background: "#fff",
-                border: "1px solid var(--stroke-soft)",
-                borderRadius: 12,
-              }}
-            >
-              <div className="row" style={{ justifyContent: "center" }}>
+            <section key={it.code} className="panel ad-drop-card">
+              <div className="ad-well">
                 <div ref={(el) => { cardRefs.current[it.code] = el; }}>
                   <StatusCard
                     product={product}
@@ -178,29 +202,30 @@ export default function DropOutputClient({
                 </div>
               </div>
 
-              <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
-                <span className="mono" style={{ fontSize: 10 }}>{trackedLink}</span>
-                <button
-                  type="button"
-                  className="btn gh"
-                  onClick={() => saveOne(it.code)}
-                >
-                  Save PNG
-                </button>
-              </div>
+              <div className="ad-drop-card-body">
+                <div className="ad-drop-card-row">
+                  <span className="mono">{trackedLink}</span>
+                  <button
+                    type="button"
+                    className="btn gh"
+                    onClick={() => saveOne(it.code)}
+                  >
+                    Save PNG
+                  </button>
+                </div>
 
-              <div className="col" style={{ gap: 6 }}>
-                <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
+                <hr className="ad-divider" />
+
+                <div className="ad-drop-card-row">
                   <span className="k">Caption</span>
-                  <div className="row" style={{ gap: 6 }}>
+                  <div className="ad-chips" style={{ gap: 6 }}>
                     {VARIANTS.map((v) => (
                       <button
                         key={v}
                         type="button"
-                        className={`btn gh${it.activeCaption === v ? " on" : ""}`}
+                        className={`ad-chip sm${it.activeCaption === v ? " on" : ""}`}
                         onClick={() => setActiveVariant(it.code, v)}
                         aria-pressed={it.activeCaption === v}
-                        style={{ padding: "4px 8px", fontSize: 10 }}
                       >
                         {VARIANT_LABEL[v]}
                       </button>
@@ -209,13 +234,12 @@ export default function DropOutputClient({
                 </div>
                 <textarea
                   className="inp"
-                  rows={3}
+                  rows={4}
                   value={rendered}
                   readOnly
                   onFocus={(e) => e.currentTarget.select()}
-                  style={{ resize: "vertical", fontFamily: "inherit" }}
                 />
-                <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
+                <div className="ad-drop-card-row">
                   <span className="s">
                     {rendered.length} chars · WhatsApp allows ~300 in a status caption
                   </span>
@@ -229,43 +253,10 @@ export default function DropOutputClient({
                   </button>
                 </div>
               </div>
-            </div>
+            </section>
           );
         })}
       </div>
-
-      <div
-        className="col"
-        style={{
-          gap: 10,
-          padding: 16,
-          background: "var(--color-surface)",
-          border: "1px solid var(--stroke-soft)",
-          borderRadius: 12,
-          marginTop: 20,
-        }}
-      >
-        <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
-          <Button onClick={saveAll} disabled={savingAll || items.length === 0}>
-            {savingAll ? "Saving all…" : `Save all ${items.length} to gallery`}
-          </Button>
-          <Button variant="sec" disabled title="Coming soon">
-            Share cards to another reseller
-          </Button>
-        </div>
-        <div className="anno">
-          shared copies will point at THEIR shop link, not yours — coming soon
-        </div>
-      </div>
-
-      <style jsx>{`
-        .drop-grid {
-          display: grid;
-          gap: 16px;
-          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-          margin-top: 20px;
-        }
-      `}</style>
     </main>
   );
 }
