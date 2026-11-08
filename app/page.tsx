@@ -10,6 +10,13 @@ export const metadata: Metadata = {
 
 const SHOP_SLUG = process.env.NEXT_PUBLIC_SHOP_SLUG || "shania";
 
+/** Product facts, not vanity metrics — every number here is true of the app. */
+const STATS = [
+  { value: "9:16", label: "Status-ready cards, sized for stories" },
+  { value: "3", label: "Caption styles for every card" },
+  { value: "1 tap", label: "From your status to a WhatsApp order" },
+];
+
 const STEPS = [
   {
     n: "01",
@@ -19,7 +26,7 @@ const STEPS = [
   {
     n: "02",
     title: "Post a drop to your status",
-    body: "Pick today's products and Haali makes a 9:16 status card for each one, with a ready-to-paste caption and a short link. Save them all in one tap.",
+    body: "Pick today's products and Haali makes a status card for each one, with a ready-to-paste caption and a short link. Save them all in one tap.",
   },
   {
     n: "03",
@@ -28,26 +35,14 @@ const STEPS = [
   },
 ];
 
-const FEATURES = [
-  {
-    title: "Status cards in your brand",
-    body: "Built-in and custom templates, your palette and frame, product photo, price and code. Download as PNG, ready for WhatsApp, Instagram or TikTok stories.",
-  },
-  {
-    title: "Drops with captions",
-    body: "Batch-generate a whole drop. Each card comes with Default, Scarcity (“only 2 left”) and Restock captions you can switch between and copy.",
-  },
+const SMALL_FEATURES = [
   {
     title: "One shop link",
-    body: "A clean storefront that works on any phone, plus a page for just today's drop. No app for buyers to install, no checkout to set up.",
-  },
-  {
-    title: "WhatsApp handoff",
-    body: "Every order arrives as a pre-composed WhatsApp message with product, size, code and delivery details, so nothing gets lost in the chat.",
+    body: "A storefront that works on any phone, plus a page for just today's drop. Nothing for buyers to install.",
   },
   {
     title: "Short product links",
-    body: "Each card gets its own short link that goes straight to that product, so buyers land on exactly what they saw in your status.",
+    body: "Every card gets its own short link, so buyers land on exactly what they saw in your status.",
   },
   {
     title: "One-tap repeat buyers",
@@ -55,25 +50,82 @@ const FEATURES = [
   },
 ];
 
+function Pill({ children, dark = false }: { children: React.ReactNode; dark?: boolean }) {
+  return (
+    <span className={dark ? "lp-pill lp-pill-dark" : "lp-pill"}>
+      <span className="lp-pill-mark" aria-hidden />
+      {children}
+    </span>
+  );
+}
+
+/** Faint circuit-board lines behind the hero, echoing "everything connected". */
+function CircuitLines() {
+  return (
+    <svg className="lp-circuit" viewBox="0 0 1200 640" preserveAspectRatio="xMidYMid slice" aria-hidden>
+      <g fill="none" strokeWidth="1">
+        <path d="M0 120 H140 V260 H260" />
+        <path d="M0 380 H90 V520 H220 V640" />
+        <path d="M160 0 V70 H320 V180" />
+        <path d="M1200 140 H1060 V60 H940 V0" />
+        <path d="M1200 330 H1090 V470 H960 V640" />
+        <path d="M1200 560 H1120" />
+        <path d="M60 640 V560" />
+      </g>
+      <g strokeWidth="1">
+        <rect x="248" y="248" width="40" height="24" rx="6" />
+        <rect x="300" y="168" width="40" height="24" rx="6" />
+        <rect x="200" y="508" width="40" height="24" rx="6" />
+        <rect x="920" y="48" width="40" height="24" rx="6" />
+        <rect x="940" y="458" width="40" height="24" rx="6" />
+        <rect x="1100" y="548" width="40" height="24" rx="6" />
+        <circle cx="140" cy="120" r="3" />
+        <circle cx="1060" cy="140" r="3" />
+        <circle cx="1090" cy="330" r="3" />
+      </g>
+    </svg>
+  );
+}
+
+function StatusCardMock() {
+  return (
+    <div className="lp-card">
+      <div className="lp-card-top">
+        <span className="lp-card-shop">Your shop</span>
+        <span className="lp-card-tag">Today&apos;s drop</span>
+      </div>
+      <div className="lp-card-img ph">product photo</div>
+      <div className="lp-card-name">Hoodie grey</div>
+      <div className="lp-card-price">UGX 55,000</div>
+      <div className="lp-card-meta">
+        <span>S · M · L</span>
+        <span className="lp-card-left">Only 3 left</span>
+      </div>
+      <div className="lp-card-link">haali.app/o/C4</div>
+    </div>
+  );
+}
+
 export default function Landing() {
   return (
     <main className="lp">
-      {/* Hero */}
+      {/* ---------------- Hero ---------------- */}
       <section className="lp-hero">
+        <CircuitLines />
         <div className="lp-hero-copy">
-          <div className="lp-eyebrow">Commerce for social sellers</div>
+          <Pill>Built for WhatsApp sellers</Pill>
           <h1 className="lp-h1">
             Sell from your status.
             <br />
-            <span>Take orders on WhatsApp.</span>
+            <span className="lp-soft">Take orders on</span> WhatsApp.
           </h1>
           <p className="lp-lede">
-            Haali turns your catalogue into branded status cards, gives buyers one link to shop from, and sends
-            every order straight into your WhatsApp, already written out.
+            Branded status cards, one link to shop from, and every order sent straight into your WhatsApp,
+            already written out.
           </p>
-          <div className="lp-ctas">
+          <div className="lp-ctas lp-ctas-center">
             <Link href="/brand-kit" className="lp-btn">
-              Set up your shop <span aria-hidden>→</span>
+              Set up your shop
             </Link>
             <Link href={`/shop/${SHOP_SLUG}`} className="lp-btn lp-btn-sec">
               See a live shop
@@ -81,23 +133,22 @@ export default function Landing() {
           </div>
         </div>
 
-        {/* Illustrative mock: a status card and the WhatsApp order it produces */}
-        <div className="lp-mock" aria-hidden>
-          <div className="lp-card">
-            <div className="lp-card-top">
-              <span className="lp-card-shop">Your shop</span>
-              <span className="lp-card-tag">Today&apos;s drop</span>
+        <div className="lp-stage" aria-hidden>
+          <div className="lp-float lp-float-left">
+            <div className="lp-float-k">Drop · 6 cards ready</div>
+            <div className="lp-float-row">
+              <span className="lp-chip on">Default</span>
+              <span className="lp-chip">Scarcity</span>
+              <span className="lp-chip">Restock</span>
             </div>
-            <div className="lp-card-img ph">product photo</div>
-            <div className="lp-card-name">Hoodie grey</div>
-            <div className="lp-card-price">UGX 55,000</div>
-            <div className="lp-card-meta">
-              <span>S · M · L</span>
-              <span className="lp-card-left">Only 3 left</span>
-            </div>
-            <div className="lp-card-link">haali.app/o/C4</div>
+            <p className="lp-float-text">
+              🔥 Hoodie grey is back. Sizes S–L, only 3 left. Tap to order: haali.app/o/C4
+            </p>
           </div>
-          <div className="lp-bubble">
+
+          <StatusCardMock />
+
+          <div className="lp-float lp-float-right lp-bubble">
             <div className="lp-bubble-k">New order · WhatsApp</div>
             <p>
               Hi! I&apos;d like to order <b>Hoodie grey</b> (size M), code <b>C4</b>. Deliver to Ntinda, please.
@@ -105,12 +156,119 @@ export default function Landing() {
             <div className="lp-bubble-time">18:24 ✓✓</div>
           </div>
         </div>
+
+        <p className="lp-hero-note">
+          <span className="lp-hero-note-k">/about</span>
+          Haali helps social sellers turn a catalogue into status posts that sell, and turns every tap into a
+          clear WhatsApp order.
+        </p>
       </section>
 
-      {/* How it works */}
+      {/* ---------------- Statement + stats (dark) ---------------- */}
+      <section className="lp-dark">
+        <div className="lp-inner lp-center">
+          <Pill dark>What Haali does</Pill>
+          <p className="lp-statement">
+            Haali gives social sellers one place to manage their catalogue, post drops that look like a brand,{" "}
+            <span className="lp-fade">and turn every status view into an order they can actually fulfil.</span>
+          </p>
+          <div className="lp-stats">
+            {STATS.map((s) => (
+              <div key={s.value} className="lp-stat">
+                <div className="lp-stat-v">{s.value}</div>
+                <div className="lp-stat-l">{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ---------------- Features (glow panel) ---------------- */}
       <section className="lp-section">
-        <div className="lp-eyebrow">How it works</div>
-        <h2 className="lp-h2">From catalogue to confirmed order in three steps</h2>
+        <div className="lp-glow">
+          <div className="lp-center">
+            <Pill dark>Features</Pill>
+            <h2 className="lp-h2 lp-h2-light">
+              Everything a <span className="lp-fade">status seller</span> needs
+            </h2>
+            <p className="lp-sub-light">Make the post, share the link, take the order.</p>
+          </div>
+
+          <div className="lp-feature-grid">
+            <article className="lp-fcard">
+              <div className="lp-fshot">
+                <div className="lp-mini-cards">
+                  <div className="lp-mini-card">
+                    <div className="ph" />
+                    <b>UGX 35,000</b>
+                  </div>
+                  <div className="lp-mini-card lp-mini-card-hi">
+                    <div className="ph" />
+                    <b>UGX 55,000</b>
+                  </div>
+                  <div className="lp-mini-card">
+                    <div className="ph" />
+                    <b>UGX 40,000</b>
+                  </div>
+                </div>
+              </div>
+              <h3>Status cards in your brand</h3>
+              <p>Your logo, palette and frame on every card. Download as PNG for WhatsApp, Instagram or TikTok.</p>
+            </article>
+
+            <article className="lp-fcard">
+              <div className="lp-fshot">
+                <div className="lp-ui">
+                  <div className="lp-ui-k">Caption</div>
+                  <div className="lp-float-row">
+                    <span className="lp-chip">Default</span>
+                    <span className="lp-chip on">Scarcity</span>
+                    <span className="lp-chip">Restock</span>
+                  </div>
+                  <p className="lp-ui-text">Only 2 left in size 32 👀 Jeans straight, UGX 40,000. haali.app/o/C1</p>
+                  <div className="lp-ui-btn">Copy caption</div>
+                </div>
+              </div>
+              <h3>Drops with captions</h3>
+              <p>Batch-generate a whole drop. Switch each card between Default, Scarcity and Restock captions.</p>
+            </article>
+
+            <article className="lp-fcard">
+              <div className="lp-fshot">
+                <div className="lp-ui lp-ui-wa">
+                  <div className="lp-bubble lp-bubble-static">
+                    <div className="lp-bubble-k">New order</div>
+                    <p>
+                      <b>T-shirt black</b>, size L, code B3. Deliver to Kololo.
+                    </p>
+                    <div className="lp-bubble-time">09:12 ✓✓</div>
+                  </div>
+                </div>
+              </div>
+              <h3>WhatsApp handoff</h3>
+              <p>Orders arrive pre-written with product, size, code and delivery details. Nothing lost in the chat.</p>
+            </article>
+          </div>
+
+          <div className="lp-small-grid">
+            {SMALL_FEATURES.map((f) => (
+              <div key={f.title} className="lp-small">
+                <h3>{f.title}</h3>
+                <p>{f.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ---------------- How it works ---------------- */}
+      <section className="lp-section lp-inner">
+        <div className="lp-center">
+          <Pill>How it works</Pill>
+          <h2 className="lp-h2">
+            From catalogue to <span className="lp-soft">confirmed order</span>
+          </h2>
+        </div>
         <ol className="lp-steps">
           {STEPS.map((s) => (
             <li key={s.n} className="lp-step">
@@ -122,35 +280,28 @@ export default function Landing() {
         </ol>
       </section>
 
-      {/* Features */}
+      {/* ---------------- Closing CTA ---------------- */}
       <section className="lp-section">
-        <div className="lp-eyebrow">What you get</div>
-        <h2 className="lp-h2">Everything a status seller needs, nothing they don&apos;t</h2>
-        <div className="lp-features">
-          {FEATURES.map((f) => (
-            <div key={f.title} className="lp-feature">
-              <h3>{f.title}</h3>
-              <p>{f.body}</p>
+        <div className="lp-final">
+          <CircuitLines />
+          <div className="lp-final-copy">
+            <h2 className="lp-h2 lp-h2-light">
+              Your next drop could be <span className="lp-fade">ready in minutes.</span>
+            </h2>
+            <p className="lp-sub-light">Set up your brand kit, add a few products, and post your first drop today.</p>
+            <div className="lp-ctas lp-ctas-center">
+              <Link href="/brand-kit" className="lp-btn">
+                Get started
+              </Link>
+              <Link href="/products" className="lp-btn lp-btn-ghost">
+                Add products
+              </Link>
             </div>
-          ))}
+          </div>
         </div>
       </section>
 
-      {/* Closing CTA */}
-      <section className="lp-final">
-        <h2>Your next drop could be ready in minutes.</h2>
-        <p>Set up your brand kit, add a few products, and post your first drop today.</p>
-        <div className="lp-ctas">
-          <Link href="/brand-kit" className="lp-btn lp-btn-inv">
-            Get started <span aria-hidden>→</span>
-          </Link>
-          <Link href="/products" className="lp-btn lp-btn-ghost">
-            Add products
-          </Link>
-        </div>
-      </section>
-
-      <footer className="lp-footer">
+      <footer className="lp-footer lp-inner">
         <span>Haali</span>
         <span>Made for social sellers in Kampala and beyond</span>
       </footer>
