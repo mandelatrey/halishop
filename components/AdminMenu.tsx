@@ -12,6 +12,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+const SHOP_SLUG = process.env.NEXT_PUBLIC_SHOP_SLUG || "shania";
+
 /**
  * Floating hamburger in the top-right corner of every page. Exposes admin
  * routes without cluttering the buyer-facing storefront chrome.
@@ -30,7 +32,7 @@ export default function AdminMenu() {
         <DropdownMenuContent align="end" sideOffset={8} className="admin-menu-content">
           <DropdownMenuGroup>
             <DropdownMenuLabel>Storefront</DropdownMenuLabel>
-            <DropdownMenuItem render={<Link href="/">View shop</Link>} />
+            <DropdownMenuItem render={<Link href={`/shop/${SHOP_SLUG}`}>View shop</Link>} />
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>

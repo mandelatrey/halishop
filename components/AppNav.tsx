@@ -2,6 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import AdminMenu from "./AdminMenu";
 
+const SHOP_SLUG = process.env.NEXT_PUBLIC_SHOP_SLUG || "shania";
+
 /**
  * Global top nav — Haali wordmark on the left, admin links on the right.
  * Desktop shows the links inline; mobile collapses them behind the hamburger
@@ -24,6 +26,7 @@ export default function AppNav() {
         </Link>
 
         <nav className="app-nav-links" aria-label="Manage">
+          <Link href={`/shop/${SHOP_SLUG}`}>View shop</Link>
           <Link href="/products">Products</Link>
           <Link href="/drops/new">New drop</Link>
           <Link href="/templates">Templates</Link>

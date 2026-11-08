@@ -14,7 +14,7 @@ A single-shop app for the Status Commerce wedge. A reseller:
 
 | Route | Screen | Purpose |
 |---|---|---|
-| `/` | — | Launcher |
+| `/` | — | Landing page explaining Haali, with links into setup and the live shop |
 | `/brand-kit` | 2e | Shop name, URL, logo, palette, frame, WhatsApp number |
 | `/templates` | — | List custom templates |
 | `/templates/[id]` | — | Custom template editor with live preview + instructions |
