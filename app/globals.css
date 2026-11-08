@@ -786,3 +786,7 @@ input, textarea, select { font-family: inherit; }
 .stat-v { font: 300 clamp(28px, 3.4vw, 40px)/1 "DM Sans", sans-serif; letter-spacing: -0.04em; margin-bottom: 8px; }
 .stat-l { font: 400 12.5px/1.4 "DM Sans", sans-serif; color: var(--color-mute-2); }
 .panel-dark .stat-l { color: var(--color-on-dark-soft); }
+
+/* `.btn.pill` (soft row CTA) predates the `.pill` label — keep it a button */
+.btn.pill { border: 0; text-transform: none; letter-spacing: 0.01em; }
+.btn.pill::before { content: none; }
