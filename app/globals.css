@@ -53,6 +53,10 @@
   --color-accent-soft: #dbe1ff;
   --color-error: #ba1a1a;
   --color-error-container: #ffdad6;
+  --color-brand-orange: #ff3600;      /* logo mark — tiny accents only */
+  --color-soft-ink: rgba(32, 30, 29, 0.42); /* second tone of two-tone headings */
+  --color-on-dark: #fafaf9;
+  --color-on-dark-soft: rgba(250, 250, 249, 0.42);
 
   /* Strokes — restrained. Use these instead of the raw ink for borders. */
   --stroke-soft: rgba(32, 30, 29, 0.14);    /* structural containers */
@@ -138,20 +142,20 @@ input, textarea, select { font-family: inherit; }
 
 /* metadata-key: small caps mono for field labels — 12% letter-spacing */
 .k {
-  font: 700 8.5px/1 ui-monospace, Menlo, monospace;
+  font: 700 9.5px/1 ui-monospace, Menlo, monospace;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--color-mute-2);
 }
 
 /* headline-primary */
-.t { font: 700 14px/1.15 "DM Sans", sans-serif; letter-spacing: -0.01em; }
+.t { font: 600 15px/1.2 "DM Sans", sans-serif; letter-spacing: -0.01em; }
 /* headline-secondary */
-.t2 { font: 700 11.5px/1.2 "DM Sans", sans-serif; }
+.t2 { font: 600 13px/1.25 "DM Sans", sans-serif; }
 /* body-main */
-.p { font: 400 11.5px/1.5 "DM Sans", sans-serif; color: var(--color-mute); }
+.p { font: 400 13px/1.55 "DM Sans", sans-serif; color: var(--color-mute); }
 /* caption */
-.s { font: 400 9.5px/1.35 "DM Sans", sans-serif; color: var(--color-mute-2); }
+.s { font: 400 11.5px/1.4 "DM Sans", sans-serif; color: var(--color-mute-2); }
 .mono {
   font: 400 9.5px/1.45 ui-monospace, Menlo, monospace;
   color: var(--color-mute);
@@ -167,19 +171,20 @@ input, textarea, select { font-family: inherit; }
   background: var(--color-accent);
   color: #fff;
   border: 0;
-  border-radius: var(--radius);
-  font: 700 11px/1 "DM Sans", sans-serif;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  border-radius: 6px;
+  font: 600 13px/1 "DM Sans", sans-serif;
+  letter-spacing: 0;
+  text-transform: none;
   text-align: center;
-  transition: background 0.15s ease;
+  padding: 13px 18px;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 .btn:hover { background: var(--color-accent-dark); }
 .btn.sec {
-  background: transparent;
+  background: #fff;
   color: var(--color-text);
-  border: 1px solid var(--stroke-strong);
-  padding: 10px;
+  border: 1px solid var(--stroke-soft);
+  padding: 12px 17px;
 }
 .btn.sec:hover { background: var(--color-surface); color: var(--color-text); border-color: var(--stroke-strong); }
 .btn.gh {
@@ -191,14 +196,14 @@ input, textarea, select { font-family: inherit; }
   font-weight: 600;
   text-transform: none;
   letter-spacing: 0;
-  font-size: 10.5px;
+  font-size: 12.5px;
   text-align: center;
   width: auto;
 }
 .btn.gh:hover { color: var(--color-text); background: var(--color-surface); }
 .btn.gh.on { color: var(--color-accent-dark); background: var(--color-accent-soft); }
 .btn.gh.danger:hover { color: var(--color-error); background: var(--color-error-container); }
-.btn.sm { padding: 7px 8px; font-size: 9.5px; width: auto; }
+.btn.sm { padding: 9px 12px; font-size: 12px; width: auto; }
 /* Soft pill CTA — for row-level primary actions where a full solid button would shout */
 .btn.pill {
   display: inline-flex;
@@ -208,7 +213,7 @@ input, textarea, select { font-family: inherit; }
   background: var(--color-accent-soft);
   color: var(--color-accent-dark);
   border-radius: var(--radius-full);
-  font: 600 10.5px/1 "DM Sans", sans-serif;
+  font: 600 12px/1 "DM Sans", sans-serif;
   letter-spacing: 0.01em;
   text-transform: none;
   width: auto;
@@ -225,8 +230,8 @@ input, textarea, select { font-family: inherit; }
 .inp {
   border: 1px solid var(--stroke-soft);
   background: #fff;
-  padding: 9px 11px;
-  font: 400 11.5px/1.2 "DM Sans", sans-serif;
+  padding: 11px 13px;
+  font: 400 14px/1.25 "DM Sans", sans-serif;
   color: var(--color-text);
   border-radius: var(--radius);
   width: 100%;
@@ -242,8 +247,8 @@ input, textarea, select { font-family: inherit; }
 /* Tags — 8px radius, hairline */
 .tag {
   display: inline-block;
-  padding: 3px 8px;
-  font: 700 8px/1 ui-monospace, Menlo, monospace;
+  padding: 4px 8px;
+  font: 700 9px/1 ui-monospace, Menlo, monospace;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   border: 1px solid var(--stroke-soft);
@@ -299,9 +304,9 @@ input, textarea, select { font-family: inherit; }
 .seg > button,
 .seg > div {
   flex: 1;
-  padding: 7px 0;
+  padding: 8px 0;
   text-align: center;
-  font: 600 10px/1 "DM Sans", sans-serif;
+  font: 600 12px/1 "DM Sans", sans-serif;
   border: 0;
   color: var(--color-mute-2);
   background: transparent;
@@ -371,27 +376,38 @@ input, textarea, select { font-family: inherit; }
 }
 
 .page {
-  padding: 20px;
-  max-width: 940px;
+  padding: 40px 20px 72px;
+  max-width: 1080px;
   margin: 0 auto;
 }
 .page h1 {
-  font: 700 20px/1.1 "DM Sans", sans-serif;
-  letter-spacing: -0.02em;
-  margin: 0 0 18px;
+  font: 300 clamp(32px, 4.6vw, 52px)/1.02 "DM Sans", sans-serif;
+  letter-spacing: -0.05em;
+  margin: 0 0 14px;
 }
 .page .subtitle {
-  font: 400 12px/1.5 "DM Sans", sans-serif;
+  font: 400 15px/1.55 "DM Sans", sans-serif;
   color: var(--color-mute);
-  margin: -12px 0 24px;
+  margin: 0 0 32px;
   max-width: 60ch;
 }
 .section-title {
-  font: 700 11px/1 ui-monospace, Menlo, monospace;
-  letter-spacing: 0.18em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 600 11px/1 "DM Sans", sans-serif;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-accent);
-  margin: 0 0 10px;
+  color: var(--color-text);
+  margin: 0 0 14px;
+}
+.section-title::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background: var(--color-brand-orange);
+  flex: none;
 }
 
 .launcher {
@@ -684,3 +700,89 @@ input, textarea, select { font-family: inherit; }
   border-radius: var(--radius-sm);
 }
 .tlist .previewbox img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+
+/* -------------------------------------------------------------------------
+ * Visual direction v2 — shared with the landing page
+ *   Light two-tone display type, pill labels with an orange mark, white
+ *   rounded panels on warm paper, and dark "ink" panels with a blue glow.
+ * ------------------------------------------------------------------------- */
+.soft { color: var(--color-soft-ink); }
+.on-dark .soft, .panel-dark .soft { color: var(--color-on-dark-soft); }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--stroke-soft);
+  border-radius: 6px;
+  background: #fff;
+  font: 600 10.5px/1 "DM Sans", sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+.pill::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background: var(--color-brand-orange);
+  flex: none;
+}
+.pill.dark {
+  background: rgba(250, 250, 249, 0.08);
+  border-color: rgba(250, 250, 249, 0.16);
+  color: var(--color-on-dark);
+}
+
+/* Page header: pill, two-tone light title, subtitle, actions on the right */
+.pg-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px 24px;
+  margin: 0 0 32px;
+}
+.pg-head .pill { margin-bottom: 18px; }
+.pg-head h1 { margin: 0 0 12px; }
+.pg-head .subtitle { margin: 0; }
+.pg-head-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.pg-head-actions .btn { width: auto; }
+
+/* Panels */
+.panel {
+  background: #fff;
+  border: 1px solid var(--stroke-soft);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+}
+.panel + .panel { margin-top: 16px; }
+.panel-dark {
+  position: relative;
+  background:
+    radial-gradient(110% 80% at 100% 0%, rgba(19, 90, 237, 0.5) 0%, rgba(19, 90, 237, 0) 55%),
+    var(--color-text);
+  color: var(--color-on-dark);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  overflow: hidden;
+}
+.panel-dark .k { color: var(--color-on-dark-soft); }
+.panel-dark .s, .panel-dark .p { color: var(--color-on-dark-soft); }
+
+/* Stat row — numbers split by hairlines (dashboard summaries) */
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0;
+}
+.stat-row > div { padding: 4px 20px; border-left: 1px solid var(--stroke-soft); }
+.stat-row > div:first-child { border-left: 0; padding-left: 0; }
+.panel-dark .stat-row > div { border-color: rgba(250, 250, 249, 0.18); }
+.stat-v { font: 300 clamp(28px, 3.4vw, 40px)/1 "DM Sans", sans-serif; letter-spacing: -0.04em; margin-bottom: 8px; }
+.stat-l { font: 400 12.5px/1.4 "DM Sans", sans-serif; color: var(--color-mute-2); }
+.panel-dark .stat-l { color: var(--color-on-dark-soft); }
