@@ -66,6 +66,27 @@ export const VARIANT_PLACEHOLDER: Record<ProductCategory, string> = {
   home: "Cream, Black, Grey",
 };
 
+/**
+ * What the upload step learned about a product photo (lib/image-prep.ts).
+ * Lets every frame fit the photo sensibly without re-analysing it.
+ */
+export type ImageMeta = {
+  /** Pixel size of the stored (prepared) image. */
+  w: number;
+  h: number;
+  /**
+   * "cutout": product on a plain/studio or transparent background — show the
+   *           whole product, centred, on `bg`.
+   * "photo":  a scene that should fill the frame.
+   */
+  kind: "cutout" | "photo";
+  /** Background colour of a cutout ("#ffffff"), or null when transparent. */
+  bg?: string | null;
+};
+
+/** Seller override for how the photo sits in frames. */
+export type ImageFit = "auto" | "contain" | "cover";
+
 export type ProductOption = {
   /** "Size", "Colour", "Storage"… */
   label: string;
@@ -78,6 +99,10 @@ export type Product = {
   price: number;
   currency: string;
   image?: string;
+  /** Set when the photo was prepared on upload; absent for older photos. */
+  imageMeta?: ImageMeta;
+  /** "auto" (default) lets imageMeta decide. */
+  imageFit?: ImageFit;
   category?: ProductCategory;
   /**
    * Option types the buyer picks one value from each of, e.g.

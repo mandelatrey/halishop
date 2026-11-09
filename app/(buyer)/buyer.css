@@ -149,7 +149,8 @@ a.by-card:focus-visible { outline: 2px solid var(--color-accent); outline-offset
 }
 .by-card-img img { object-fit: cover; display: block; }
 .by-card-img .ph { font-size: 11px; }
-a.by-card:hover .by-card-img img { transform: scale(1.03); }
+.by-card-img > div:first-child { transition: transform 0.4s ease; }
+a.by-card:hover .by-card-img > div:first-child { transform: scale(1.03); }
 
 .by-chip {
   position: absolute;
@@ -160,6 +161,9 @@ a.by-card:hover .by-card-img img { transform: scale(1.03); }
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
+  /* hairline so the chip still reads on white product backgrounds */
+  box-shadow: 0 0 0 1px rgba(32, 30, 29, 0.12), 0 1px 2px rgba(32, 30, 29, 0.08);
+  z-index: 1;
   font: 600 10px/1 ui-monospace, Menlo, monospace;
   letter-spacing: 0.08em;
   color: var(--color-text);
@@ -212,8 +216,7 @@ a.by-card:hover .by-card-foot .btn .arrow { transform: translateX(2px); }
 }
 
 .by-card.sold { background: transparent; border-style: dashed; }
-.by-card.sold .by-card-img > img,
-.by-card.sold .by-card-img > .ph { opacity: 0.45; filter: grayscale(1); }
+.by-card.sold .by-card-img > div:first-child { opacity: 0.45; }
 .by-card.sold .by-card-title,
 .by-card.sold .by-card-price { color: var(--color-mute-2); }
 

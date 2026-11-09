@@ -1,3 +1,4 @@
+import ProductPhoto from "@/components/ProductPhoto";
 import { optionsSummary } from "@/lib/variants";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -62,12 +63,7 @@ export default async function BuyerDropPage({
           return (
             <Link key={p.code} href={`/shop/${slug}/${p.code}`} className="by-card">
               <div className="by-card-img">
-                {p.image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={p.image} alt="" />
-                ) : (
-                  <div className="ph">{p.code}</div>
-                )}
+                <ProductPhoto src={p.image} meta={p.imageMeta} fit={p.imageFit} label={p.code} />
                 <span className="by-chip">{p.code}</span>
               </div>
               <div className="by-card-body">

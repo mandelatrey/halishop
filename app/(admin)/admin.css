@@ -721,3 +721,22 @@
 .drop:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
 .drop.on { border-style: solid; border-width: 2px; box-shadow: 0 0 0 4px rgba(19, 90, 237, 0.12); }
 .drop.on * { pointer-events: none; }
+
+/* ProductPhoto positions itself inside these frames */
+.prow .thumb, .ad-thumb { position: relative; }
+
+/* ---------- Photo fit control + previews (products form) ---------- */
+.ad-fit { display: flex; flex-wrap: wrap; gap: 16px 24px; align-items: flex-start; }
+.ad-fit > .ad-field { flex: 1 1 280px; }
+.ad-fit-previews { display: flex; gap: 12px; align-items: flex-end; }
+.ad-fit-previews figure { margin: 0; display: flex; flex-direction: column; gap: 6px; align-items: center; }
+.ad-fit-previews figcaption { font: 500 11.5px/1 "DM Sans", sans-serif; color: var(--color-mute-2); }
+.ad-fit-frame {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid var(--stroke-soft);
+  background: var(--color-surface);
+}
+.ad-fit-frame.shop { width: 96px; aspect-ratio: 4 / 5; }
+.ad-fit-frame.status { width: 68px; aspect-ratio: 9 / 16; }

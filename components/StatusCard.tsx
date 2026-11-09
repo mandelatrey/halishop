@@ -13,6 +13,7 @@ import type {
 import { derivePalette, type DerivedPalette } from "@/lib/palette";
 import { getOptions } from "@/lib/variants";
 import { prettyPhone } from "@/lib/wa";
+import ProductPhoto from "./ProductPhoto";
 
 const REF_WIDTH = 200;
 const REF_HEIGHT = 356;
@@ -449,6 +450,21 @@ function fgHex(v: string) {
 
 type TplProps = { product: Product; brand: BrandKit; config: CardConfig; width: number };
 
+/** Product photo inside a card: whole-product shots keep clear of the shop tag and text panels. */
+function CardPhoto({ product, reserveTop, reserveBottom }: { product: Product; reserveTop: number; reserveBottom: number }) {
+  return (
+    <ProductPhoto
+      src={product.image}
+      meta={product.imageMeta}
+      fit={product.imageFit}
+      label="product photo"
+      padding={0.06}
+      reserveTop={reserveTop}
+      reserveBottom={reserveBottom}
+    />
+  );
+}
+
 /* ---- 1. Bar — photo on top, a rounded brand-colour sheet below ---------- */
 function BarTemplate({ product, brand, config, width }: TplProps) {
   const c = cardCtx(product, brand, config, width);
@@ -456,7 +472,7 @@ function BarTemplate({ product, brand, config, width }: TplProps) {
   return (
     <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%", background: p.primary }}>
       <div style={{ flex: 1, minHeight: 0, position: "relative", overflow: "hidden", background: "#fff" }}>
-        <ProductImage product={product} width={width} />
+        <CardPhoto product={product} reserveTop={0.12} reserveBottom={0.08} />
         <div style={{ position: "absolute", top: s(10), left: s(10), right: s(10) }}>
           <ShopTag c={c} tone="dark" photo />
         </div>
@@ -496,7 +512,7 @@ function BlockTemplate({ product, brand, config, width }: TplProps) {
   return (
     <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%", background: p.primary }}>
       <div style={{ height: "52%", flex: "none", position: "relative", overflow: "hidden", background: "#fff" }}>
-        <ProductImage product={product} width={width} />
+        <CardPhoto product={product} reserveTop={0.14} reserveBottom={0.04} />
         <div style={{ position: "absolute", top: s(10), left: s(10), right: s(10) }}>
           <ShopTag c={c} tone="dark" photo />
         </div>
@@ -539,7 +555,7 @@ function FrameTemplate({ product, brand, config, width }: TplProps) {
   return (
     <div style={{ width: "100%", height: "100%", background: p.primary, padding: s(8), display: "flex" }}>
       <div style={{ position: "relative", flex: 1, borderRadius: s(12), overflow: "hidden", background: "#fff" }}>
-        <ProductImage product={product} width={width} />
+        <CardPhoto product={product} reserveTop={0.1} reserveBottom={0.44} />
         <div
           style={{
             position: "absolute",
@@ -603,7 +619,7 @@ function SplitTemplate({ product, brand, config, width }: TplProps) {
           borderRadius: `0 0 ${s(16)}px ${s(16)}px`,
         }}
       >
-        <ProductImage product={product} width={width} />
+        <CardPhoto product={product} reserveTop={0.14} reserveBottom={0.02} />
         <div style={{ position: "absolute", top: s(10), left: s(10), right: s(10) }}>
           <ShopTag c={c} tone="dark" photo />
         </div>
@@ -647,12 +663,14 @@ function CleanTemplate({ product, brand, config, width }: TplProps) {
   const { s, p } = c;
   return (
     <div style={{ width: "100%", height: "100%", position: "relative", background: "#fff" }}>
-      <ProductImage product={product} width={width} />
+      <CardPhoto product={product} reserveTop={0.1} reserveBottom={0.44} />
       <div
         style={{
           position: "absolute",
           inset: 0,
-          background: "linear-gradient(to bottom, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0) 20%, rgba(10,10,10,0) 62%, rgba(10,10,10,0.25) 100%)",
+          // Faint top shade only: the shop tag has its own backing and the details
+          // sit on the sticker, so heavy fades would just grey out white backgrounds.
+          background: "linear-gradient(to bottom, rgba(10,10,10,0.14) 0%, rgba(10,10,10,0) 14%)",
         }}
       />
       <div style={{ position: "absolute", top: s(10), left: s(10), right: s(10) }}>

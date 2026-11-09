@@ -1,3 +1,4 @@
+import ProductPhoto from "@/components/ProductPhoto";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProduct, getShop } from "@/lib/server-store";
@@ -28,12 +29,13 @@ function BuyerProductScreen({ shop, product }: { shop: Shop; product: Product })
 
       <div className="by-product">
         <div className="by-product-media">
-          {product.image ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={product.image} alt="" />
-          ) : (
-            <div className="ph">{product.code}</div>
-          )}
+          <ProductPhoto
+            src={product.image}
+            meta={product.imageMeta}
+            fit={product.imageFit}
+            label={product.code}
+            padding={0.08}
+          />
           <div className="by-chip ink">{product.code}</div>
         </div>
 

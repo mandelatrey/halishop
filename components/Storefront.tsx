@@ -1,3 +1,4 @@
+import ProductPhoto from "./ProductPhoto";
 import { optionsSummary } from "@/lib/variants";
 import Link from "next/link";
 import { formatPrice } from "@/lib/format";
@@ -120,12 +121,7 @@ export default function Storefront({
               aria-label={`Order ${p.title}`}
             >
               <div className="by-card-img">
-                {p.image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={p.image} alt="" />
-                ) : (
-                  <div className="ph">{p.code}</div>
-                )}
+                <ProductPhoto src={p.image} meta={p.imageMeta} fit={p.imageFit} label={p.code} />
                 <span className="by-chip">{ref}</span>
               </div>
               <div className="by-card-body">
@@ -156,12 +152,7 @@ export default function Storefront({
         {soldOut.map((p) => (
           <div key={p.code} className="by-card sold" aria-label={`${p.title} — sold out`}>
             <div className="by-card-img">
-              {p.image ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={p.image} alt="" />
-              ) : (
-                <div className="ph">{p.code}</div>
-              )}
+              <ProductPhoto src={p.image} meta={p.imageMeta} fit={p.imageFit} label={p.code} grayscale />
               <span className="by-chip ink">Sold out</span>
             </div>
             <div className="by-card-body">

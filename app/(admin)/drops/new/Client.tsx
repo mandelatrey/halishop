@@ -1,5 +1,6 @@
 "use client";
 
+import ProductPhoto from "@/components/ProductPhoto";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
@@ -128,12 +129,7 @@ export default function NewDropClient({
                   >
                     <span aria-hidden className="ad-check">{on ? "✓" : ""}</span>
                     <div className="ad-thumb">
-                      {p.image ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={p.image} alt="" />
-                      ) : (
-                        <div className="ph" style={{ width: "100%", height: "100%" }}>{p.code}</div>
-                      )}
+                      <ProductPhoto src={p.image} meta={p.imageMeta} fit={p.imageFit} label={p.code} padding={0.06} />
                     </div>
                     <div className="ad-pick-body">
                       <span className="t2">{p.title}</span>

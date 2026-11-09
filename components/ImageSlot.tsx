@@ -1,12 +1,17 @@
 "use client";
 
-import { useId, useRef } from "react";
+import { useId, useRef, useState } from "react";
 import { fileToDataUrl } from "@/lib/render-card";
 import { useFileDrop } from "@/lib/use-file-drop";
+import { prepareProductImage } from "@/lib/image-prep";
+import type { ImageMeta } from "@/lib/types";
 
 type Props = {
   value?: string;
-  onChange: (dataUrl: string | undefined) => void;
+  /** `meta` is set when `prepare` is on (product photos). */
+  onChange: (dataUrl: string | undefined, meta?: ImageMeta) => void;
+  /** Downscale, detect plain backgrounds and trim empty margins on upload. */
+  prepare?: boolean;
   label?: string;
   width?: number;
   height?: number;
@@ -19,12 +24,24 @@ export default function ImageSlot({
   label = "Upload image",
   width = 96,
   height = 96,
+  prepare = false,
 }: Props) {
   const id = useId();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { dragging, error, take, dropProps } = useFileDrop(async (f) => {
-    onChange(await fileToDataUrl(f));
+  const [busy, setBusy] = useState(false);
+  const { dragging, error, setError, take, dropProps } = useFileDrop(async (f) => {
+    const raw = await fileToDataUrl(f);
+    if (!prepare) return onChange(raw);
+    setBusy(true);
+    try {
+      const { dataUrl, meta } = await prepareProductImage(raw);
+      onChange(dataUrl, meta);
+    } catch {
+      setError("Couldn't read that image — try a PNG or JPG.");
+    } finally {
+      setBusy(false);
+    }
   });
 
   return (
@@ -46,6 +63,7 @@ export default function ImageSlot({
             <span className="ad-slot-empty"><b>+</b>Upload</span>
           )}
           {dragging && <span className="ad-slot-drop">Drop to {value ? "replace" : "upload"}</span>}
+          {busy && <span className="ad-slot-drop">Preparing…</span>}
         </button>
         <div className="ad-slot-side">
           {value && (

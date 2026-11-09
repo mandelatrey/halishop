@@ -1,5 +1,6 @@
 "use client";
 
+import ProductPhoto from "@/components/ProductPhoto";
 import Link from "next/link";
 import { useRef, useState, useTransition } from "react";
 import Button from "@/components/Button";
@@ -7,7 +8,7 @@ import ImageSlot from "@/components/ImageSlot";
 import PageHeader from "@/components/PageHeader";
 import OptionsEditor from "@/components/OptionsEditor";
 import { removeProduct, upsertProduct } from "@/lib/actions/products";
-import { CATEGORY_LABEL, type Product, type ProductCategory } from "@/lib/types";
+import { CATEGORY_LABEL, type ImageFit, type Product, type ProductCategory } from "@/lib/types";
 import { defaultOptionsFor, getOptions, learnValues, optionsDetail, withOptions } from "@/lib/variants";
 
 const CATEGORIES: ProductCategory[] = [
@@ -18,6 +19,12 @@ const CATEGORIES: ProductCategory[] = [
   "beauty",
   "food",
   "home",
+];
+
+const FIT_OPTIONS: { value: ImageFit; label: string }[] = [
+  { value: "auto", label: "Auto" },
+  { value: "contain", label: "Show whole product" },
+  { value: "cover", label: "Fill frame" },
 ];
 
 const EMPTY: Product = {
@@ -227,11 +234,55 @@ export default function ProductsClient({ initialProducts }: { initialProducts: P
 
                 <ImageSlot
                   value={draft.image}
-                  onChange={(v) => setDraft({ ...draft, image: v })}
+                  prepare
+                  onChange={(v, meta) => setDraft({ ...draft, image: v, imageMeta: v ? meta : undefined })}
                   label="Product photo"
                   width={88}
                   height={88}
                 />
+
+                {draft.image && (
+                  <div className="ad-fit">
+                    <div className="ad-field">
+                      <span className="k">Photo fit</span>
+                      <div className="ad-chips" role="radiogroup" aria-label="Photo fit">
+                        {FIT_OPTIONS.map((o) => (
+                          <button
+                            key={o.value}
+                            type="button"
+                            role="radio"
+                            aria-checked={(draft.imageFit ?? "auto") === o.value}
+                            className={`ad-chip${(draft.imageFit ?? "auto") === o.value ? " on" : ""}`}
+                            onClick={() => setDraft({ ...draft, imageFit: o.value })}
+                          >
+                            {o.label}
+                          </button>
+                        ))}
+                      </div>
+                      <span className="ad-hint">
+                        {draft.imageMeta?.kind === "cutout"
+                          ? "Plain background detected — Auto shows the whole product on its background colour."
+                          : draft.imageMeta?.kind === "photo"
+                            ? "Scene photo detected — Auto fills the frame unless its shape is very different."
+                            : "Auto works out the best fit for each frame."}
+                      </span>
+                    </div>
+                    <div className="ad-fit-previews" aria-label="Fit preview">
+                      <figure>
+                        <div className="ad-fit-frame shop">
+                          <ProductPhoto src={draft.image} meta={draft.imageMeta} fit={draft.imageFit} />
+                        </div>
+                        <figcaption>Shop card</figcaption>
+                      </figure>
+                      <figure>
+                        <div className="ad-fit-frame status">
+                          <ProductPhoto src={draft.image} meta={draft.imageMeta} fit={draft.imageFit} />
+                        </div>
+                        <figcaption>Status card</figcaption>
+                      </figure>
+                    </div>
+                  </div>
+                )}
 
                 <hr className="ad-divider" />
 
@@ -258,12 +309,7 @@ export default function ProductsClient({ initialProducts }: { initialProducts: P
           return (
             <div key={p.code} className={`prow${isEditing ? " editing" : ""}`}>
               <div className="thumb">
-                {p.image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={p.image} alt="" />
-                ) : (
-                  <div className="ph" style={{ width: "100%", height: "100%" }}>{p.code}</div>
-                )}
+                <ProductPhoto src={p.image} meta={p.imageMeta} fit={p.imageFit} label={p.code} padding={0.06} />
               </div>
               <div className="col">
                 <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
