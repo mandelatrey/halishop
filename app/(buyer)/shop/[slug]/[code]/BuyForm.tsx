@@ -10,12 +10,20 @@ import { useIsDesktop } from "@/lib/use-desktop";
 import AskWhatsApp from "@/components/AskWhatsApp";
 import ReadTicks from "@/components/ReadTicks";
 import type { Product, Shop } from "@/lib/types";
+import { getOptions } from "@/lib/variants";
 
 export default function BuyForm({ shop, product }: { shop: Shop; product: Product }) {
   const { recall, save, clear, ready } = useBuyerRecall();
   const [compact, setCompact] = useState(true);
-  const variants = product.variants ?? [];
-  const [variant, setVariant] = useState<string>(variants.includes("L") ? "L" : variants[0] ?? "");
+  // One pick per option (Size, Colour, Storage…), defaulting to the first value.
+  const options = useMemo(() => getOptions(product), [product]);
+  const [picks, setPicks] = useState<string[]>(() => options.map((o) => o.values[0] ?? ""));
+  // One option: "(M)". Several: name each so "12GB" can't be mistaken for
+  // storage — "(Colour: Blue, Storage: 256GB, RAM: 12GB)".
+  const variant =
+    options.length > 1
+      ? options.map((o, i) => (picks[i] ? `${o.label}: ${picks[i]}` : "")).filter(Boolean).join(", ")
+      : picks.filter(Boolean).join(", ");
   const [qty, setQty] = useState(1);
   const [area, setArea] = useState<string>(shop.contact.area ?? "");
   const [whatsapp, setWhatsapp] = useState<string>("");
@@ -78,6 +86,28 @@ export default function BuyForm({ shop, product }: { shop: Shop; product: Produc
     // Browser opens wa.me in a new tab via target=_blank
   }
 
+  // Option pickers (Size, Colour, Storage…) — shared by the compact and full layouts.
+  const optionPickers =
+    options.map((o, i) => (
+      <div className="by-field" key={o.label}>
+        <span className="by-label">{o.label}</span>
+        <div className="seg by-sizes" role="radiogroup" aria-label={o.label}>
+          {o.values.map((v) => (
+            <button
+              key={v}
+              type="button"
+              role="radio"
+              aria-checked={picks[i] === v}
+              className={picks[i] === v ? "on" : ""}
+              onClick={() => setPicks((prev) => prev.map((p, j) => (j === i ? v : p)))}
+            >
+              {v}
+            </button>
+          ))}
+        </div>
+      </div>
+    ));
+
   return (
     <div className="by-form">
       <div className="by-form-head">
@@ -104,23 +134,7 @@ export default function BuyForm({ shop, product }: { shop: Shop; product: Produc
       {showCompact ? (
         // Screen 1h — compact returning-buyer layout
         <div className="by-form-body">
-          {variants.length > 0 && (
-            <div className="by-field">
-              <span className="by-label">Size</span>
-              <div className="seg by-sizes">
-                {variants.map((v) => (
-                  <button
-                    key={v}
-                    type="button"
-                    className={variant === v ? "on" : ""}
-                    onClick={() => setVariant(v)}
-                  >
-                    {v}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+          {optionPickers}
 
           <div className="by-recall">
             <div className="by-field" style={{ gap: 6 }}>
@@ -159,23 +173,7 @@ export default function BuyForm({ shop, product }: { shop: Shop; product: Produc
       ) : (
         // Screen 1f + 1g — full form + message preview
         <div className="by-form-body">
-          {variants.length > 0 && (
-            <div className="by-field">
-              <span className="by-label">{product.variantLabel ?? "Size"}</span>
-              <div className="seg by-sizes">
-                {variants.map((v) => (
-                  <button
-                    key={v}
-                    type="button"
-                    className={variant === v ? "on" : ""}
-                    onClick={() => setVariant(v)}
-                  >
-                    {v}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+          {optionPickers}
 
           <div className="by-field-row">
             <div className="by-field">

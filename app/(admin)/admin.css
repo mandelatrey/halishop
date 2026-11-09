@@ -618,3 +618,80 @@
 }
 .ad-linkrow-value { font: 500 15px/1.3 "DM Sans", sans-serif; letter-spacing: 0.01em; }
 .ad-linkrow .btn { width: auto; }
+
+/* ---------- Product options editor (components/OptionsEditor.tsx) ---------- */
+.ad-opts { display: flex; flex-direction: column; gap: 12px; }
+.ad-opts-head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 6px 12px; }
+.ad-opt {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--stroke-soft);
+  border-radius: 14px;
+  background: var(--color-bg);
+}
+.ad-opt-top { display: flex; gap: 8px; align-items: center; }
+.ad-opt-label { max-width: 260px; font-weight: 600; }
+.ad-opt-remove {
+  margin-left: auto;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid var(--stroke-soft);
+  background: #fff;
+  color: var(--color-mute);
+  font: 400 20px/1 "DM Sans", sans-serif;
+  display: grid;
+  place-items: center;
+}
+.ad-opt-remove:hover { color: var(--color-error); border-color: var(--color-error); background: var(--color-error-container); }
+
+/* Chosen values + inline input, styled as one field */
+.ad-opt-values {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  min-height: 46px;
+  border: 1px solid var(--stroke-soft);
+  border-radius: var(--radius);
+  background: #fff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.ad-opt-values:focus-within { border-color: var(--color-accent); box-shadow: 0 0 0 3px var(--color-accent-soft); }
+.ad-opt-values .ad-chip.on { padding: 6px 6px 6px 12px; cursor: default; }
+.ad-opt-values .ad-chip.on button {
+  border: 0;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  font: 400 14px/1 "DM Sans", sans-serif;
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+.ad-opt-values .ad-chip.on button:hover { background: rgba(255, 255, 255, 0.35); }
+.ad-opt-input {
+  flex: 1 1 140px;
+  min-width: 120px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: 400 14px/1.3 "DM Sans", sans-serif;
+  padding: 6px;
+  color: var(--color-text);
+}
+.ad-opt-input::placeholder { color: var(--color-mute-2); }
+
+.ad-opt-suggest { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.ad-opt-suggest .ad-hint { margin-right: 2px; }
+.ad-chip.ghost { border-style: dashed; background: transparent; }
+.ad-opts-add { display: flex; flex-wrap: wrap; gap: 8px; }
+.ad-chip-add { color: var(--color-accent-dark); border-color: var(--color-accent-soft); background: #fff; }
+.ad-chip-add:hover { background: var(--color-accent-soft); color: var(--color-accent-dark); border-color: transparent; }
+.ad-chip-add.ghost { color: var(--color-mute); border-color: var(--stroke-soft); }

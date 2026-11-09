@@ -1,3 +1,4 @@
+import { optionsSummary } from "@/lib/variants";
 import Link from "next/link";
 import { formatPrice } from "@/lib/format";
 import { buildRef } from "@/lib/ref";
@@ -110,7 +111,7 @@ export default function Storefront({
       <div className="by-grid">
         {inStock.map((p) => {
           const ref = buildRef(shop, p.code, "full");
-          const variantsText = (p.variants ?? []).join(" ");
+          const variantsText = optionsSummary(p);
           return (
             <Link
               key={p.code}

@@ -1,5 +1,6 @@
 import type { CaptionVariantKind, Product, Shop } from "./types";
 import { formatPrice } from "./format";
+import { getOptions } from "./variants";
 import { buildRef } from "./ref";
 
 /**
@@ -22,9 +23,11 @@ export const DEFAULT_CAPTIONS: Record<CaptionVariantKind, string> = {
  * exist, empty string otherwise. Reads well in the default caption.
  */
 function variantsLine(product: Product): string {
-  const variants = product.variants ?? [];
+  // Captions mention the first option only ("Sizes S to XL") to stay short.
+  const first = getOptions(product)[0];
+  const variants = first?.values ?? [];
   if (variants.length === 0) return "";
-  const label = product.variantLabel ?? "Sizes";
+  const label = first.label;
   if (variants.length === 1) return `${label} ${variants[0]}, still available. `;
   return `${label} ${variants[0]} to ${variants[variants.length - 1]}, still available. `;
 }
@@ -54,7 +57,7 @@ export function captionTokensFor(shop: Shop, product: Product): Record<string, s
     shop: shop.brandKit.shopName,
     product: product.title,
     price: formatPrice(product.price, product.currency),
-    variants: (product.variants ?? []).join(", "),
+    variants: (getOptions(product)[0]?.values ?? []).join(", "),
     variantsLine: variantsLine(product),
     stock: String(product.stock ?? ""),
     code: product.code,

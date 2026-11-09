@@ -5,14 +5,10 @@ import { useRef, useState, useTransition } from "react";
 import Button from "@/components/Button";
 import ImageSlot from "@/components/ImageSlot";
 import PageHeader from "@/components/PageHeader";
+import OptionsEditor from "@/components/OptionsEditor";
 import { removeProduct, upsertProduct } from "@/lib/actions/products";
-import {
-  CATEGORY_LABEL,
-  DEFAULT_VARIANT_LABEL,
-  VARIANT_PLACEHOLDER,
-  type Product,
-  type ProductCategory,
-} from "@/lib/types";
+import { CATEGORY_LABEL, type Product, type ProductCategory } from "@/lib/types";
+import { defaultOptionsFor, getOptions, learnValues, optionsDetail, withOptions } from "@/lib/variants";
 
 const CATEGORIES: ProductCategory[] = [
   "general",
@@ -30,16 +26,10 @@ const EMPTY: Product = {
   price: 0,
   currency: "UGX",
   category: "general",
-  variantLabel: DEFAULT_VARIANT_LABEL["general"],
-  variants: [],
+  options: [],
   stock: 0,
   description: "",
 };
-
-function variantLabelFor(p: Product): string {
-  if (p.variantLabel && p.variantLabel.trim()) return p.variantLabel;
-  return DEFAULT_VARIANT_LABEL[p.category ?? "general"];
-}
 
 export default function ProductsClient({ initialProducts }: { initialProducts: Product[] }) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
@@ -54,8 +44,8 @@ export default function ProductsClient({ initialProducts }: { initialProducts: P
     setDraft({
       ...p,
       category: p.category ?? "general",
-      variantLabel: p.variantLabel ?? DEFAULT_VARIANT_LABEL[p.category ?? "general"],
-      variants: p.variants ?? [],
+      // Legacy single-variant products open as one option row.
+      options: getOptions(p),
     });
     setAddOpen(true);
     requestAnimationFrame(() => {
@@ -71,13 +61,15 @@ export default function ProductsClient({ initialProducts }: { initialProducts: P
 
   function submit() {
     if (!draft.code.trim() || !draft.title.trim()) return;
-    const next: Product = {
-      ...draft,
-      code: draft.code.trim().toUpperCase(),
-      title: draft.title.trim(),
-      variants: (draft.variants ?? []).filter(Boolean),
-      soldOut: (draft.stock ?? 0) === 0,
-    };
+    const next: Product = withOptions(
+      {
+        ...draft,
+        code: draft.code.trim().toUpperCase(),
+        title: draft.title.trim(),
+        soldOut: (draft.stock ?? 0) === 0,
+      },
+      draft.options ?? []
+    );
     startTransition(async () => {
       await upsertProduct(next);
       setProducts((prev) => {
@@ -96,18 +88,19 @@ export default function ProductsClient({ initialProducts }: { initialProducts: P
   }
 
   function chooseCategory(next: ProductCategory) {
-    const shouldSyncLabel =
-      !draft.variantLabel ||
-      Object.values(DEFAULT_VARIANT_LABEL).includes(draft.variantLabel);
+    // Swap in the new category's option types only while nothing has been
+    // filled in yet — never throw away values the seller entered.
+    const untouched = (draft.options ?? []).every((o) => o.values.length === 0);
     setDraft({
       ...draft,
       category: next,
-      variantLabel: shouldSyncLabel ? DEFAULT_VARIANT_LABEL[next] : draft.variantLabel,
+      options: untouched ? defaultOptionsFor(next) : draft.options,
     });
   }
 
   const currentCategory = draft.category ?? "general";
-  const currentVariantLabel = variantLabelFor(draft);
+  // Values already used across the catalogue, offered first as suggestions.
+  const learned = learnValues(products);
 
   return (
     <main className="page ad-page">
@@ -214,31 +207,12 @@ export default function ProductsClient({ initialProducts }: { initialProducts: P
                   </label>
                 </div>
 
-                <div className="ad-row">
-                  <label className="ad-field ad-f-label">
-                    <span className="k">Variant label</span>
-                    <input
-                      className="inp"
-                      value={currentVariantLabel}
-                      onChange={(e) => setDraft({ ...draft, variantLabel: e.target.value })}
-                      placeholder={DEFAULT_VARIANT_LABEL[currentCategory]}
-                    />
-                  </label>
-                  <label className="ad-field ad-f-grow">
-                    <span className="k">{currentVariantLabel} (comma-separated)</span>
-                    <input
-                      className="inp"
-                      value={(draft.variants ?? []).join(", ")}
-                      onChange={(e) =>
-                        setDraft({
-                          ...draft,
-                          variants: e.target.value.split(",").map((s) => s.trim()).filter(Boolean),
-                        })
-                      }
-                      placeholder={VARIANT_PLACEHOLDER[currentCategory]}
-                    />
-                  </label>
-                </div>
+                <OptionsEditor
+                  category={currentCategory}
+                  options={draft.options ?? []}
+                  onChange={(options) => setDraft({ ...draft, options })}
+                  learned={learned}
+                />
 
                 <label className="ad-field">
                   <span className="k">Description</span>
@@ -279,8 +253,7 @@ export default function ProductsClient({ initialProducts }: { initialProducts: P
           <span className="s">{products.length} product{products.length === 1 ? "" : "s"}</span>
         </div>
         {products.map((p) => {
-          const label = variantLabelFor(p);
-          const vs = (p.variants ?? []).filter(Boolean);
+          const detail = optionsDetail(p);
           const isEditing = editingCode === p.code;
           return (
             <div key={p.code} className={`prow${isEditing ? " editing" : ""}`}>
@@ -303,7 +276,7 @@ export default function ProductsClient({ initialProducts }: { initialProducts: P
                 </div>
                 <span className="s">
                   {p.currency} {p.price.toLocaleString()} · {p.stock ?? 0} in stock
-                  {vs.length > 0 ? ` · ${label}: ${vs.join(" / ")}` : ""}
+                  {detail ? ` · ${detail}` : ""}
                 </span>
               </div>
               <div className="actions">

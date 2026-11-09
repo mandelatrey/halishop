@@ -1,3 +1,4 @@
+import { optionsSummary } from "@/lib/variants";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getDrop, getShop, listProducts } from "@/lib/server-store";
@@ -57,7 +58,7 @@ export default async function BuyerDropPage({
 
       <div className="by-grid">
         {dropProducts.map((p) => {
-          const variantsText = (p.variants ?? []).join(" ");
+          const variantsText = optionsSummary(p);
           return (
             <Link key={p.code} href={`/shop/${slug}/${p.code}`} className="by-card">
               <div className="by-card-img">

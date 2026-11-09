@@ -66,6 +66,12 @@ export const VARIANT_PLACEHOLDER: Record<ProductCategory, string> = {
   home: "Cream, Black, Grey",
 };
 
+export type ProductOption = {
+  /** "Size", "Colour", "Storage"… */
+  label: string;
+  values: string[];
+};
+
 export type Product = {
   code: string;
   title: string;
@@ -73,9 +79,19 @@ export type Product = {
   currency: string;
   image?: string;
   category?: ProductCategory;
-  /** What to call the variants — falls back to DEFAULT_VARIANT_LABEL[category]. */
+  /**
+   * Option types the buyer picks one value from each of, e.g.
+   * [{ label: "Colour", values: ["Black", "Blue"] }, { label: "Storage", values: ["128GB", "256GB"] }].
+   * Read through `getOptions()` in lib/variants.ts, which also understands the
+   * older single-variant fields below.
+   */
+  options?: ProductOption[];
+  /**
+   * Legacy single variant (label + values). Kept in sync with `options[0]` on
+   * save so captions and older readers keep working.
+   */
   variantLabel?: string;
-  /** Free-form variant values. Was previously named `sizes`. */
+  /** Legacy single-variant values. Was previously named `sizes`. */
   variants?: string[];
   stock?: number;
   description?: string;
