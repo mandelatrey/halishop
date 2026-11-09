@@ -5,6 +5,7 @@ import { useCallback, useMemo, useRef, useState, useTransition } from "react";
 import Button from "@/components/Button";
 import PageHeader from "@/components/PageHeader";
 import StatusCard from "@/components/StatusCard";
+import ExportCard from "@/components/ExportCard";
 import { downloadCardAsPng } from "@/lib/render-card";
 import { updateDropItems } from "@/lib/actions/drops";
 import { captionTokensFor, renderCaption, trackedLinkFor } from "@/lib/captions";
@@ -187,7 +188,7 @@ export default function DropOutputClient({
           return (
             <section key={it.code} className="panel ad-drop-card">
               <div className="ad-well">
-                <div ref={(el) => { cardRefs.current[it.code] = el; }}>
+                <div>
                   <StatusCard
                     product={product}
                     brand={shop.brandKit}
@@ -198,6 +199,17 @@ export default function DropOutputClient({
                     }}
                     template={template}
                     width={180}
+                  />
+                  <ExportCard
+                    ref={(el) => { cardRefs.current[it.code] = el; }}
+                    product={product}
+                    brand={shop.brandKit}
+                    config={{
+                      templateId: drop.templateId,
+                      showPrice: drop.cardConfig.showPrice,
+                      codeFormat: drop.cardConfig.codeFormat,
+                    }}
+                    template={template}
                   />
                 </div>
               </div>

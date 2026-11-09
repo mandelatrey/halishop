@@ -740,3 +740,34 @@
 }
 .ad-fit-frame.shop { width: 96px; aspect-ratio: 4 / 5; }
 .ad-fit-frame.status { width: 68px; aspect-ratio: 9 / 16; }
+
+/* ---------- Card generator: preview beside settings on phones ----------
+ * Below 860px the generic split stacks; here we keep two columns so sellers
+ * see the card change as they tap templates. The preview column is pinned;
+ * the phone-frame chrome is dropped to give the card the room. */
+@media (max-width: 859px) {
+  .ad-split.ad-cardgen {
+    grid-template-columns: minmax(0, 42%) minmax(0, 1fr);
+    gap: 10px;
+    align-items: start;
+  }
+  .ad-cardgen > .ad-aside { position: sticky; top: 72px; }
+  .ad-cardgen .ad-phone {
+    width: 100% !important;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+  }
+  .ad-cardgen .ad-phone-bar { display: none; }
+  .ad-cardgen .ad-phone > .col { padding: 0 !important; }
+  .ad-cardgen .ad-well { padding: 10px 6px; border-radius: 12px; }
+
+  .ad-cardgen > .panel { padding: 14px; border-radius: 14px; }
+  .ad-cardgen .ad-panel-head .section-title { font-size: 10px; }
+  .ad-cardgen .ad-form { gap: 14px; }
+  .ad-cardgen .ad-grid-2 { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .ad-cardgen .seg > button, .ad-cardgen .seg > div { font-size: 12px; padding: 9px 0; }
+  .ad-cardgen .btn { font-size: 12.5px; padding: 12px 10px; }
+  .ad-cardgen .ad-hint { font-size: 11.5px; }
+}

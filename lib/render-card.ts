@@ -2,10 +2,18 @@
 
 import { toPng } from "html-to-image";
 
+/** Status images are exported at WhatsApp/Instagram story size: 1080×1920. */
+export const EXPORT_WIDTH = 1080;
+
 export async function downloadCardAsPng(node: HTMLElement, filename: string) {
-  // pixelRatio 3 → a 360×640 preview becomes a ~1080×1920 PNG, i.e. a real 9:16 status image
+  // Scale from whatever size the preview is drawn at (200px on desktop,
+  // smaller on phones) up to exactly 1080px wide → a 1080×1920 PNG.
+  // canvasWidth/Height fix the output to exactly 1080×1920 (a fractional
+  // preview height would otherwise round to 1921/1922).
   const dataUrl = await toPng(node, {
-    pixelRatio: 3,
+    pixelRatio: 1,
+    canvasWidth: EXPORT_WIDTH,
+    canvasHeight: Math.round((EXPORT_WIDTH * 16) / 9),
     cacheBust: true,
     style: { transform: "none" },
     skipFonts: false,
