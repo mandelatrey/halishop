@@ -96,7 +96,15 @@ export async function requireVendor(next?: string): Promise<Vendor> {
 export const requireOwnedShop = cache(async (slug: string): Promise<{ vendor: Vendor; shop: Shop }> => {
   const vendor = await requireVendor(`/dashboard/${slug}`);
   const shop = await getShopDoc(slug);
-  if (!shop || shop.ownerId !== vendor.id) notFound();
+  if (!shop || shop.ownerId !== vendor.id) {
+    // Same 404 either way (so slugs can't be probed), but say why in the server log.
+    console.warn(
+      !shop
+        ? `[hali] /dashboard/${slug}: no shop with that link in db "${process.env.MONGODB_DB ?? "hali"}"`
+        : `[hali] /dashboard/${slug}: shop owner is ${shop.ownerId ?? "nobody (legacy shop)"}, signed-in vendor is ${vendor.id} (${vendor.email})`
+    );
+    notFound();
+  }
   return { vendor, shop };
 });
 
