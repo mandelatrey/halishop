@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import Button from "@/components/Button";
 import PageHeader from "@/components/PageHeader";
+import { useFileDrop } from "@/lib/use-file-drop";
 import SegmentedControl from "@/components/SegmentedControl";
 import TextZonePicker from "@/components/TextZonePicker";
 import StatusCard from "@/components/StatusCard";
@@ -50,8 +51,6 @@ export default function TemplateEditorClient({
   const router = useRouter();
   const [draft, setDraft] = useState<CustomTemplate>(initial);
   const [aspectWarn, setAspectWarn] = useState<string | null>(null);
-  const dropRef = useRef<HTMLDivElement>(null);
-  const [dragging, setDragging] = useState(false);
   const posDragRef = useRef<{
     startX: number;
     startY: number;
@@ -62,6 +61,11 @@ export default function TemplateEditorClient({
   const [isPending, startTransition] = useTransition();
 
   const sampleProduct = products.find((p) => p.code === "B3") ?? products[0];
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { dragging, error: uploadError, take, dropProps } = useFileDrop((f) => {
+    void handleFile(f);
+  }, { accept: ["image/png", "image/jpeg", "image/webp"] });
 
   async function handleFile(f: File | undefined) {
     if (!f) return;
@@ -134,21 +138,22 @@ export default function TemplateEditorClient({
               <div className="ad-field">
                 <span className="k">Image</span>
                 <div
-                  ref={dropRef}
                   className={`drop${dragging ? " on" : ""}`}
-                  onClick={() => document.getElementById("tpl-file")?.click()}
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    setDragging(true);
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Template image: click or drop a 9:16 PNG or JPG"
+                  onClick={() => fileInputRef.current?.click()}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      fileInputRef.current?.click();
+                    }
                   }}
-                  onDragLeave={() => setDragging(false)}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    setDragging(false);
-                    handleFile(e.dataTransfer.files?.[0]);
-                  }}
+                  {...dropProps}
                 >
-                  {draft.image ? (
+                  {dragging ? (
+                    <span><strong>Drop to {draft.image ? "replace" : "upload"}</strong></span>
+                  ) : draft.image ? (
                     <>
                       <span>Click or drop to replace</span>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -160,13 +165,19 @@ export default function TemplateEditorClient({
                     </span>
                   )}
                   <input
+                    ref={fileInputRef}
                     id="tpl-file"
                     type="file"
-                    accept="image/png,image/jpeg"
+                    accept="image/png,image/jpeg,image/webp"
                     style={{ display: "none" }}
-                    onChange={(e) => handleFile(e.target.files?.[0])}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) => {
+                      take(e.target.files?.[0]);
+                      e.target.value = "";
+                    }}
                   />
                 </div>
+                {uploadError && <span className="ad-upload-error" role="alert">{uploadError}</span>}
                 {aspectWarn && <div className="dinstr warn">{aspectWarn}</div>}
               </div>
 

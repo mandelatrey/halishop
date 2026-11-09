@@ -695,3 +695,29 @@
 .ad-chip-add { color: var(--color-accent-dark); border-color: var(--color-accent-soft); background: #fff; }
 .ad-chip-add:hover { background: var(--color-accent-soft); color: var(--color-accent-dark); border-color: transparent; }
 .ad-chip-add.ghost { color: var(--color-mute); border-color: var(--stroke-soft); }
+
+/* ---------- Drag & drop uploads (lib/use-file-drop.ts) ---------- */
+.ad-slot-box { position: relative; }
+.ad-slot-box.dragging {
+  border: 2px solid var(--color-accent);
+  background: var(--color-accent-soft);
+  box-shadow: 0 0 0 4px rgba(19, 90, 237, 0.12);
+}
+.ad-slot-drop {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 6px;
+  text-align: center;
+  background: rgba(219, 225, 255, 0.92);
+  color: var(--color-accent-dark);
+  font: 600 12px/1.2 "DM Sans", sans-serif;
+  pointer-events: none;
+}
+.ad-slot-side { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; }
+.ad-slot-side .btn.gh { padding-left: 0; }
+.ad-upload-error { font: 500 12.5px/1.4 "DM Sans", sans-serif; color: var(--color-error); }
+.drop:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+.drop.on { border-style: solid; border-width: 2px; box-shadow: 0 0 0 4px rgba(19, 90, 237, 0.12); }
+.drop.on * { pointer-events: none; }
