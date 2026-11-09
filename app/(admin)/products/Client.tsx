@@ -326,8 +326,8 @@ export default function ProductsClient({ initialProducts }: { initialProducts: P
                 </span>
               </div>
               <div className="actions">
-                <Link href={`/products/${p.code}/card`} className="ad-cta" aria-label={`Make card for ${p.title}`}>
-                  Make card <span className="arrow" aria-hidden>→</span>
+                <Link href={`/products/${p.code}/card`} className="ad-cta" aria-label={`Make a status card for ${p.title}`}>
+                  Make a status card <span className="arrow" aria-hidden>→</span>
                 </Link>
                 <button
                   className={`btn gh${isEditing ? " on" : ""}`}

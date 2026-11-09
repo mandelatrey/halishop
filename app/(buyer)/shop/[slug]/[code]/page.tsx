@@ -24,7 +24,7 @@ function BuyerProductScreen({ shop, product }: { shop: Shop; product: Product })
   return (
     <main className="by-wrap">
       <Link href={`/shop/${shop.slug}`} className="by-back">
-        <span aria-hidden>←</span> {shop.brandKit.shopName}
+        <span aria-hidden>←</span> Back
       </Link>
 
       <div className="by-product">
