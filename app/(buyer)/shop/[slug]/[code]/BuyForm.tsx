@@ -8,6 +8,7 @@ import { buildRef } from "@/lib/ref";
 import { buildWhatsAppHref, composeOrderMessage } from "@/lib/wa";
 import { useIsDesktop } from "@/lib/use-desktop";
 import AskWhatsApp from "@/components/AskWhatsApp";
+import ReadTicks from "@/components/ReadTicks";
 import type { Product, Shop } from "@/lib/types";
 
 export default function BuyForm({ shop, product }: { shop: Shop; product: Product }) {
@@ -219,7 +220,7 @@ export default function BuyForm({ shop, product }: { shop: Shop; product: Produc
             <span className="by-label">What gets sent</span>
             <div className="by-bubble">
               {orderText}
-              <div className="by-bubble-time">✓✓</div>
+              <div className="by-bubble-time"><ReadTicks /></div>
             </div>
           </div>
 

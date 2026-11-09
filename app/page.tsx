@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import "./landing.css";
 import LandingMotion from "./LandingMotion";
+import ReadTicks from "@/components/ReadTicks";
 
 export const metadata: Metadata = {
   title: "Haali — commerce for social sellers",
@@ -179,7 +180,7 @@ export default function Landing() {
               <p>
                 Hi! I&apos;d like to order <b>Hoodie grey</b> (size M), code <b>C4</b>. Deliver to Ntinda, please.
               </p>
-              <div className="lp-bubble-time">18:24 ✓✓</div>
+              <div className="lp-bubble-time">18:24 <ReadTicks /></div>
             </div>
           </div>
         </div>
@@ -277,7 +278,7 @@ export default function Landing() {
                     <p>
                       <b>T-shirt black</b>, size L, code B3. Deliver to Kololo.
                     </p>
-                    <div className="lp-bubble-time">09:12 ✓✓</div>
+                    <div className="lp-bubble-time">09:12 <ReadTicks /></div>
                   </div>
                 </div>
               </div>

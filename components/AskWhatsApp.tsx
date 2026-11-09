@@ -3,6 +3,7 @@
 import { useId, useRef, useState, type ReactNode } from "react";
 import { buildWhatsAppHref, composeQuestionMessage, MAX_PREFILL_CHARS } from "@/lib/wa";
 import { useIsDesktop } from "@/lib/use-desktop";
+import ReadTicks from "./ReadTicks";
 
 /**
  * "Ask a question" button + on-site sheet. The buyer types their question
@@ -139,7 +140,7 @@ export default function AskWhatsApp({
             <span className="by-label">What gets sent</span>
             <div className={`by-bubble${canSend ? "" : " by-bubble-empty"}`}>
               {canSend ? message : "Your question will appear here."}
-              <div className="by-bubble-time">✓✓</div>
+              <div className="by-bubble-time"><ReadTicks /></div>
             </div>
             {tooLong && (
               <span className="by-ask-warn">Long messages may be cut short by WhatsApp — try trimming it.</span>

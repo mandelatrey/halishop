@@ -8,6 +8,7 @@ import { buildWaLink, composeOrderMessage, normalizePhone, prettyPhone } from "@
 import Button from "@/components/Button";
 import PageHeader from "@/components/PageHeader";
 import PhoneInput from "@/components/PhoneInput";
+import ReadTicks from "@/components/ReadTicks";
 
 
 export default function SettingsClient({
@@ -201,7 +202,7 @@ export default function SettingsClient({
           <p className="s">A buyer tapping &ldquo;Order&rdquo; sends this to that number:</p>
           <div className="ad-settings-bubble">
             <p>{sampleMessage}</p>
-            <div className="ad-settings-bubble-time">✓✓</div>
+            <div className="ad-settings-bubble-time"><ReadTicks /></div>
           </div>
           <Link href={shopPath} className="btn sec ad-settings-shoplink">
             Open your shop
