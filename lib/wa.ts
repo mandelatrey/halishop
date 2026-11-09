@@ -1,3 +1,5 @@
+import { parsePhone } from "./country-codes";
+
 /**
  * WhatsApp wa.me deep-link helpers.
  *
@@ -21,6 +23,21 @@ export function normalizePhone(raw: string, defaultCc = "256"): string {
   if (digits.startsWith(defaultCc)) return digits;
   if (digits.startsWith("0")) return defaultCc + digits.slice(1);
   return digits;
+}
+
+/**
+ * Readable display form of a stored number — "+256772145908" → "+256 772 145 908".
+ * Splits off the country code using the same table as the phone input, then
+ * groups the rest in threes. Display only — never use it to build links.
+ */
+export function prettyPhone(raw: string): string {
+  const { cc, national } = parsePhone(raw);
+  if (!national) return "";
+  const grouped =
+    national.length === 10
+      ? national.replace(/(\d{3})(\d{3})(\d{4})/, "$1 $2 $3")
+      : national.replace(/(\d{3})(?=\d)/g, "$1 ");
+  return `+${cc} ${grouped}`;
 }
 
 /**

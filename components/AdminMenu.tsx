@@ -41,6 +41,7 @@ export default function AdminMenu() {
             <DropdownMenuItem render={<Link href="/drops/new">New drop</Link>} />
             <DropdownMenuItem render={<Link href="/templates">Templates</Link>} />
             <DropdownMenuItem render={<Link href="/brand-kit">Brand kit</Link>} />
+            <DropdownMenuItem render={<Link href="/settings">Settings</Link>} />
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>

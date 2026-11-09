@@ -13,7 +13,8 @@ import Button from "@/components/Button";
 import ImageSlot from "@/components/ImageSlot";
 import PageHeader from "@/components/PageHeader";
 import PaletteMaker from "@/components/PaletteMaker";
-import PhoneInput from "@/components/PhoneInput";
+import Link from "next/link";
+import { prettyPhone } from "@/lib/wa";
 import SegmentedControl from "@/components/SegmentedControl";
 import StatusCard from "@/components/StatusCard";
 
@@ -56,7 +57,14 @@ const ALWAYS_SHOW_KEYS = [
   { key: "whatsapp", label: "WhatsApp number" },
 ] as const;
 
-export default function BrandKitClient({ initialBrand }: { initialBrand: BrandKit }) {
+export default function BrandKitClient({
+  initialBrand,
+  orderNumber,
+}: {
+  initialBrand: BrandKit;
+  /** The number order links actually use (shop.contact.whatsapp). Edited in Settings. */
+  orderNumber: string;
+}) {
   const [saved, setSaved] = useState<BrandKit>(initialBrand);
   const [draft, setDraft] = useState<BrandKit>(initialBrand);
   const [flash, setFlash] = useState<"idle" | "saved">("idle");
@@ -136,14 +144,15 @@ export default function BrandKitClient({ initialBrand }: { initialBrand: BrandKi
               </div>
 
               <div className="ad-field">
-                <span className="k">WhatsApp number</span>
-                <PhoneInput
-                  value={draft.whatsapp ?? ""}
-                  onChange={(next) => setDraft({ ...draft, whatsapp: next || undefined })}
-                  placeholder="772 000 000"
-                />
+                <span className="k">Orders go to</span>
+                <div className="ad-linkrow">
+                  <span className="ad-linkrow-value">{prettyPhone(orderNumber)}</span>
+                  <Link href="/settings" className="btn sec">
+                    Change in Settings
+                  </Link>
+                </div>
                 <span className="ad-hint">
-                  Used for buyer &ldquo;Order on WhatsApp&rdquo; links. Pick a country then type the number.
+                  The WhatsApp number buyers&rsquo; &ldquo;Order&rdquo; links open is managed in Settings.
                 </span>
               </div>
             </div>

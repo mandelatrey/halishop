@@ -31,6 +31,7 @@ export default function AppNav() {
           <Link href="/drops/new">New drop</Link>
           <Link href="/templates">Templates</Link>
           <Link href="/brand-kit">Brand kit</Link>
+          <Link href="/settings">Settings</Link>
         </nav>
 
         <div className="app-nav-hamburger">
