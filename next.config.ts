@@ -2,6 +2,12 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["mongodb"],
+  experimental: {
+    // Product photos, logos and template backgrounds are saved as data URLs
+    // through Server Actions. Photos are shrunk to <1 MB on upload
+    // (lib/image-prep.ts); this leaves headroom for a product + logo/template.
+    serverActions: { bodySizeLimit: "4mb" },
+  },
   webpack: (config, { isServer }) => {
     // `serverExternalPackages` covers Server Components + Server Actions but
     // not the `instrumentation` entry. Without this, webpack tries to bundle

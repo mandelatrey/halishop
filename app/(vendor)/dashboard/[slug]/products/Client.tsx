@@ -45,6 +45,7 @@ export default function ProductsClient({ initialProducts }: { initialProducts: P
   const [editingCode, setEditingCode] = useState<string | null>(null);
   const [draft, setDraft] = useState<Product>(EMPTY);
   const [addOpen, setAddOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const formRef = useRef<HTMLDivElement>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -63,13 +64,18 @@ export default function ProductsClient({ initialProducts }: { initialProducts: P
   }
 
   function reset() {
+    setError(null);
     setEditingCode(null);
     setDraft(EMPTY);
     setAddOpen(false);
   }
 
   function submit() {
-    if (!draft.code.trim() || !draft.title.trim()) return;
+    if (!draft.code.trim()) return setError("Give the product a short code (e.g. B3) — it goes on the card and in orders.");
+    if (!draft.title.trim()) return setError("Give the product a title.");
+    if (!editingCode && products.some((p) => p.code === draft.code.trim().toUpperCase()))
+      return setError(`You already have a product with code ${draft.code.trim().toUpperCase()}. Pick another code.`);
+    setError(null);
     const next: Product = withOptions(
       {
         ...draft,
@@ -80,7 +86,16 @@ export default function ProductsClient({ initialProducts }: { initialProducts: P
       draft.options ?? []
     );
     startTransition(async () => {
-      await upsertProduct(slug, next);
+      try {
+        await upsertProduct(slug, next);
+      } catch {
+        setError(
+          (next.image?.length ?? 0) > 900_000
+            ? "That photo is too large to save. Try re-uploading it, or use a smaller photo."
+            : "Couldn't save the product. Check your connection and try again — if it keeps failing, sign in again."
+        );
+        return;
+      }
       setProducts((prev) => {
         const idx = prev.findIndex((p) => p.code === next.code);
         return idx === -1 ? [...prev, next] : prev.map((p, i) => (i === idx ? next : p));
@@ -91,7 +106,12 @@ export default function ProductsClient({ initialProducts }: { initialProducts: P
 
   function del(code: string) {
     startTransition(async () => {
-      await removeProduct(slug, code);
+      try {
+        await removeProduct(slug, code);
+      } catch {
+        setError("Couldn't delete the product. Check your connection and try again.");
+        return;
+      }
       setProducts((prev) => prev.filter((p) => p.code !== code));
     });
   }
@@ -287,6 +307,12 @@ export default function ProductsClient({ initialProducts }: { initialProducts: P
                 )}
 
                 <hr className="ad-divider" />
+
+                {error && (
+                  <div className="ad-alert" role="alert">
+                    {error}
+                  </div>
+                )}
 
                 <div className="ad-actions">
                   <Button onClick={submit} disabled={isPending}>{editingCode ? (isPending ? "Saving…" : "Save changes") : (isPending ? "Saving…" : "Add product")}</Button>

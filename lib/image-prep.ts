@@ -10,13 +10,20 @@ import type { ImageMeta } from "./types";
  *    background) or transparent, it's a "cutout": record the background colour
  *    and trim the empty margin around the product, keeping a little air.
  *    Otherwise it's a "photo" (a scene) and is left uncropped.
- * 3. Re-encode (JPEG, or PNG when there's transparency).
+ * 3. Re-encode (JPEG, or WebP/PNG when there's transparency), shrinking until
+ *    it fits MAX_DATA_URL so the save request stays small.
  *
  * Frames then show cutouts whole on their own background colour and let scene
  * photos fill — see components/ProductPhoto.tsx.
  */
 
 const MAX_EDGE = 1600;
+/**
+ * Upper bound for the stored data URL. Products are saved through a Server
+ * Action, whose request body is capped (next.config.ts); a phone photo or a
+ * detailed transparent PNG can blow well past that at full size.
+ */
+const MAX_DATA_URL = 900_000;
 /** Max per-channel distance for a pixel to count as "background". */
 const TOLERANCE = 26;
 /** Share of border samples that must match for a flat background. */
@@ -155,10 +162,41 @@ export async function prepareProductImage(src: string): Promise<PreparedImage> {
     octx.fillRect(0, 0, crop.w, crop.h);
   }
   octx.drawImage(canvas, crop.x, crop.y, crop.w, crop.h, 0, 0, crop.w, crop.h);
-  const dataUrl = transparent ? out.toDataURL("image/png") : out.toDataURL("image/jpeg", 0.88);
+  const { dataUrl, width, height } = encodeWithinBudget(out, transparent);
 
   return {
     dataUrl,
-    meta: { w: crop.w, h: crop.h, kind: cutout ? "cutout" : "photo", bg: bg ? toHex(bg) : null },
+    meta: { w: width, h: height, kind: cutout ? "cutout" : "photo", bg: bg ? toHex(bg) : null },
   };
+}
+
+/**
+ * Encode the canvas, stepping quality down and then size down until the data
+ * URL fits MAX_DATA_URL. Transparent images use WebP (keeps alpha at a
+ * fraction of PNG's size) where the browser can encode it, else PNG.
+ */
+function encodeWithinBudget(
+  source: HTMLCanvasElement,
+  transparent: boolean
+): { dataUrl: string; width: number; height: number } {
+  const encode = (c: HTMLCanvasElement, q: number) => {
+    if (!transparent) return c.toDataURL("image/jpeg", q);
+    const webp = c.toDataURL("image/webp", q);
+    return webp.startsWith("data:image/webp") ? webp : c.toDataURL("image/png");
+  };
+
+  let canvas = source;
+  for (let attempt = 0; attempt < 8; attempt++) {
+    for (const q of [0.88, 0.78, 0.68]) {
+      const dataUrl = encode(canvas, q);
+      if (dataUrl.length <= MAX_DATA_URL) return { dataUrl, width: canvas.width, height: canvas.height };
+    }
+    // Still too big at low quality — shrink by 20% and try again.
+    const smaller = document.createElement("canvas");
+    smaller.width = Math.max(1, Math.round(canvas.width * 0.8));
+    smaller.height = Math.max(1, Math.round(canvas.height * 0.8));
+    smaller.getContext("2d")!.drawImage(canvas, 0, 0, smaller.width, smaller.height);
+    canvas = smaller;
+  }
+  return { dataUrl: encode(canvas, 0.68), width: canvas.width, height: canvas.height };
 }
