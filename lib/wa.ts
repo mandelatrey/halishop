@@ -45,9 +45,50 @@ export function prettyPhone(raw: string): string {
  * MAX_PREFILL_CHARS with an ellipsis if it's too long.
  */
 export function buildWaLink(number: string, text: string): string {
+  return buildWhatsAppHref(number, text, "wa.me");
+}
+
+function capPrefill(text: string): string {
+  return text.length > MAX_PREFILL_CHARS ? text.slice(0, MAX_PREFILL_CHARS - 1) + "…" : text;
+}
+
+/**
+ * Where a WhatsApp link should open.
+ * - "wa.me": universal link. On phones it opens the app directly; on desktop
+ *   browsers it shows WhatsApp's "Open app / Continue to WhatsApp Web" page.
+ * - "web":   WhatsApp Web directly — skips that interstitial on desktop.
+ * - "app":   the installed desktop app via the whatsapp:// scheme.
+ */
+export type WhatsAppTarget = "wa.me" | "web" | "app";
+
+export function buildWhatsAppHref(number: string, text: string, target: WhatsAppTarget): string {
   const n = normalizePhone(number);
-  const t = text.length > MAX_PREFILL_CHARS ? text.slice(0, MAX_PREFILL_CHARS - 1) + "…" : text;
-  return `https://wa.me/${n}?text=${encodeURIComponent(t)}`;
+  const t = encodeURIComponent(capPrefill(text));
+  if (target === "web") return `https://web.whatsapp.com/send?phone=${n}&text=${t}`;
+  if (target === "app") return `whatsapp://send?phone=${n}&text=${t}`;
+  return `https://wa.me/${n}?text=${t}`;
+}
+
+/**
+ * A buyer's own question, typed on the site. With a product it carries the
+ * product name and ref so the seller knows what it's about.
+ */
+export function composeQuestionMessage(input: {
+  shopName: string;
+  question: string;
+  productTitle?: string;
+  ref?: string;
+}): string {
+  const first = input.shopName.split(/\s+/)[0];
+  const q = input.question.trim();
+  if (input.productTitle) {
+    const ref = input.ref ? ` (Ref ${input.ref})` : "";
+    return `Hi ${first}, a question about the ${input.productTitle}${ref}: ${q}`;
+  }
+  // Joined after "Hi Name, " — lowercase the first letter ("Do you…" → "do you…"),
+  // but leave "I", acronyms ("MTN…") and names alone.
+  const joined = /^[A-Z][a-z]/.test(q) && !/^I\b/.test(q) ? q[0].toLowerCase() + q.slice(1) : q;
+  return `Hi ${first}, ${joined}`;
 }
 
 /**

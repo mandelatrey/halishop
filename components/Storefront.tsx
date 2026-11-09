@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { formatPrice } from "@/lib/format";
 import { buildRef } from "@/lib/ref";
-import { buildWaLink } from "@/lib/wa";
+import AskWhatsApp from "./AskWhatsApp";
 import type { Product, Shop } from "@/lib/types";
 
 /**
@@ -25,9 +25,8 @@ export default function Storefront({
   const soldOut = products.filter((p) => p.soldOut);
 
   const firstName = shop.brandKit.shopName.split(/\s+/)[0];
-  const askLink = buildWaLink(
-    shop.contact.whatsapp,
-    `Hi ${firstName}, I'd like to ask about your shop.`
+  const ask = (
+    <AskWhatsApp number={shop.contact.whatsapp} shopName={shop.brandKit.shopName} area={shop.contact.area} />
   );
 
   // Two-tone display name: first word in ink, the rest in the soft second tone.
@@ -88,9 +87,7 @@ export default function Storefront({
               See today&rsquo;s drop <span className="arrow" aria-hidden>→</span>
             </Link>
           )}
-          <a href={askLink} className="btn sec" target="_blank" rel="noopener noreferrer">
-            Ask a question on WhatsApp
-          </a>
+          {ask}
         </div>
       </header>
 
@@ -184,9 +181,7 @@ export default function Storefront({
           </div>
           <p>You pay the rider on delivery, or send MoMo to {firstName}.</p>
         </div>
-        <a href={askLink} className="btn sec" target="_blank" rel="noopener noreferrer">
-          Ask a question on WhatsApp
-        </a>
+        {ask}
       </footer>
     </main>
   );

@@ -5,7 +5,9 @@ import PhoneInput from "@/components/PhoneInput";
 import { useBuyerRecall } from "@/lib/buyer-recall";
 import { formatPrice } from "@/lib/format";
 import { buildRef } from "@/lib/ref";
-import { buildWaLink, composeOrderMessage, composeAskMessage } from "@/lib/wa";
+import { buildWhatsAppHref, composeOrderMessage } from "@/lib/wa";
+import { useIsDesktop } from "@/lib/use-desktop";
+import AskWhatsApp from "@/components/AskWhatsApp";
 import type { Product, Shop } from "@/lib/types";
 
 export default function BuyForm({ shop, product }: { shop: Shop; product: Product }) {
@@ -40,17 +42,25 @@ export default function BuyForm({ shop, product }: { shop: Shop; product: Produc
     [shop.brandKit.shopName, product.title, variant, qty, product.price, product.currency, effectiveArea, ref]
   );
 
-  const askText = useMemo(
-    () => composeAskMessage({ shopName: shop.brandKit.shopName, productTitle: product.title, ref }),
-    [shop.brandKit.shopName, product.title, ref]
-  );
-
+  // Desktop browsers go straight to WhatsApp Web; wa.me would first show an
+  // "Open app / Continue to WhatsApp Web" page. Phones keep wa.me (opens the app).
+  const desktop = useIsDesktop();
   const orderLink =
     effectiveWhatsapp
-      ? buildWaLink(shop.contact.whatsapp, orderText)
+      ? buildWhatsAppHref(shop.contact.whatsapp, orderText, desktop ? "web" : "wa.me")
       : "";
 
-  const askLink = buildWaLink(shop.contact.whatsapp, askText);
+  const askButton = (label: string) => (
+    <AskWhatsApp
+      number={shop.contact.whatsapp}
+      shopName={shop.brandKit.shopName}
+      productTitle={product.title}
+      refCode={ref}
+      className="btn gh"
+    >
+      {label}
+    </AskWhatsApp>
+  );
 
   function persistRecall() {
     if (!effectiveWhatsapp) return;
@@ -142,9 +152,7 @@ export default function BuyForm({ shop, product }: { shop: Shop; product: Produc
               Order — 1 tap · {formatPrice(product.price * qty, product.currency)}
             </a>
 
-            <a href={askLink} target="_blank" rel="noopener noreferrer" className="btn gh">
-              Ask a question first →
-            </a>
+            {askButton("Ask a question first →")}
           </div>
         </div>
       ) : (
@@ -226,9 +234,7 @@ export default function BuyForm({ shop, product }: { shop: Shop; product: Produc
             >
               Order on WhatsApp — {formatPrice(product.price * qty, product.currency)}
             </a>
-            <a href={askLink} target="_blank" rel="noopener noreferrer" className="btn gh">
-              Or just ask a question first →
-            </a>
+            {askButton("Or just ask a question first →")}
           </div>
         </div>
       )}
