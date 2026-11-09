@@ -3,6 +3,7 @@
 import { useId, useRef, useState, type ReactNode } from "react";
 import { buildWhatsAppHref, composeQuestionMessage, MAX_PREFILL_CHARS } from "@/lib/wa";
 import { useIsDesktop } from "@/lib/use-desktop";
+import { track } from "@/lib/track";
 import ReadTicks from "./ReadTicks";
 
 /**
@@ -22,6 +23,8 @@ export default function AskWhatsApp({
   area,
   className = "btn sec",
   children = "Ask a question on WhatsApp",
+  trackSlug,
+  trackCode,
 }: {
   /** Seller's WhatsApp number (shop.contact.whatsapp). */
   number: string;
@@ -33,6 +36,9 @@ export default function AskWhatsApp({
   area?: string;
   className?: string;
   children?: ReactNode;
+  /** Shop slug to count this as an `ask_tap` in the seller's metrics. */
+  trackSlug?: string;
+  trackCode?: string;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -69,6 +75,7 @@ export default function AskWhatsApp({
   }
 
   function sent() {
+    if (trackSlug) track(trackSlug, "ask_tap", { code: trackCode });
     // Let the link open first, then tidy up for next time.
     setTimeout(() => {
       close();

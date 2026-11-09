@@ -1,7 +1,8 @@
 import "server-only";
-import type { CustomTemplate, Drop, Product, Shop } from "./types";
+import { cache } from "react";
+import type { CustomTemplate, Drop, Product, Shop, VendorPublic } from "./types";
 import { getDb } from "./db";
-import { ensureSeeded } from "./seed";
+import { ensureDemoSeeded } from "./seed";
 
 type ShopDoc = Shop & { _id: string };
 type ProductDoc = Product & { _id: string; shopSlug: string; updatedAt?: number };
@@ -18,17 +19,50 @@ function strip<T extends Record<string, unknown>>(doc: T, keys: string[]): Omit<
 
 /* -------------------------------------------------------------------------
  * Reads
+ *
+ * None of these create data. A slug that doesn't exist reads as null/empty so
+ * buyer routes can 404 — previously every read seeded a fresh shop for any
+ * slug a visitor typed into the URL.
  * ------------------------------------------------------------------------- */
-export async function getShop(slug: string): Promise<Shop> {
-  await ensureSeeded(slug);
-  const db = await getDb();
-  const doc = await db.collection<ShopDoc>("shops").findOne({ _id: slug });
-  if (!doc) throw new Error(`Shop not found after seed: ${slug}`);
+function toShop(doc: ShopDoc): Shop {
   return strip(doc as unknown as Record<string, unknown>, ["_id"]) as unknown as Shop;
 }
 
+/** The shop, or null if no shop has this slug. Memoised per request. */
+export const getShopDoc = cache(async (slug: string): Promise<Shop | null> => {
+  if (typeof slug !== "string" || !slug) return null;
+  await ensureDemoSeeded();
+  const db = await getDb();
+  const doc = await db.collection<ShopDoc>("shops").findOne({ _id: slug });
+  return doc ? toShop(doc) : null;
+});
+
+/** The shop; throws if missing. For callers that have already checked access. */
+export async function getShop(slug: string): Promise<Shop> {
+  const shop = await getShopDoc(slug);
+  if (!shop) throw new Error(`Shop not found: ${slug}`);
+  return shop;
+}
+
+/** Every shop a vendor owns, oldest first (their first hustle leads). */
+export async function listShopsForOwner(ownerId: string): Promise<Shop[]> {
+  await ensureDemoSeeded();
+  const db = await getDb();
+  const docs = await db.collection<ShopDoc>("shops").find({ ownerId }).sort({ createdAt: 1 }).toArray();
+  return docs.map(toShop);
+}
+
+/** The owner's buyer-safe profile, or null if the shop is unclaimed. */
+export async function getShopOwnerPublic(shop: Shop): Promise<VendorPublic | null> {
+  if (!shop.ownerId) return null;
+  const db = await getDb();
+  const doc = await db
+    .collection<{ _id: string; name: string; bio?: string; avatar?: string; createdAt: number }>("vendors")
+    .findOne({ _id: shop.ownerId }, { projection: { name: 1, bio: 1, avatar: 1, createdAt: 1 } });
+  return doc ? { name: doc.name, bio: doc.bio, avatar: doc.avatar, createdAt: doc.createdAt } : null;
+}
+
 export async function listProducts(slug: string): Promise<Product[]> {
-  await ensureSeeded(slug);
   const db = await getDb();
   const docs = await db
     .collection<ProductDoc>("products")

@@ -2,8 +2,8 @@ import ProductPhoto from "@/components/ProductPhoto";
 import { optionsSummary } from "@/lib/variants";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getDrop, getShop, listProducts } from "@/lib/server-store";
-import { getShopSlug } from "@/lib/actions/_slug";
+import TrackView from "@/components/TrackView";
+import { getDrop, getShopDoc, listProducts } from "@/lib/server-store";
 import { formatPrice } from "@/lib/format";
 
 export default async function BuyerDropPage({
@@ -12,15 +12,13 @@ export default async function BuyerDropPage({
   params: Promise<{ slug: string; dropId: string }>;
 }) {
   const { slug, dropId } = await params;
-  if (slug !== getShopSlug()) notFound();
-
   const [shop, drop, products] = await Promise.all([
-    getShop(slug),
+    getShopDoc(slug),
     getDrop(slug, dropId),
     listProducts(slug),
   ]);
 
-  if (!drop) notFound();
+  if (!shop || !drop) notFound();
 
   const byCode = new Map(products.map((p) => [p.code, p]));
   const dropProducts = drop.items
@@ -39,6 +37,7 @@ export default async function BuyerDropPage({
 
   return (
     <main className="by-wrap">
+      <TrackView slug={slug} type="drop_view" dropId={drop.id} />
       <header className="panel-dark by-drop-banner">
         <span className="pill dark">Live drop · {shop.brandKit.shopName}</span>
         <h1 className="by-h1">{drop.name}</h1>

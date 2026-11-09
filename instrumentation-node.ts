@@ -4,14 +4,15 @@
  * Next.js won't try to resolve Node's `net` module for browser targets.
  */
 import { getDb } from "./lib/db";
-import { ensureSeeded } from "./lib/seed";
+import { demoShopSlug, ensureDemoSeeded } from "./lib/seed";
 
-export async function warmup(slug: string): Promise<void> {
+export async function warmup(): Promise<void> {
   try {
     await getDb();
-    await ensureSeeded(slug);
+    await ensureDemoSeeded();
+    const slug = demoShopSlug();
     // eslint-disable-next-line no-console
-    console.log(`[hali] warmup complete — mongo ready, shop "${slug}" seeded`);
+    console.log(`[hali] warmup complete — mongo ready${slug ? `, demo shop "${slug}" seeded` : ""}`);
   } catch (err) {
     // eslint-disable-next-line no-console
     console.warn(

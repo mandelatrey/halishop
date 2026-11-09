@@ -187,8 +187,9 @@ export const BUILTIN_TEMPLATES: BuiltinTemplate[] = [
 ];
 
 /* -------------------------------------------------------------------------
- * Shop — the multi-tenant root. Phase 1 has one shop per deployment
- * identified by NEXT_PUBLIC_SHOP_SLUG.
+ * Shop — the multi-tenant root. Each shop is owned by one vendor; a vendor
+ * can own many shops (one per hustle). Buyers only ever see one shop at a
+ * time, at `/shop/[slug]`.
  * ------------------------------------------------------------------------- */
 export type ShopContact = {
   /** E.164, stored with leading + (e.g. "+256772145908"). */
@@ -207,9 +208,72 @@ export type Shop = {
   contact: ShopContact;
   /** Prefix used to build the full ref code (e.g. "SH-4F2" → "SH-4F2-B3"). */
   refPrefix: string;
+  /** Vendor who owns the shop. Absent only on legacy shops not yet claimed. */
+  ownerId?: string;
+  /** Buyer-facing "About this shop" info. */
+  about?: ShopAbout;
   createdAt: number;
   updatedAt: number;
 };
+
+/** What buyers see about a shop on its About page and storefront footer. */
+export type ShopAbout = {
+  /** One line under the shop name ("Thrifted streetwear, hand-picked"). */
+  tagline?: string;
+  /** A few sentences about the shop: what it sells, how it works. */
+  description?: string;
+  /** How buyers pay ("Cash on delivery or MoMo"). */
+  payment?: string;
+  /** When the seller replies / delivers ("Mon–Sat, 9am–7pm"). */
+  hours?: string;
+  /** Social handles, without the @. */
+  instagram?: string;
+  tiktok?: string;
+  /** Show the owner's name, photo and bio on the About page. Default true. */
+  showOwner?: boolean;
+};
+
+/* -------------------------------------------------------------------------
+ * Vendors — the people who sign in and run shops.
+ * ------------------------------------------------------------------------- */
+export type Vendor = {
+  id: string;
+  email: string;
+  name: string;
+  /** Short bio shown to buyers on shops that opt in. */
+  bio?: string;
+  /** Profile photo — Google avatar URL or uploaded data URL. */
+  avatar?: string;
+  /** Which sign-in methods are linked. */
+  hasPassword: boolean;
+  hasGoogle: boolean;
+  createdAt: number;
+};
+
+/** The subset of a vendor that's safe to show buyers. */
+export type VendorPublic = Pick<Vendor, "name" | "bio" | "avatar" | "createdAt">;
+
+/* -------------------------------------------------------------------------
+ * Events — anonymous buyer activity, the raw input for vendor metrics.
+ * ------------------------------------------------------------------------- */
+export type ShopEventType =
+  | "shop_view"
+  | "product_view"
+  | "drop_view"
+  | "about_view"
+  | "order_tap"
+  | "ask_tap"
+  | "link_tap";
+
+export const SHOP_EVENT_TYPES: ShopEventType[] = [
+  "shop_view",
+  "product_view",
+  "drop_view",
+  "about_view",
+  "order_tap",
+  "ask_tap",
+  "link_tap",
+];
 
 /* -------------------------------------------------------------------------
  * Drops — a curated list of products the reseller batch-generated cards for.

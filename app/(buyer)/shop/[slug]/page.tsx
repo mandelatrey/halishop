@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Storefront from "@/components/Storefront";
-import { getShop, listDropsForShop, listProducts } from "@/lib/server-store";
-import { getShopSlug } from "@/lib/actions/_slug";
+import TrackView from "@/components/TrackView";
+import { getShopDoc, getShopOwnerPublic, listDropsForShop, listProducts } from "@/lib/server-store";
 import type { Drop } from "@/lib/types";
 
 /** Is this drop still "up" by its own expiry rule? */
@@ -13,15 +13,27 @@ function isLive(drop: Drop, now = Date.now()): boolean {
 
 export default async function StorefrontPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  if (slug !== getShopSlug()) notFound();
+  const shop = await getShopDoc(slug);
+  if (!shop) notFound();
 
-  const [shop, products, drops] = await Promise.all([
-    getShop(slug),
+  const [products, drops, owner] = await Promise.all([
     listProducts(slug),
     listDropsForShop(slug, 1),
+    getShopOwnerPublic(shop),
   ]);
   const latest = drops[0];
   const dropHref = latest && isLive(latest) ? `/shop/${slug}/d/${latest.id}` : undefined;
 
-  return <Storefront shop={shop} products={products} slug={slug} dropHref={dropHref} />;
+  return (
+    <>
+      <TrackView slug={slug} type="shop_view" />
+      <Storefront
+        shop={shop}
+        products={products}
+        slug={slug}
+        dropHref={dropHref}
+        owner={shop.about?.showOwner === false ? null : owner}
+      />
+    </>
+  );
 }

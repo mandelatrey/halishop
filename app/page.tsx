@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import "./landing.css";
 import LandingMotion from "./LandingMotion";
+import AppNav from "@/components/AppNav";
 import ReadTicks from "@/components/ReadTicks";
+import { getCurrentVendor } from "@/lib/auth/session";
+import { demoShopSlug } from "@/lib/seed";
+import { listShopsForOwner } from "@/lib/server-store";
 
 export const metadata: Metadata = {
   title: "Haali — commerce for social sellers",
@@ -10,7 +14,7 @@ export const metadata: Metadata = {
     "Turn your catalogue into WhatsApp status cards, share one shop link, and get orders straight into your WhatsApp, already written out.",
 };
 
-const SHOP_SLUG = process.env.NEXT_PUBLIC_SHOP_SLUG || "shania";
+const DEMO_SLUG = demoShopSlug();
 
 /** Product facts, not vanity metrics — every number here is true of the app. */
 const STATS: { value: string; count?: number; suffix?: string; label: string }[] = [
@@ -125,8 +129,18 @@ function StatusCardMock() {
   );
 }
 
-export default function Landing() {
+// Reads the session cookie to tailor the nav and CTAs.
+export const dynamic = "force-dynamic";
+
+export default async function Landing() {
+  const vendor = await getCurrentVendor();
+  const shops = vendor ? await listShopsForOwner(vendor.id) : [];
   return (
+    <>
+    <AppNav
+      vendor={vendor ? { name: vendor.name, email: vendor.email, avatar: vendor.avatar } : null}
+      shops={shops.map((s) => ({ slug: s.slug, name: s.brandKit.shopName }))}
+    />
     <LandingMotion>
       {/* ---------------- Hero ---------------- */}
       <section className="lp-hero">
@@ -148,12 +162,14 @@ export default function Landing() {
             already written out.
           </p>
           <div className="lp-ctas lp-ctas-center">
-            <Link href="/brand-kit" className="lp-btn">
-              Set up your shop
+            <Link href={vendor ? "/dashboard" : "/signup"} className="lp-btn">
+              {vendor ? "Go to your dashboard" : "Set up your shop"}
             </Link>
-            <Link href={`/shop/${SHOP_SLUG}`} className="lp-btn lp-btn-sec">
-              See a live shop
-            </Link>
+            {DEMO_SLUG && (
+              <Link href={`/shop/${DEMO_SLUG}`} className="lp-btn lp-btn-sec">
+                See a live shop
+              </Link>
+            )}
           </div>
         </div>
 
@@ -327,12 +343,14 @@ export default function Landing() {
             </h2>
             <p className="lp-sub-light">Set up your brand kit, add a few products, and post your first drop today.</p>
             <div className="lp-ctas lp-ctas-center">
-              <Link href="/brand-kit" className="lp-btn">
-                Get started
+              <Link href={vendor ? "/dashboard" : "/signup"} className="lp-btn">
+                {vendor ? "Go to your dashboard" : "Get started"}
               </Link>
-              <Link href="/products" className="lp-btn lp-btn-ghost">
-                Add products
-              </Link>
+              {!vendor && (
+                <Link href="/login" className="lp-btn lp-btn-ghost">
+                  Log in
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -343,5 +361,6 @@ export default function Landing() {
         <span>Made for social sellers in Kampala and beyond</span>
       </footer>
     </LandingMotion>
+    </>
   );
 }

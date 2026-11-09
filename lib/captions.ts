@@ -33,9 +33,9 @@ function variantsLine(product: Product): string {
 }
 
 /** Absolute host for the tracked link — falls back to "shop.app" in prod. */
-export function trackedLinkFor(code: string): string {
+export function trackedLinkFor(slug: string, code: string): string {
   const host = process.env.NEXT_PUBLIC_APP_HOST || "shop.app";
-  return `${host}/o/${code}`;
+  return `${host}/o/${slug}/${code}`;
 }
 
 /**
@@ -62,7 +62,7 @@ export function captionTokensFor(shop: Shop, product: Product): Record<string, s
     stock: String(product.stock ?? ""),
     code: product.code,
     ref: buildRef(shop, product.code, "full"),
-    trackedLink: trackedLinkFor(product.code),
+    trackedLink: trackedLinkFor(shop.slug, product.code),
     shopLink: shop.brandKit.shopUrl,
     cityCopy: shop.contact.cityCopy ?? "",
     city: shop.contact.city ?? "",

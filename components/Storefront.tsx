@@ -4,7 +4,8 @@ import Link from "next/link";
 import { formatPrice } from "@/lib/format";
 import { buildRef } from "@/lib/ref";
 import AskWhatsApp from "./AskWhatsApp";
-import type { Product, Shop } from "@/lib/types";
+import SellerCard from "./SellerCard";
+import type { Product, Shop, VendorPublic } from "@/lib/types";
 
 /**
  * Buyer-facing storefront. Rendered at `/shop/[slug]`. Product links use
@@ -16,19 +17,27 @@ export default function Storefront({
   products,
   slug,
   dropHref,
+  owner = null,
 }: {
   shop: Shop;
   products: Product[];
   slug: string;
   /** Link to the shop's live drop, if one is currently up. */
   dropHref?: string;
+  /** The person behind the shop, when they've chosen to show it. */
+  owner?: VendorPublic | null;
 }) {
   const inStock = products.filter((p) => !p.soldOut);
   const soldOut = products.filter((p) => p.soldOut);
 
   const firstName = shop.brandKit.shopName.split(/\s+/)[0];
   const ask = (
-    <AskWhatsApp number={shop.contact.whatsapp} shopName={shop.brandKit.shopName} area={shop.contact.area} />
+    <AskWhatsApp
+      number={shop.contact.whatsapp}
+      shopName={shop.brandKit.shopName}
+      area={shop.contact.area}
+      trackSlug={slug}
+    />
   );
 
   // Two-tone display name: first word in ink, the rest in the soft second tone.
@@ -79,6 +88,7 @@ export default function Storefront({
           {nameHead}
           {nameRest.length > 0 && <span className="soft"> {nameRest.join(" ")}</span>}
         </h1>
+        {shop.about?.tagline && <p className="by-tagline">{shop.about.tagline}</p>}
         <p className="by-lede">
           Tap anything you like and your order opens in WhatsApp, already written out for {firstName}.
         </p>
@@ -165,13 +175,15 @@ export default function Storefront({
         ))}
       </div>
 
+      <SellerCard shop={shop} owner={owner} />
+
       <footer className="by-foot">
         <div className="by-foot-info">
           <div className="by-label">
             {shop.brandKit.shopName} · {shop.contact.whatsapp}
             {shop.contact.area ? ` · ${shop.contact.area}` : ""}
           </div>
-          <p>You pay the rider on delivery, or send MoMo to {firstName}.</p>
+          <p>{shop.about?.payment || `You pay the rider on delivery, or send MoMo to ${firstName}.`}</p>
         </div>
         {ask}
       </footer>

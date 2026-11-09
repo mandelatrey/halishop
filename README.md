@@ -1,36 +1,64 @@
-# HALI — Status Commerce (Phase 1 wedge)
+# HALI — Status Commerce
 
-A single-shop app for the Status Commerce wedge. A reseller:
+A multi-shop app for social sellers. A **vendor** signs in (email + password or
+Google), runs one or more shops (one per hustle), and tracks how they're doing
+from a dashboard. For each shop they:
 
-1. Sets a brand kit, uploads a logo, seeds a catalogue.
-2. Generates a 9:16 status card for one product, or batch-generates a whole drop
+1. Set a brand kit, upload a logo, seed a catalogue, and fill in shop info.
+2. Generate a 9:16 status card for one product, or batch-generate a whole drop
    (multiple products at once with captions + tracked links).
-3. Shares the buyer-facing shop URL — buyers tap "Order" and land in the
-   reseller's WhatsApp with the order pre-composed.
+3. Share the buyer-facing shop URL — buyers tap "Order" and land in the
+   vendor's WhatsApp with the order pre-composed.
+
+**Buyers** never sign in. They arrive from a vendor's status and only ever see
+that one shop, plus an About page telling them who they're buying from.
 
 ## What ships
 
-### Reseller (admin)
+### Vendor (sign-in required)
 
 | Route | Screen | Purpose |
 |---|---|---|
-| `/` | — | Landing page explaining Haali, with links into setup and the live shop |
-| `/brand-kit` | 2e | Shop name, URL, logo, palette, frame, WhatsApp number |
-| `/templates` | — | List custom templates |
-| `/templates/[id]` | — | Custom template editor with live preview + instructions |
-| `/products` | — | Catalogue + inline add/edit |
-| `/products/[code]/card` | 1t | Single-card generator |
-| `/drops/new` | 1u | Multi-select products, name/expiry/template, batch generate |
-| `/drops/[dropId]` | 1v | Card carousel + captions (default/scarcity/restock) + save-all |
+| `/` | — | Landing page; log in / sign up |
+| `/login`, `/signup` | — | Email + password, or "Continue with Google" |
+| `/dashboard` | — | All the vendor's shops + metrics rolled up across them |
+| `/dashboard/new` | — | Create another shop (name, link, WhatsApp, city) |
+| `/dashboard/account` | — | Name, photo, bio (shown to buyers), sign-in methods |
+| `/dashboard/[slug]` | — | One shop's overview: share link, metrics, most-wanted products |
+| `/dashboard/[slug]/products` | — | Catalogue + inline add/edit |
+| `/dashboard/[slug]/products/[code]/card` | 1t | Single-card generator |
+| `/dashboard/[slug]/drops/new` | 1u | Multi-select products, name/expiry/template, batch generate |
+| `/dashboard/[slug]/drops/[dropId]` | 1v | Card carousel + captions (default/scarcity/restock) + save-all |
+| `/dashboard/[slug]/templates[/id]` | — | Custom templates + editor |
+| `/dashboard/[slug]/brand-kit` | 2e | Shop name, logo, palette, frame |
+| `/dashboard/[slug]/settings` | — | Order WhatsApp number, delivery, **About the shop** (tagline, description, payment, hours, socials, show owner) |
 
-### Buyer
+Every `/dashboard/[slug]/…` page and every Server Action checks the signed-in
+vendor owns the shop; anyone else gets a 404 / an error.
+
+### Buyer (no sign-in)
 
 | Route | Screen | Purpose |
 |---|---|---|
-| `/shop/[slug]` | 1a / 1c | Storefront — mobile list + desktop grid |
+| `/shop/[slug]` | 1a / 1c | Storefront + "You're buying from" seller card |
+| `/shop/[slug]/about` | — | Shop details + who runs it (if the vendor opts in) |
 | `/shop/[slug]/d/[dropId]` | 1d | Today's-drop page (only items in this drop) |
 | `/shop/[slug]/[code]` | 1f / 1g / 1h | Product + inline buy form, message preview, one-tap repeat buyer |
-| `/o/[code]` | — | 302 tracked short link → `/shop/[slug]/[code]` |
+| `/o/[slug]/[code]` | — | Tracked short link (logs a tap) → product page |
+| `/o/[code]` | — | Legacy short link from old captions → demo shop's product |
+
+Buyer pages carry no Haali nav — only the seller's shop.
+
+### Metrics
+
+Buyer pages send anonymous beacons to `/api/track` (`lib/track.ts`) — page
+views, order taps, question taps — and `/o/…` logs link taps server-side.
+Events live in `events` (no personal data, 400-day TTL). `lib/metrics.ts`
+aggregates them per shop for the dashboards: page views, order taps,
+product-view→order rate, daily charts, most-wanted products, plus catalogue
+facts (stock value, low stock). Bots and the vendor's own visits are ignored.
+"Order taps" means a buyer opened WhatsApp with an order; whether the chat
+became a sale isn't visible to Haali.
 
 ### WhatsApp handoff
 
@@ -53,16 +81,17 @@ A single-shop app for the Status Commerce wedge. A reseller:
 
 ## Setup
 
-1. Copy MongoDB URI + shop config into `.env.local`:
+1. Copy `.env.example` to `.env.local` and fill it in:
 
-   ```
-   MONGODB_URI="mongodb+srv://…"
-   MONGODB_DB="hali"
-   NEXT_PUBLIC_SHOP_SLUG="shania"
-   NEXT_PUBLIC_APP_HOST="shop.app"
-   ```
-
-   `atlas-credentials.env` has the current cluster URI.
+   | Variable | Purpose |
+   |---|---|
+   | `MONGODB_URI`, `MONGODB_DB` | Database |
+   | `NEXT_PUBLIC_APP_HOST` | Host shown in captions and shop links (`shop.app`) |
+   | `APP_URL` | Public origin, e.g. `https://shop.app` — used for the Google redirect URI |
+   | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Enables "Continue with Google" (optional) |
+   | `HALI_DEMO_SHOP` | Slug of the fixture shop to seed (`shania`), or `off` |
+   | `HALI_LEGACY_OWNER_EMAIL` | Vendor who inherits shops created before accounts existed |
+   | `HALI_TIMEZONE` | Day boundaries for metrics (default `Africa/Kampala`) |
 
 2. Install and run:
 
@@ -71,9 +100,24 @@ A single-shop app for the Status Commerce wedge. A reseller:
    npm run dev
    ```
 
-3. Open `http://localhost:3000`. First page load triggers `ensureSeeded()` in
-   `lib/seed.ts`, which idempotently upserts the Shania fixture (`shops`) and
-   6 seed products (`products`). Indexes are created on the same call.
+3. Open `http://localhost:3000`, sign up, and create a shop.
+
+### Google sign-in
+
+Google Cloud Console → APIs & Services → Credentials → *Create OAuth client ID*
+(Web application). Add the authorised redirect URI
+`{APP_URL}/auth/google/callback` (e.g. `http://localhost:3000/auth/google/callback`
+for dev), then set `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`. Without them the
+Google button is hidden. A Google account whose verified email matches an
+existing vendor is linked to that vendor; vendors can also link Google from
+`/dashboard/account`.
+
+### Migrating the original single-shop deployment
+
+Shops created before accounts have no owner. Set `HALI_LEGACY_OWNER_EMAIL` to
+the seller's email; the first time they sign up or log in with it, every
+unowned shop is assigned to them. Until then nobody can edit those shops
+(buyers can still browse them).
 
 ### First-request performance
 
@@ -102,17 +146,20 @@ adding, then reload the page.
 
 ## Reseeding
 
-The seeder is idempotent. To reseed the Shania fixture from scratch, drop the
-Atlas collections (`shops`, `products`, `custom_templates`, `drops`) and reload
-the app.
+The seeder is idempotent and only touches the demo shop (`HALI_DEMO_SHOP`).
+To reseed it from scratch, drop the `shops`/`products` docs for that slug and
+restart the app.
 
 ## Data model
 
 ```
-shops              _id = slug              — Shop { brandKit, contact, refPrefix }
+vendors            _id = uuid              — email (unique), name, bio, avatar, passwordHash (scrypt), googleId
+sessions           _id = sha256(token)     — vendorId, expiresAt (TTL)
+shops              _id = slug              — Shop { ownerId, brandKit, contact, about, refPrefix }
 products           _id = `${slug}:${code}` — Product + shopSlug
 custom_templates   _id = uuid              — CustomTemplate + shopSlug
 drops              _id = `${slug}:${id}`   — Drop with items + captions + expiry
+events             auto id                 — { shopSlug, type, code?, dropId?, ts } (TTL 400 days)
 ```
 
 See `lib/types.ts` for full shapes.
@@ -121,9 +168,12 @@ See `lib/types.ts` for full shapes.
 
 - Onboarding (screen 1s) — brand kit + products together cover the same ground.
 - Camera-first "shoot and generate" (pattern 2a) — deferred from the start.
-- Reseller dashboard / orders / stock / earnings (screens 1i–1r).
-- Analytics on `/o/[code]` taps — the redirect is live, tap logging is Phase 2.
-- Auth — single-shop deployment via env var.
+- Orders / earnings (screens 1i–1r) — orders complete in WhatsApp, so metrics
+  stop at the order tap.
+- Buyer accounts — buyers stay anonymous; repeat-buyer details live on their phone.
+- Team members / shared shops — one vendor owns each shop.
+- Password reset by email — needs an email provider. Vendors can sign in with
+  Google, or change their password from `/dashboard/account`.
 - Supplier surfaces (1w/1x) — Phase 3.
 
 ## Layout
@@ -131,31 +181,31 @@ See `lib/types.ts` for full shapes.
 ```
 app/
   layout.tsx                       # Root — html/body only
-  globals.css                      # Design tokens + utility classes
-  (admin)/
-    layout.tsx                     # Admin nav
-    page.tsx                       # Launcher
-    brand-kit/{page.tsx, Client.tsx}
-    templates/{page.tsx, Client.tsx, [id]/{page.tsx, Client.tsx}}
-    products/{page.tsx, Client.tsx, [code]/card/{page.tsx, Client.tsx}}
-    drops/
-      new/{page.tsx, Client.tsx}
-      [dropId]/{page.tsx, Client.tsx}
+  page.tsx                         # Landing (public nav)
+  (auth)/login, signup             # Email/password forms + Google button
+  auth/google/{route.ts, callback/route.ts}   # Google OAuth (PKCE)
+  logout/route.ts                  # POST — end session
+  (vendor)/
+    layout.tsx                     # Requires sign-in; vendor nav + shop switcher
+    dashboard/
+      page.tsx                     # All shops + rolled-up metrics
+      new/  account/
+      [slug]/
+        layout.tsx                 # Ownership check, ShopProvider, tab bar
+        page.tsx                   # Shop overview + metrics
+        products/ drops/ templates/ brand-kit/ settings/
   (buyer)/
-    layout.tsx                     # Buyer chrome (no admin nav)
+    layout.tsx                     # Buyer chrome (no Haali nav)
     shop/[slug]/
-      page.tsx                     # Storefront
-      d/[dropId]/page.tsx          # Drop page
-      [code]/{page.tsx, BuyForm.tsx}
-  o/[code]/route.ts                # Short link 302
+      page.tsx  about/  d/[dropId]/  [code]/
+  api/track/route.ts               # Buyer activity beacon
+  o/[slug]/[code]/route.ts         # Tracked short link
+  o/[slug]/route.ts                # Legacy /o/{code}
 
-components/                        # StatusCard, TemplatePicker, Frame, Button, …
+components/                        # StatusCard, ShopContext, ShopTabs, SellerCard, DailyBars, …
 lib/
-  db.ts                            # Mongo singleton
-  seed.ts                          # ensureSeeded(slug)
-  server-store.ts                  # Server-only reads
-  actions/                         # "use server" mutations
-    _slug.ts brand-kit.ts products.ts templates.ts drops.ts
-  wa.ts captions.ts ref.ts format.ts buyer-recall.ts
-  types.ts fixtures.ts palette.ts render-card.ts
+  auth/                            # session, password (scrypt), vendors, google, next
+  actions/                         # "use server" mutations — each checks ownership
+  db.ts seed.ts server-store.ts events.ts metrics.ts track.ts paths.ts
+  wa.ts captions.ts ref.ts format.ts buyer-recall.ts types.ts …
 ```

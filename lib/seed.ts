@@ -15,12 +15,41 @@ const seeded = globalThis._haliSeeded ?? new Map<string, Promise<void>>();
 if (process.env.NODE_ENV !== "production") globalThis._haliSeeded = seeded;
 
 /**
+ * Slug of the demo shop seeded with fixtures, or null when seeding is off.
+ * Set HALI_DEMO_SHOP=off in production once real vendors are on board.
+ * Falls back to the old single-shop env var so existing deployments keep
+ * their shop.
+ */
+export function demoShopSlug(): string | null {
+  const v = process.env.HALI_DEMO_SHOP ?? process.env.NEXT_PUBLIC_SHOP_SLUG ?? "shania";
+  return v === "off" || v === "" ? null : v;
+}
+
+/** Seed the demo shop (if enabled) and create indexes. Safe to call on every request. */
+export async function ensureDemoSeeded(): Promise<void> {
+  const slug = demoShopSlug();
+  if (slug) return ensureSeeded(slug);
+  return ensureIndexes();
+}
+
+let indexes: Promise<void> | null = null;
+function ensureIndexes(): Promise<void> {
+  if (!indexes) {
+    indexes = createIndexes().catch((err) => {
+      indexes = null;
+      throw err;
+    });
+  }
+  return indexes;
+}
+
+/**
  * Ensure a shop doc exists for `slug`. Idempotent via `$setOnInsert` upsert
  * plus a per-process memoization so subsequent requests inside the same Node
  * process short-circuit — otherwise every page render would run 5 parallel
  * createIndex calls against Atlas.
  */
-export async function ensureSeeded(slug: string): Promise<void> {
+async function ensureSeeded(slug: string): Promise<void> {
   const cached = seeded.get(slug);
   if (cached) return cached;
 
@@ -66,13 +95,22 @@ async function runSeed(slug: string): Promise<void> {
     );
   }
 
-  // Ensure indexes (safe to call repeatedly, but round-trips every time — so
-  // gated by the seeded-memo above so we only do it once per process).
+  await ensureIndexes();
+}
+
+async function createIndexes(): Promise<void> {
+  const db = await getDb();
+  // Safe to call repeatedly, but round-trips every time — so memoised above.
   await Promise.all([
-    shops.createIndex({ slug: 1 }, { unique: true }),
-    products.createIndex({ shopSlug: 1, code: 1 }, { unique: true }),
+    db.collection("shops").createIndex({ slug: 1 }, { unique: true }),
+    db.collection("products").createIndex({ shopSlug: 1, code: 1 }, { unique: true }),
     db.collection("custom_templates").createIndex({ shopSlug: 1, createdAt: -1 }),
     db.collection("drops").createIndex({ shopSlug: 1, id: 1 }, { unique: true }),
     db.collection("drops").createIndex({ shopSlug: 1, createdAt: -1 }),
+    db.collection("shops").createIndex({ ownerId: 1 }),
+    db.collection("events").createIndex({ shopSlug: 1, ts: -1 }),
+    db.collection("events").createIndex({ shopSlug: 1, type: 1, ts: -1 }),
+    // Raw events age out after ~13 months; metrics only look back 90 days.
+    db.collection("events").createIndex({ ts: 1 }, { expireAfterSeconds: 400 * 86_400 }),
   ]);
 }

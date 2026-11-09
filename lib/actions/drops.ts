@@ -9,9 +9,9 @@ import type {
   DropItem,
 } from "../types";
 import { getDb } from "../db";
-import { ensureSeeded } from "../seed";
 import { DEFAULT_CAPTIONS } from "../captions";
-import { getShopSlug } from "./_slug";
+import { assertShopOwner } from "../auth/session";
+import { dashPath, shopPath } from "../paths";
 
 type DropDoc = Drop & { _id: string };
 
@@ -55,9 +55,8 @@ export type CreateDropInput = {
   codeFormat: "short" | "full";
 };
 
-export async function createDrop(input: CreateDropInput): Promise<Drop> {
-  const slug = getShopSlug();
-  await ensureSeeded(slug);
+export async function createDrop(slug: string, input: CreateDropInput): Promise<Drop> {
+  await assertShopOwner(slug);
   const db = await getDb();
   const id = await generateDropId(slug);
   const now = Date.now();
@@ -85,27 +84,26 @@ export async function createDrop(input: CreateDropInput): Promise<Drop> {
 
   await db.collection<DropDoc>("drops").insertOne({ _id: `${slug}:${id}`, ...doc });
 
-  revalidatePath("/drops");
-  revalidatePath(`/drops/${id}`);
-  revalidatePath(`/shop/${slug}/d/${id}`);
+  revalidatePath(dashPath(slug), "layout");
+  revalidatePath(shopPath(slug), "layout");
   return doc;
 }
 
-export async function updateDropItems(dropId: string, items: DropItem[]): Promise<void> {
-  const slug = getShopSlug();
+export async function updateDropItems(slug: string, dropId: string, items: DropItem[]): Promise<void> {
+  await assertShopOwner(slug);
   const db = await getDb();
   await db.collection<DropDoc>("drops").updateOne(
     { _id: `${slug}:${dropId}` },
     { $set: { items } }
   );
-  revalidatePath(`/drops/${dropId}`);
-  revalidatePath(`/shop/${slug}/d/${dropId}`);
+  revalidatePath(dashPath(slug, `/drops/${dropId}`));
+  revalidatePath(shopPath(slug, `/d/${dropId}`));
 }
 
-export async function deleteDrop(dropId: string): Promise<void> {
-  const slug = getShopSlug();
+export async function deleteDrop(slug: string, dropId: string): Promise<void> {
+  await assertShopOwner(slug);
   const db = await getDb();
   await db.collection<DropDoc>("drops").deleteOne({ _id: `${slug}:${dropId}` });
-  revalidatePath("/drops");
-  revalidatePath(`/shop/${slug}/d/${dropId}`);
+  revalidatePath(dashPath(slug), "layout");
+  revalidatePath(shopPath(slug), "layout");
 }

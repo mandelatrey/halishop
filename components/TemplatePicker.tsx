@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useShop } from "./ShopContext";
 import type {
   BrandKit,
   BuiltinTemplate,
@@ -32,6 +33,7 @@ export default function TemplatePicker({
   onSelect,
   showUploadTile = true,
 }: Props) {
+  const { dash } = useShop();
   return (
     <div className="tpick">
       {BUILTIN_TEMPLATES.map((b) => (
@@ -55,11 +57,11 @@ export default function TemplatePicker({
           selected={config.templateId === `custom:${c.id}`}
           onClick={() => onSelect(`custom:${c.id}`)}
           labelOverride={c.name}
-          editHref={`/templates/${c.id}`}
+          editHref={dash(`/templates/${c.id}`)}
         />
       ))}
       {showUploadTile && (
-        <Link href="/templates" className="upload-tile" title="Upload your own">
+        <Link href={dash("/templates")} className="upload-tile" title="Upload your own">
           + Upload
         </Link>
       )}

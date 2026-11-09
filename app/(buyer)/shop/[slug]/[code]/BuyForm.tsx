@@ -8,6 +8,7 @@ import { buildRef } from "@/lib/ref";
 import { buildWhatsAppHref, composeOrderMessage } from "@/lib/wa";
 import { useIsDesktop } from "@/lib/use-desktop";
 import AskWhatsApp from "@/components/AskWhatsApp";
+import { track } from "@/lib/track";
 import ReadTicks from "@/components/ReadTicks";
 import type { Product, Shop } from "@/lib/types";
 import { getOptions } from "@/lib/variants";
@@ -61,6 +62,8 @@ export default function BuyForm({ shop, product }: { shop: Shop; product: Produc
 
   const askButton = (label: string) => (
     <AskWhatsApp
+      trackSlug={shop.slug}
+      trackCode={product.code}
       number={shop.contact.whatsapp}
       shopName={shop.brandKit.shopName}
       productTitle={product.title}
@@ -83,6 +86,7 @@ export default function BuyForm({ shop, product }: { shop: Shop; product: Produc
       return;
     }
     persistRecall();
+    track(shop.slug, "order_tap", { code: product.code });
     // Browser opens wa.me in a new tab via target=_blank
   }
 

@@ -471,3 +471,85 @@ a.by-card:hover .by-card-foot .btn .arrow { transform: translateX(2px); }
 .by-ask-actions .btn.by-order { display: flex; align-items: center; justify-content: center; min-height: 50px; font-size: 15px; }
 .by-ask-actions .btn.by-order[aria-disabled="true"] { opacity: 0.45; }
 .by-ask-actions .btn.gh { align-self: center; }
+
+/* ---------- Seller card + About page ---------- */
+.by-tagline {
+  font: 500 17px/1.4 "DM Sans", sans-serif;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+  margin: 0;
+  max-width: 46ch;
+}
+.by-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  object-fit: cover;
+  flex: none;
+  border: 1px solid var(--stroke-soft);
+  background: var(--color-surface);
+}
+.by-avatar-ph {
+  display: inline-grid;
+  place-items: center;
+  font: 600 14px/1 "DM Sans", sans-serif;
+  color: var(--color-mute);
+}
+.by-seller {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.by-seller-who { display: flex; gap: 14px; align-items: center; min-width: 0; }
+.by-seller-text { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.by-seller-text strong { font: 600 16px/1.3 "DM Sans", sans-serif; overflow-wrap: anywhere; }
+.by-seller-text p {
+  margin: 0;
+  font: 400 14px/1.5 "DM Sans", sans-serif;
+  color: var(--color-mute);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.by-seller-link { width: auto; align-self: flex-start; }
+@media (min-width: 720px) {
+  .by-seller { flex-direction: row; align-items: center; justify-content: space-between; }
+  .by-seller-link { align-self: center; flex: none; }
+}
+
+.by-about-desc { display: flex; flex-direction: column; gap: 12px; max-width: 60ch; }
+.by-about-desc p { margin: 0; font: 400 15px/1.6 "DM Sans", sans-serif; color: var(--color-mute); white-space: pre-line; }
+.by-about-grid { display: grid; gap: 16px; }
+.by-about-grid .panel + .panel { margin-top: 0; }
+@media (min-width: 860px) {
+  .by-about-grid { grid-template-columns: 3fr 2fr; align-items: start; }
+}
+.by-dl { margin: 16px 0 0; display: flex; flex-direction: column; }
+.by-dl > div {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--stroke-hair);
+}
+.by-dl > div:first-child { border-top: 0; padding-top: 0; }
+.by-dl dt { padding-top: 3px; }
+.by-dl dd { margin: 0; font: 400 14.5px/1.5 "DM Sans", sans-serif; overflow-wrap: anywhere; }
+.by-owner .by-seller-who { margin-top: 16px; }
+.by-owner .by-avatar { width: 56px; height: 56px; }
+.by-owner-bio { margin: 14px 0 0; font: 400 14.5px/1.6 "DM Sans", sans-serif; color: var(--color-mute); white-space: pre-line; }
+.by-about-ctas { margin-top: 28px; }
+.by-about-ctas .btn { width: auto; }
+
+/* ---------- Buyer chrome ---------- */
+.by-poweredby {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 24px 20px 40px;
+  font: 500 12px/1 "DM Sans", sans-serif;
+  color: var(--color-mute-2);
+  text-align: center;
+}
+.by-poweredby a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
