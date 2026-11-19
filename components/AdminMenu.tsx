@@ -71,7 +71,7 @@ export default function AdminMenu() {
         .admin-menu-icon { width: 20px; height: 20px; }
         .admin-menu-content {
           min-width: 200px;
-          font-family: "DM Sans", sans-serif;
+          font-family: var(--f-sans);
         }
         .admin-menu-content a {
           color: inherit;

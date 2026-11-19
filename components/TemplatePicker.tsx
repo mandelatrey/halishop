@@ -134,17 +134,17 @@ function TemplateTile({
           width: 24px;
           height: 24px;
           border-radius: 999px;
-          background: color-mix(in srgb, #ffffff 92%, transparent);
+          background: color-mix(in srgb, var(--color-panel) 92%, transparent);
           color: var(--color-text);
           display: grid;
           place-items: center;
-          font: 600 12px/1 "DM Sans", sans-serif;
+          font: 600 12px/1 var(--f-sans);
           text-decoration: none;
           border: 1px solid var(--stroke-soft);
           transition: background 0.15s ease, transform 0.15s ease, color 0.15s ease;
         }
         .tile-edit:hover {
-          background: var(--color-accent);
+          background: var(--color-accent-fill);
           color: #fff;
           transform: scale(1.06);
         }
