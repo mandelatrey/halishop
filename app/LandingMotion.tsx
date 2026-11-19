@@ -81,7 +81,7 @@ export default function LandingMotion({ children }: { children: ReactNode }) {
           words,
           { opacity: 0.12 },
           {
-            opacity: (_i, el: HTMLElement) => (el.dataset.soft ? 0.42 : 1),
+            opacity: 1,
             ease: "none",
             stagger: 0.08,
             scrollTrigger: {

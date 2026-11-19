@@ -1,12 +1,13 @@
 import type { ReactNode } from "react";
 
 /**
- * Shared page header in the v2 visual direction: pill label, light two-tone
- * display title, optional subtitle, and actions aligned right.
+ * Shared page header: pill label, title in charcoal, optional grey subtitle,
+ * and actions aligned right.
  *
  *   <PageHeader label="Catalogue" title="Your" soft="products" subtitle="…" actions={<Button/>} />
  *
- * `title` renders in ink, `soft` (optional) follows it in the muted second tone.
+ * `soft` (optional) is appended to `title` in the same colour — titles are one
+ * tone; the contrast is between the title and the grey subtitle beneath it.
  */
 export default function PageHeader({
   label,
@@ -27,12 +28,7 @@ export default function PageHeader({
         <span className="pill">{label}</span>
         <h1>
           {title}
-          {soft ? (
-            <>
-              {" "}
-              <span className="soft">{soft}</span>
-            </>
-          ) : null}
+          {soft ? <> {soft}</> : null}
         </h1>
         {subtitle ? <p className="subtitle">{subtitle}</p> : null}
       </div>

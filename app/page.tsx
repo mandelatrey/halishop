@@ -19,16 +19,15 @@ const STATS: { value: string; count?: number; suffix?: string; label: string }[]
   { value: "1 tap", count: 1, suffix: " tap", label: "From your status to a WhatsApp order" },
 ];
 
-const STATEMENT_MAIN =
-  "Haali gives social sellers one place to manage their catalogue, post drops that look like a brand,";
-const STATEMENT_SOFT = "and turn every status view into an order they can actually fulfil.";
+const STATEMENT =
+  "Haali gives social sellers one place to manage their catalogue, post drops that look like a brand, and turn every status view into an order they can actually fulfil.";
 
 /** Split a sentence into word spans so GSAP can light them up one by one. */
-function Words({ text, soft = false }: { text: string; soft?: boolean }) {
+function Words({ text }: { text: string }) {
   return (
     <>
       {text.split(" ").map((w, i) => (
-        <span key={i} className="lp-word" data-soft={soft ? "1" : undefined}>
+        <span key={i} className="lp-word">
           {w}{" "}
         </span>
       ))}
@@ -139,7 +138,7 @@ export default function Landing() {
             </span>
             <span className="lp-line">
               <span className="lp-line-in">
-                <span className="lp-soft">Into an</span> Online Marketplace
+                Into an Online Marketplace
               </span>
             </span>
           </h1>
@@ -196,9 +195,8 @@ export default function Landing() {
       <section className="lp-dark">
         <div className="lp-inner lp-center">
           <Pill dark>What Haali does</Pill>
-          <p className="lp-statement" aria-label={`${STATEMENT_MAIN} ${STATEMENT_SOFT}`}>
-            <Words text={STATEMENT_MAIN} />
-            <Words text={STATEMENT_SOFT} soft />
+          <p className="lp-statement" aria-label={STATEMENT}>
+            <Words text={STATEMENT} />
           </p>
           <div className="lp-stats">
             {STATS.map((s) => (
@@ -226,7 +224,7 @@ export default function Landing() {
           <div className="lp-center">
             <Pill dark>Features</Pill>
             <h2 className="lp-h2 lp-h2-light">
-              Everything a <span className="lp-fade">status seller</span> needs
+              Everything a status seller needs
             </h2>
             <p className="lp-sub-light">Make the post, share the link, take the order.</p>
           </div>
@@ -303,7 +301,7 @@ export default function Landing() {
         <div className="lp-center lp-steps-head">
           <Pill>How it works</Pill>
           <h2 className="lp-h2">
-            From catalogue to <span className="lp-soft">confirmed order</span>
+            From catalogue to confirmed order
           </h2>
         </div>
         <ol className="lp-steps">
@@ -323,7 +321,7 @@ export default function Landing() {
           <CircuitLines />
           <div className="lp-final-copy">
             <h2 className="lp-h2 lp-h2-light">
-              Your next drop could be <span className="lp-fade">ready in minutes.</span>
+              Your next drop could be ready in minutes.
             </h2>
             <p className="lp-sub-light">Set up your brand kit, add a few products, and post your first drop today.</p>
             <div className="lp-ctas lp-ctas-center">
