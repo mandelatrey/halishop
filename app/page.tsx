@@ -135,17 +135,17 @@ export default function Landing() {
           <Pill>Built for WhatsApp sellers</Pill>
           <h1 className="lp-h1">
             <span className="lp-line">
-              <span className="lp-line-in">Sell from your status.</span>
+              <span className="lp-line-in">Turn Your WhatsApp Status</span>
             </span>
             <span className="lp-line">
               <span className="lp-line-in">
-                <span className="lp-soft">Take orders on</span> WhatsApp.
+                <span className="lp-soft">Into an</span> Online Marketplace
               </span>
             </span>
           </h1>
           <p className="lp-lede">
-            Branded status cards, one link to shop from, and every order sent straight into your WhatsApp,
-            already written out.
+            Create branded WhatsApp status cards, build an online product catalog, and let customers
+            browse, shop, and send orders directly to your WhatsApp.
           </p>
           <div className="lp-ctas lp-ctas-center">
             <Link href="/brand-kit" className="lp-btn">
