@@ -36,7 +36,9 @@ export default function AppNav() {
 
         <NavLinks />
 
-        <ThemeSwitch />
+        <div className="app-nav-theme">
+          <ThemeSwitch />
+        </div>
 
         <div className="app-nav-hamburger">
           <AdminMenu />
@@ -109,9 +111,12 @@ export default function AppNav() {
           width: 40px;
           height: 40px;
         }
+        /* On phones the theme switch lives in the menu */
+        .app-nav-theme { display: none; }
 
         @media (min-width: 720px) {
           .app-nav-links { display: flex; }
+          .app-nav-theme { display: block; }
           .app-nav-hamburger { display: none; }
         }
       `}</style>
