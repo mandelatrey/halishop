@@ -150,7 +150,7 @@ export default function Landing() {
           <Pill>Built for entrepreneurs</Pill>
           <h1 className="lp-h1">
             <span className="lp-line">
-              <span className="lp-line-in">Turn your status</span>
+              <span className="lp-line-in">Turn your Whatsapp status</span>
             </span>
             <span className="lp-line">
               <span className="lp-line-in">
@@ -160,7 +160,7 @@ export default function Landing() {
           </h1>
           <p className="lp-lede">
             Create branded posts, track your products, let customers browse your product catalogue and
-            send orders directly to WhatsApp.
+            send orders directly to your DM.
           </p>
           <div className="lp-ctas lp-ctas-center">
             <Link href="/brand-kit" className="lp-btn">
