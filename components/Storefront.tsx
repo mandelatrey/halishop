@@ -77,7 +77,7 @@ export default function Storefront({
 
         <h1 className="by-h1">
           {nameHead}
-          {nameRest.length > 0 && <span className="soft"> {nameRest.join(" ")}</span>}
+          {nameRest.length > 0 && ` ${nameRest.join(" ")}`}
         </h1>
         <p className="by-lede">
           Tap anything you like and your order opens in WhatsApp, already written out for {firstName}.

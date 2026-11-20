@@ -68,7 +68,7 @@ export default function PaletteMaker({ value, onChange }: Props) {
               className="inp"
               value={primary.toUpperCase()}
               onChange={(e) => onChange({ ...value, primary: normalizeHex(e.target.value) })}
-              style={{ width: 132, fontFamily: "ui-monospace, Menlo, monospace" }}
+              style={{ width: 132, fontFamily: "var(--f-mono)" }}
             />
             <span className="s">
               Card footer background · text is auto-picked for contrast
@@ -200,9 +200,9 @@ export default function PaletteMaker({ value, onChange }: Props) {
           flex: 0 0 auto;
           padding: 8px 14px;
           border: 1px solid var(--stroke-soft);
-          background: #fff;
+          background: var(--color-panel);
           border-radius: 999px;
-          font: 500 13px/1 "DM Sans", sans-serif;
+          font: 500 13px/1 var(--f-sans);
           letter-spacing: 0;
           color: var(--color-mute);
           cursor: pointer;
@@ -220,7 +220,7 @@ export default function PaletteMaker({ value, onChange }: Props) {
         }
         .pm-harmony-chip.on {
           background: var(--color-text);
-          color: #fff;
+          color: var(--color-on-ink);
           border-color: var(--color-text);
         }
         .pm-accent-header {
@@ -246,37 +246,37 @@ export default function PaletteMaker({ value, onChange }: Props) {
           width: 56px;
           height: 56px;
           border-radius: 999px;
-          border: 1px solid rgba(32, 30, 29, 0.14);
+          border: 1px solid var(--stroke-soft);
           padding: 3px;
           background-clip: content-box;
           cursor: pointer;
           transition: transform 0.15s ease, border-color 0.15s ease;
         }
-        .pm-well:hover { transform: scale(1.04); border-color: rgba(32, 30, 29, 0.28); }
+        .pm-well:hover { transform: scale(1.04); border-color: var(--stroke-strong); }
         .pm-chip {
           width: 40px;
           height: 40px;
           border-radius: 999px;
-          border: 1px solid rgba(32, 30, 29, 0.14);
+          border: 1px solid var(--stroke-soft);
           padding: 3px;
           background-clip: content-box;
           cursor: pointer;
           transition: transform 0.15s ease, border-color 0.15s ease;
         }
         .pm-chip:hover { transform: scale(1.05); }
-        .pm-chip.on { border-color: #135aed; border-width: 2px; padding: 2px; }
+        .pm-chip.on { border-color: var(--color-accent); border-width: 2px; padding: 2px; }
         .pm-custom {
           width: 40px;
           height: 40px;
           border-radius: 999px;
-          border: 1px dashed rgba(32, 30, 29, 0.28);
+          border: 1px dashed var(--stroke-strong);
           display: grid;
           place-items: center;
           position: relative;
           cursor: pointer;
           transition: border-color 0.15s ease;
         }
-        .pm-custom:hover { border-color: #135aed; }
+        .pm-custom:hover { border-color: var(--color-accent); }
         .pm-custom > span:first-of-type {
           width: 30px;
           height: 30px;
@@ -293,12 +293,12 @@ export default function PaletteMaker({ value, onChange }: Props) {
           width: 18px;
           height: 18px;
           border-radius: 999px;
-          background: #fff;
-          border: 1px solid rgba(32, 30, 29, 0.14);
+          background: var(--color-panel);
+          border: 1px solid var(--stroke-soft);
           display: grid;
           place-items: center;
-          font: 700 10px/1 ui-monospace, Menlo, monospace;
-          color: #201e1d;
+          font: 700 10px/1 var(--f-mono);
+          color: var(--color-text);
         }
         .pm-preview {
           display: grid;
@@ -315,20 +315,20 @@ export default function PaletteMaker({ value, onChange }: Props) {
           flex-direction: column;
           gap: 6px;
           min-height: 116px;
-          border: 1px solid rgba(32, 30, 29, 0.08);
+          border: 1px solid var(--stroke-hair);
         }
         .pm-swatch-role {
-          font: 600 10.5px/1 ui-monospace, Menlo, monospace;
+          font: 600 10.5px/1 var(--f-mono);
           letter-spacing: 0.1em;
           text-transform: uppercase;
           opacity: 0.78;
         }
         .pm-swatch-hex {
-          font: 600 14px/1 ui-monospace, Menlo, monospace;
+          font: 600 14px/1 var(--f-mono);
           letter-spacing: 0.02em;
         }
         .pm-swatch-contrast {
-          font: 400 11.5px/1.3 ui-monospace, Menlo, monospace;
+          font: 400 11.5px/1.3 var(--f-mono);
           opacity: 0.75;
           margin-top: auto;
         }

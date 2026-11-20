@@ -4,6 +4,8 @@ import { useRef, type ReactNode } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import Lenis from "lenis";
+import "lenis/dist/lenis.css";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -13,7 +15,11 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
  * targeting elements by class / data attributes inside its own scope.
  *
  * Everything is gated on `prefers-reduced-motion: no-preference`; with reduced
- * motion the page renders static (the CSS un-hides the intro elements).
+ * motion the page renders static (the CSS un-hides the intro elements) and
+ * scrolls natively.
+ *
+ * Scrolling gets a light easing (Lenis) on this page only, driven by GSAP's
+ * ticker so ScrollTrigger animations stay in step with it.
  */
 export default function LandingMotion({ children }: { children: ReactNode }) {
   const root = useRef<HTMLElement>(null);
@@ -24,6 +30,15 @@ export default function LandingMotion({ children }: { children: ReactNode }) {
 
       mm.add("(prefers-reduced-motion: no-preference)", () => {
         const q = gsap.utils.selector(root);
+
+        /* ---------- Slight smooth scroll ---------- */
+        // lerp: share of the remaining distance covered each frame — higher is
+        // closer to native, so 0.14 is a gentle glide rather than a float.
+        const lenis = new Lenis({ lerp: 0.14, wheelMultiplier: 1, anchors: true });
+        lenis.on("scroll", ScrollTrigger.update);
+        const raf = (time: number) => lenis.raf(time * 1000);
+        gsap.ticker.add(raf);
+        gsap.ticker.lagSmoothing(0);
 
         /* ---------- Hero intro ---------- */
         const intro = gsap.timeline({ defaults: { ease: "power3.out", duration: 0.9 } });
@@ -81,7 +96,7 @@ export default function LandingMotion({ children }: { children: ReactNode }) {
           words,
           { opacity: 0.12 },
           {
-            opacity: (_i, el: HTMLElement) => (el.dataset.soft ? 0.42 : 1),
+            opacity: 1,
             ease: "none",
             stagger: 0.08,
             scrollTrigger: {
@@ -269,6 +284,12 @@ export default function LandingMotion({ children }: { children: ReactNode }) {
             scrollTrigger: { trigger: q(".lp-final")[0], start: "top 65%" },
           }
         );
+
+        return () => {
+          gsap.ticker.remove(raf);
+          gsap.ticker.lagSmoothing(500, 33);
+          lenis.destroy();
+        };
       });
 
       return () => mm.revert();

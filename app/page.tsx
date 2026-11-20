@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
 import type { Metadata } from "next";
 import Link from "next/link";
 import "./landing.css";
@@ -19,16 +21,15 @@ const STATS: { value: string; count?: number; suffix?: string; label: string }[]
   { value: "1 tap", count: 1, suffix: " tap", label: "From your status to a WhatsApp order" },
 ];
 
-const STATEMENT_MAIN =
-  "Haali gives social sellers one place to manage their catalogue, post drops that look like a brand,";
-const STATEMENT_SOFT = "and turn every status view into an order they can actually fulfil.";
+const STATEMENT =
+  "Haali gives social sellers one place to manage their catalogue, post drops that look like a brand, and turn every status view into an order they can actually fulfil.";
 
 /** Split a sentence into word spans so GSAP can light them up one by one. */
-function Words({ text, soft = false }: { text: string; soft?: boolean }) {
+function Words({ text }: { text: string }) {
   return (
     <>
       {text.split(" ").map((w, i) => (
-        <span key={i} className="lp-word" data-soft={soft ? "1" : undefined}>
+        <span key={i} className="lp-word">
           {w}{" "}
         </span>
       ))}
@@ -106,6 +107,15 @@ function CircuitLines() {
   );
 }
 
+/**
+ * The hero card's product photo. Drop an image into `public/landing/` named
+ * `hero-product` (.webp, .jpg, .jpeg or .png); until one exists the striped
+ * placeholder shows. Portrait images fit best (roughly 4:5).
+ */
+const HERO_PHOTO = ["webp", "jpg", "jpeg", "png"]
+  .map((ext) => `/landing/hero-product.${ext}`)
+  .find((src) => existsSync(path.join(process.cwd(), "public", src)));
+
 function StatusCardMock() {
   return (
     <div className="lp-card">
@@ -113,11 +123,16 @@ function StatusCardMock() {
         <span className="lp-card-shop">Your shop</span>
         <span className="lp-card-tag">Today&apos;s drop</span>
       </div>
-      <div className="lp-card-img ph">product photo</div>
-      <div className="lp-card-name">Hoodie grey</div>
+      {HERO_PHOTO ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img className="lp-card-img lp-card-photo" src={HERO_PHOTO} alt="" />
+      ) : (
+        <div className="lp-card-img ph">product photo</div>
+      )}
+      <div className="lp-card-name">Black flats</div>
       <div className="lp-card-price">UGX 55,000</div>
       <div className="lp-card-meta">
-        <span>S · M · L</span>
+        <span>37 · 38 · 39</span>
         <span className="lp-card-left">Only 3 left</span>
       </div>
       <div className="lp-card-link">haali.app/o/C4</div>
@@ -132,20 +147,20 @@ export default function Landing() {
       <section className="lp-hero">
         <CircuitLines />
         <div className="lp-hero-copy">
-          <Pill>Built for WhatsApp sellers</Pill>
+          <Pill>Built for entrepreneurs</Pill>
           <h1 className="lp-h1">
             <span className="lp-line">
-              <span className="lp-line-in">Sell from your status.</span>
+              <span className="lp-line-in">Turn your Whatsapp status</span>
             </span>
             <span className="lp-line">
               <span className="lp-line-in">
-                <span className="lp-soft">Take orders on</span> WhatsApp.
+                into an online marketplace
               </span>
             </span>
           </h1>
           <p className="lp-lede">
-            Branded status cards, one link to shop from, and every order sent straight into your WhatsApp,
-            already written out.
+            Create branded posts, track your products, let customers browse your product catalogue and
+            send orders directly to your DM.
           </p>
           <div className="lp-ctas lp-ctas-center">
             <Link href="/brand-kit" className="lp-btn">
@@ -167,7 +182,7 @@ export default function Landing() {
               <span className="lp-chip">Restock</span>
             </div>
             <p className="lp-float-text">
-              🔥 Hoodie grey is back. Sizes S–L, only 3 left. Tap to order: haali.app/o/C4
+              🔥 Black flats are back. Sizes 37–39, only 3 left. Tap to order: haali.app/o/C4
             </p>
             </div>
           </div>
@@ -178,7 +193,7 @@ export default function Landing() {
             <div className="lp-float-bob lp-bubble">
               <div className="lp-bubble-k">New order · WhatsApp</div>
               <p>
-                Hi! I&apos;d like to order <b>Hoodie grey</b> (size M), code <b>C4</b>. Deliver to Ntinda, please.
+                Hi! I&apos;d like to order <b>Black flats</b> (size 38), code <b>C4</b>. Deliver to Ntinda, please.
               </p>
               <div className="lp-bubble-time">18:24 <ReadTicks /></div>
             </div>
@@ -196,9 +211,8 @@ export default function Landing() {
       <section className="lp-dark">
         <div className="lp-inner lp-center">
           <Pill dark>What Haali does</Pill>
-          <p className="lp-statement" aria-label={`${STATEMENT_MAIN} ${STATEMENT_SOFT}`}>
-            <Words text={STATEMENT_MAIN} />
-            <Words text={STATEMENT_SOFT} soft />
+          <p className="lp-statement" aria-label={STATEMENT}>
+            <Words text={STATEMENT} />
           </p>
           <div className="lp-stats">
             {STATS.map((s) => (
@@ -226,7 +240,7 @@ export default function Landing() {
           <div className="lp-center">
             <Pill dark>Features</Pill>
             <h2 className="lp-h2 lp-h2-light">
-              Everything a <span className="lp-fade">status seller</span> needs
+              Everything a status seller needs
             </h2>
             <p className="lp-sub-light">Make the post, share the link, take the order.</p>
           </div>
@@ -303,7 +317,7 @@ export default function Landing() {
         <div className="lp-center lp-steps-head">
           <Pill>How it works</Pill>
           <h2 className="lp-h2">
-            From catalogue to <span className="lp-soft">confirmed order</span>
+            From catalogue to confirmed order
           </h2>
         </div>
         <ol className="lp-steps">
@@ -323,7 +337,7 @@ export default function Landing() {
           <CircuitLines />
           <div className="lp-final-copy">
             <h2 className="lp-h2 lp-h2-light">
-              Your next drop could be <span className="lp-fade">ready in minutes.</span>
+              Your next drop could be ready in minutes.
             </h2>
             <p className="lp-sub-light">Set up your brand kit, add a few products, and post your first drop today.</p>
             <div className="lp-ctas lp-ctas-center">

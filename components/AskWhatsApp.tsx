@@ -101,11 +101,11 @@ export default function AskWhatsApp({
               <h2 id={titleId} className="by-ask-title">
                 {productTitle ? (
                   <>
-                    Ask about <span className="soft">{productTitle}</span>
+                    Ask about {productTitle}
                   </>
                 ) : (
                   <>
-                    Ask <span className="soft">a question</span>
+                    Ask a question
                   </>
                 )}
               </h2>

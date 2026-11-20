@@ -1,13 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import AdminMenu from "./AdminMenu";
-
-const SHOP_SLUG = process.env.NEXT_PUBLIC_SHOP_SLUG || "shania";
+import NavLinks from "./NavLinks";
+import ThemeSwitch from "./ThemeSwitch";
 
 /**
- * Global top nav — Haali wordmark on the left, admin links on the right.
- * Desktop shows the links inline; mobile collapses them behind the hamburger
- * from `AdminMenu`.
+ * Global top nav — Haali wordmark on the left, admin links and the theme
+ * switch on the right. Desktop shows the links inline; mobile collapses them
+ * behind the hamburger from `AdminMenu`.
  */
 export default function AppNav() {
   return (
@@ -21,18 +21,24 @@ export default function AppNav() {
             height={200}
             priority
             unoptimized
-            className="app-nav-brand-mark"
+            className="app-nav-brand-mark logo-on-light"
+          />
+          <Image
+            src="/logos/haali-wordmark-on-dark.svg"
+            alt=""
+            width={500}
+            height={200}
+            priority
+            unoptimized
+            className="app-nav-brand-mark logo-on-dark"
           />
         </Link>
 
-        <nav className="app-nav-links" aria-label="Manage">
-          <Link href={`/shop/${SHOP_SLUG}`}>View shop</Link>
-          <Link href="/products">Products</Link>
-          <Link href="/drops/new">New drop</Link>
-          <Link href="/templates">Templates</Link>
-          <Link href="/brand-kit">Brand kit</Link>
-          <Link href="/settings">Settings</Link>
-        </nav>
+        <NavLinks />
+
+        <div className="app-nav-theme">
+          <ThemeSwitch />
+        </div>
 
         <div className="app-nav-hamburger">
           <AdminMenu />
@@ -52,7 +58,7 @@ export default function AppNav() {
         .app-nav-inner {
           max-width: 1180px;
           margin: 0 auto;
-          padding: 12px 20px;
+          padding: 14px 20px 12px;
           display: flex;
           align-items: center;
           gap: 12px;
@@ -61,7 +67,7 @@ export default function AppNav() {
           display: inline-flex;
           align-items: center;
           padding: 4px 6px;
-          border-radius: var(--radius-sm);
+          border-radius: var(--radius);
           flex: none;
           margin-right: auto;
         }
@@ -80,17 +86,22 @@ export default function AppNav() {
           gap: 4px;
         }
         .app-nav-links a {
-          font: 500 12px/1 "DM Sans", sans-serif;
-          letter-spacing: 0.01em;
+          font: 500 14px/1 var(--f-sans);
           color: var(--color-mute);
-          padding: 8px 12px;
-          border-radius: var(--radius);
+          padding: 9px 12px;
+          border-radius: 12px;
           white-space: nowrap;
           transition: color 0.15s ease, background 0.15s ease;
         }
         .app-nav-links a:hover {
           color: var(--color-text);
           background: var(--color-surface);
+        }
+        .app-nav-links a[aria-current="page"] {
+          color: var(--color-text);
+          background: var(--color-panel);
+          box-shadow: var(--shadow);
+          font-weight: 600;
         }
 
         /* Mobile hamburger container — AdminMenu absorbs its own positioning */
@@ -100,9 +111,12 @@ export default function AppNav() {
           width: 40px;
           height: 40px;
         }
+        /* On phones the theme switch lives in the menu */
+        .app-nav-theme { display: none; }
 
         @media (min-width: 720px) {
           .app-nav-links { display: flex; }
+          .app-nav-theme { display: block; }
           .app-nav-hamburger { display: none; }
         }
       `}</style>

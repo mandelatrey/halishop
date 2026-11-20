@@ -118,27 +118,27 @@ export default function PhoneInput({
           min-height: 46px;
           padding: 0 10px 0 12px;
           gap: 6px;
-          background: #fff;
+          background: var(--color-panel);
           border-color: var(--stroke-soft);
           border-radius: var(--radius);
-          font: 500 14px/1 "DM Sans", sans-serif;
+          font: 500 14px/1 var(--f-sans);
           color: var(--color-text);
           flex: 0 0 auto;
         }
         .phone-input :global(.phone-cc-content) {
-          font-family: "DM Sans", sans-serif;
+          font-family: var(--f-sans);
         }
         .phone-flag {
           font-size: 16px;
           line-height: 1;
         }
         .phone-cc-num {
-          font-family: ui-monospace, Menlo, monospace;
+          font-family: var(--f-mono);
           font-size: 13px;
           letter-spacing: 0.02em;
         }
         .phone-cc-hint {
-          font-family: ui-monospace, Menlo, monospace;
+          font-family: var(--f-mono);
           font-size: 11px;
           color: var(--color-mute-2);
           margin-left: auto;
@@ -147,9 +147,9 @@ export default function PhoneInput({
           flex: 1 1 auto;
           min-width: 0;
           border: 1px solid var(--stroke-soft);
-          background: #fff;
+          background: var(--color-panel);
           padding: 11px 13px;
-          font: 400 14px/1.25 "DM Sans", sans-serif;
+          font: 400 14px/1.25 var(--f-sans);
           color: var(--color-text);
           border-radius: var(--radius);
           transition: border-color 0.15s ease, box-shadow 0.15s ease;
