@@ -22,7 +22,7 @@
   --color-text: #14161a; --lp-ink: #14161a; --color-mute: #4b5059; --color-mute-2: #7b818b;
   --color-surface: #f6f7f8; --color-surface-container: #f1f3f5; --color-surface-container-high: #e7eaed;
   --stroke-soft: #e1e4e8; --stroke-hair: #eaecef;
-  --color-accent: #2f6fdb; --color-accent-fill: #2f6fdb; --color-panel: #ffffff;
+  --color-accent: #ff3600; --color-accent-dark: #c42d00; --color-accent-fill: #ff3600; --color-panel: #ffffff;
   --wa-bg: #efeae2; --wa-bubble: #dcf8c6; --wa-ink: #111b21; --wa-meta: #667781; --wa-label: #1f7a4d;
   --color-soft-ink: rgb(20 22 26 / 0.42); --lp-soft: rgb(20 22 26 / 0.42);
   color: var(--color-text);
@@ -310,8 +310,8 @@
   padding: 64px 16px 16px;
   border-radius: 20px;
   background:
-    radial-gradient(120% 70% at 100% 0%, rgb(47 111 219 / 0.55) 0%, rgb(47 111 219 / 0) 55%),
-    radial-gradient(90% 60% at 0% 100%, rgb(122 167 255 / 0.22) 0%, rgb(122 167 255 / 0) 60%),
+    radial-gradient(120% 70% at 100% 0%, rgb(255 54 0 / 0.55) 0%, rgb(255 54 0 / 0) 55%),
+    radial-gradient(90% 60% at 0% 100%, rgb(255 140 100 / 0.22) 0%, rgb(255 140 100 / 0) 60%),
     var(--lp-dark);
   border: 1px solid var(--color-ink-panel-line);
   color: var(--lp-on-dark);
@@ -334,7 +334,7 @@
   height: 200px;
   border-radius: 8px;
   background:
-    radial-gradient(80% 90% at 100% 0%, rgb(47 111 219 / 0.65) 0%, rgb(47 111 219 / 0) 60%),
+    radial-gradient(80% 90% at 100% 0%, rgb(255 54 0 / 0.65) 0%, rgb(255 54 0 / 0) 60%),
     var(--lp-dark);
   display: grid;
   place-items: center;

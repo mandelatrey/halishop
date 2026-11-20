@@ -40,8 +40,8 @@
  * Design tokens — shared with the Kampala Heat Atlas
  *   Ground:  cool grey page (#eceef0), white panels, light grey blocks
  *   Ink:     #14161a text; primary buttons and selected states are ink-filled
- *   Accent:  blue for links, focus and selection; Haali orange only for the
- *            logo mark and small brand squares, never for status
+ *   Accent:  Haali's logo orange for buttons, links, focus and selection;
+ *            never for status
  *   Status:  good / warning / critical, each with a soft background and ink
  *   Radius:  10px controls, 12px buttons, 18px panels; soft shadow on panels
  *   Type:    Geist for people, Geist Mono for labels and data
@@ -64,12 +64,13 @@
   --color-hint: #a9aeb5;
   --color-border: #14161a;                 /* ink fill for selected states */
   --color-on-ink: #ffffff;                 /* text on an ink fill */
-  --color-accent: #2f6fdb;                 /* links, focus, selection borders */
-  --color-accent-dark: #1f56b5;            /* accent text on accent-soft */
-  --color-accent-fill: #2f6fdb;            /* accent backgrounds under white text */
-  --color-accent-fill-hover: #1f56b5;
-  --color-accent-soft: #e3ecfb;
-  --color-focus: #2f6fdb;
+  /* Highlight colour: the orange from the Haali logo */
+  --color-accent: #ff3600;                 /* selection borders, focus, icons */
+  --color-accent-dark: #c42d00;            /* orange text: links, labels on accent-soft */
+  --color-accent-fill: #ff3600;            /* filled buttons and chips (white text) */
+  --color-accent-fill-hover: #e03000;
+  --color-accent-soft: #ffe7de;
+  --color-focus: #ff3600;
   --color-error: #c03030;
   --color-error-container: #f9e0e0;
   --color-good: #0ca30c;    --color-good-bg: #e3f5e3;    --color-good-ink: #0b5d0b;
@@ -125,8 +126,8 @@
     --color-text: #eef0f2; --color-text-60: rgb(238 240 242 / 0.6); --color-text-35: rgb(238 240 242 / 0.35);
     --color-mute: #b4bac3; --color-mute-2: #8a919b; --color-mute-3: #383d44; --color-hint: #5d636c;
     --color-border: #eef0f2; --color-on-ink: #17191c;
-    --color-accent: #7aa7ff; --color-accent-dark: #a9c5ff; --color-accent-soft: #1a2a45;
-    --color-accent-fill: #3a78e0; --color-accent-fill-hover: #4a87ee; --color-focus: #7aa7ff;
+    --color-accent: #ff6a3d; --color-accent-dark: #ff9a7a; --color-accent-soft: #3a1a10;
+    --color-accent-fill: #ff3600; --color-accent-fill-hover: #ff4d1a; --color-focus: #ff6a3d;
     --color-error: #f5a3a3; --color-error-container: #3a1717;
     --color-good-bg: #12301a; --color-good-ink: #8fe08f; --color-warning-bg: #3a2c0c; --color-warning-ink: #fbd27a;
     --color-soft-ink: rgb(238 240 242 / 0.45);
@@ -146,8 +147,8 @@
   --color-text: #eef0f2; --color-text-60: rgb(238 240 242 / 0.6); --color-text-35: rgb(238 240 242 / 0.35);
   --color-mute: #b4bac3; --color-mute-2: #8a919b; --color-mute-3: #383d44; --color-hint: #5d636c;
   --color-border: #eef0f2; --color-on-ink: #17191c;
-  --color-accent: #7aa7ff; --color-accent-dark: #a9c5ff; --color-accent-soft: #1a2a45;
-  --color-accent-fill: #3a78e0; --color-accent-fill-hover: #4a87ee; --color-focus: #7aa7ff;
+  --color-accent: #ff6a3d; --color-accent-dark: #ff9a7a; --color-accent-soft: #3a1a10;
+  --color-accent-fill: #ff3600; --color-accent-fill-hover: #ff4d1a; --color-focus: #ff6a3d;
   --color-error: #f5a3a3; --color-error-container: #3a1717;
   --color-good-bg: #12301a; --color-good-ink: #8fe08f; --color-warning-bg: #3a2c0c; --color-warning-ink: #fbd27a;
   --color-soft-ink: rgb(238 240 242 / 0.45);
@@ -175,8 +176,8 @@ body {
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
 }
-a { color: var(--color-accent); text-decoration: none; }
-a:hover { color: var(--color-accent-dark); }
+a { color: var(--color-accent-dark); text-decoration: none; }
+a:hover { color: var(--color-accent); }
 button { font-family: inherit; cursor: pointer; }
 input, textarea, select { font-family: inherit; }
 :focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
@@ -245,14 +246,14 @@ input, textarea, select { font-family: inherit; }
   word-break: break-all;
 }
 
-/* Buttons — as in the atlas: primary is ink-filled, secondary is a white panel with a line */
+/* Buttons — primary is filled with the logo orange, secondary is a white panel with a line */
 .btn {
   display: block;
   width: 100%;
   box-sizing: border-box;
-  background: var(--color-text);
-  color: var(--color-on-ink);
-  border: 1px solid var(--color-text);
+  background: var(--color-accent-fill);
+  color: #fff;
+  border: 1px solid var(--color-accent-fill);
   border-radius: 12px;
   font: 500 13.5px/1 var(--f-sans);
   letter-spacing: 0;
@@ -261,7 +262,7 @@ input, textarea, select { font-family: inherit; }
   padding: 12px 17px;
   transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
 }
-.btn:hover { opacity: 0.88; color: var(--color-on-ink); }
+.btn:hover { background: var(--color-accent-fill-hover); border-color: var(--color-accent-fill-hover); color: #fff; }
 .btn.sec {
   background: var(--color-panel);
   color: var(--color-text);
@@ -852,7 +853,7 @@ input, textarea, select { font-family: inherit; }
 .panel-dark {
   position: relative;
   background:
-    radial-gradient(farthest-corner at 100% 0%, rgb(47 111 219 / 0.45) 0%, rgb(47 111 219 / 0.12) 35%, rgb(47 111 219 / 0) 70%),
+    radial-gradient(farthest-corner at 100% 0%, rgb(255 54 0 / 0.45) 0%, rgb(255 54 0 / 0.12) 35%, rgb(255 54 0 / 0) 70%),
     var(--color-ink-panel);
   border: 1px solid var(--color-ink-panel-line);
   color: var(--color-on-dark);
@@ -861,12 +862,6 @@ input, textarea, select { font-family: inherit; }
   overflow: hidden;
 }
 .panel-dark .k { color: var(--color-on-dark-soft); }
-/* Ink-panel buttons: primary turns light so it reads on the dark panel in both themes */
-.panel-dark .btn:not(.sec):not(.gh):not(.pill) {
-  background: var(--color-on-dark);
-  border-color: var(--color-on-dark);
-  color: #14161a;
-}
 .panel-dark .s, .panel-dark .p { color: var(--color-on-dark-soft); }
 
 /* Stat row — numbers split by hairlines (dashboard summaries) */
@@ -987,8 +982,8 @@ input, textarea, select { font-family: inherit; }
   margin: 8px 4px 4px;
   padding: 13px 16px;
   border-radius: 12px;
-  background: var(--color-text);
-  color: var(--color-on-ink);
+  background: var(--color-accent-fill);
+  color: #fff;
   font: 500 15px/1 var(--f-sans);
   text-decoration: none;
   outline: none;
@@ -996,7 +991,7 @@ input, textarea, select { font-family: inherit; }
   transition: opacity 0.15s ease;
 }
 .mm-cta .mm-item-icon { color: inherit; }
-.mm-cta:hover, .mm-cta[data-highlighted] { color: var(--color-on-ink); opacity: 0.88; }
+.mm-cta:hover, .mm-cta[data-highlighted] { color: #fff; background: var(--color-accent-fill-hover); }
 .mm-cta[data-highlighted] { box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-focus) 35%, transparent); }
 
 .mm-foot {
