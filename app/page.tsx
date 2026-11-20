@@ -129,10 +129,10 @@ function StatusCardMock() {
       ) : (
         <div className="lp-card-img ph">product photo</div>
       )}
-      <div className="lp-card-name">Hoodie grey</div>
+      <div className="lp-card-name">Black flats</div>
       <div className="lp-card-price">UGX 55,000</div>
       <div className="lp-card-meta">
-        <span>S · M · L</span>
+        <span>37 · 38 · 39</span>
         <span className="lp-card-left">Only 3 left</span>
       </div>
       <div className="lp-card-link">haali.app/o/C4</div>
@@ -182,7 +182,7 @@ export default function Landing() {
               <span className="lp-chip">Restock</span>
             </div>
             <p className="lp-float-text">
-              🔥 Hoodie grey is back. Sizes S–L, only 3 left. Tap to order: haali.app/o/C4
+              🔥 Black flats are back. Sizes 37–39, only 3 left. Tap to order: haali.app/o/C4
             </p>
             </div>
           </div>
@@ -193,7 +193,7 @@ export default function Landing() {
             <div className="lp-float-bob lp-bubble">
               <div className="lp-bubble-k">New order · WhatsApp</div>
               <p>
-                Hi! I&apos;d like to order <b>Hoodie grey</b> (size M), code <b>C4</b>. Deliver to Ntinda, please.
+                Hi! I&apos;d like to order <b>Black flats</b> (size 38), code <b>C4</b>. Deliver to Ntinda, please.
               </p>
               <div className="lp-bubble-time">18:24 <ReadTicks /></div>
             </div>
