@@ -133,7 +133,7 @@
   color: var(--lp-ink);
 }
 .lp-lede {
-  font: 400 14px/1.6 var(--f-sans);
+  font: 500 16px/1.6 var(--f-sans);
   color: var(--color-mute);
   max-width: 52ch;
   text-wrap: balance;
