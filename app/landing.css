@@ -126,7 +126,7 @@
   align-items: center;
 }
 .lp-h1 {
-  font: 400 32px/1.2 var(--f-sans);
+  font: 500 44px/1.1 var(--f-sans);
   letter-spacing: -0.03em;
   text-wrap: balance;
   margin: 0 0 22px;
