@@ -90,6 +90,28 @@ problems.` on startup — that's expected. `next.config.ts`'s webpack block
 exists for `next build` (which still uses webpack); Turbopack just notes it
 isn't applying the config in dev.
 
+### Style editor (dev only)
+
+With `npm run dev` running, press **Shift+Alt+E** (or the "Styles" button, bottom right) to adjust
+font sizes, alignment, padding, margins and gaps by pointing at the page:
+
+- **Pick** an element, or **Alt+click** anything. The page shows its margin, padding and the gaps between its children.
+- Change a value by typing, with ↑/↓ on any number (Shift ×10, Alt ×0.1), or by dragging a label sideways.
+  Shorthands are edited in place (`padding: 18px 20px` stays one line).
+- "Edit rule" chooses which CSS rule the controls write to. Every matching rule is listed, including ones for
+  other screen widths, with how many elements on the page each one styles. A value a stronger rule overrides
+  is flagged (e.g. `.panel` in `globals.css` vs `.ad-page .panel` in `admin.css`).
+- Changes preview live. **Save** (Ctrl/⌘+S) writes them into the `.css` file under `app/` the rule lives in;
+  review them with `git diff`.
+- Tailwind's generated utilities are listed read-only, and inline `style={{...}}` in a component beats the CSS:
+  the editor flags it, but those are changed in the TSX.
+
+The editor lives in `devtools/style-editor/` and is never part of `npm run build`: it mounts only when
+`NODE_ENV` is `development`, and its file-writing route (`app/api/dev/style-editor/route.dev.ts`) only
+exists under `next dev` (`pageExtensions` in `next.config.ts`). It reads Turbopack's CSS chunks to map each
+rule the browser has back to its source file, so use the default `npm run dev`; plain `next dev` (webpack)
+still works, with fewer rules mapped. `npm test` runs its unit tests.
+
 ### Troubleshooting Atlas
 
 If pages 500 with `MongoServerSelectionError · SSL alert internal error`, the

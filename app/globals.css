@@ -1,4 +1,6 @@
 @import "tailwindcss";
+/* the dev-only style editor's panel uses its own classes; keep its source out of the utility scan */
+@source not "../devtools";
 
 /* -------------------------------------------------------------------------
  * shadcn/ui semantic tokens — mapped to HALI's palette so Tailwind utilities

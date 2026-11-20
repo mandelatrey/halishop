@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans } from "next/font/google";
 import AppNav from "@/components/AppNav";
+import StyleEditorMount from "@/devtools/style-editor/Mount";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -22,6 +23,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body suppressHydrationWarning>
         <AppNav />
         {children}
+        {/* Development only: the style editor (Shift+Alt+E), see devtools/style-editor/ */}
+        {process.env.NODE_ENV === "development" && <StyleEditorMount />}
       </body>
     </html>
   );
