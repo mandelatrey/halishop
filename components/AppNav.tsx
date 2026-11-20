@@ -56,7 +56,7 @@ export default function AppNav() {
         .app-nav-inner {
           max-width: 1180px;
           margin: 0 auto;
-          padding: 12px 20px;
+          padding: 14px 20px 12px;
           display: flex;
           align-items: center;
           gap: 12px;
