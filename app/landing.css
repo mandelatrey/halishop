@@ -48,7 +48,7 @@
   gap: 8px;
   padding: 6px 10px;
   border: 1px solid var(--stroke-soft);
-  border-radius: 999px;
+  border-radius: 6px;
   background: var(--color-panel);
   font: 500 11px/1 var(--f-mono);
   letter-spacing: 0.1em;
