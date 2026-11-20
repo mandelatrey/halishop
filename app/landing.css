@@ -96,7 +96,7 @@
   position: relative;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 56px 20px 0;
+  padding: 56px 20px 72px;
   text-align: center;
 }
 .lp-circuit {
@@ -156,9 +156,8 @@
   aspect-ratio: 9 / 16;
   background: #ffffff;
   border: 1px solid var(--stroke-soft);
-  border-radius: 20px 20px 0 0;
-  border-bottom: 0;
-  box-shadow: 0 -10px 50px rgb(16 18 22 / 0.12);
+  border-radius: 20px;
+  box-shadow: 0 10px 50px rgb(16 18 22 / 0.12);
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -178,6 +177,7 @@
   border-radius: 999px;
 }
 .lp-card-img { flex: 1; border-radius: 12px; min-height: 0; }
+.lp-card-photo { display: block; width: 100%; object-fit: cover; }
 .lp-card-name { font: 700 14px/1.1 var(--f-sans); text-transform: uppercase; }
 .lp-card-price { font: 800 21px/1 var(--f-sans); letter-spacing: -0.02em; }
 .lp-card-meta {

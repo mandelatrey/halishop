@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
 import type { Metadata } from "next";
 import Link from "next/link";
 import "./landing.css";
@@ -105,6 +107,15 @@ function CircuitLines() {
   );
 }
 
+/**
+ * The hero card's product photo. Drop an image into `public/landing/` named
+ * `hero-product` (.webp, .jpg, .jpeg or .png); until one exists the striped
+ * placeholder shows. Portrait images fit best (roughly 4:5).
+ */
+const HERO_PHOTO = ["webp", "jpg", "jpeg", "png"]
+  .map((ext) => `/landing/hero-product.${ext}`)
+  .find((src) => existsSync(path.join(process.cwd(), "public", src)));
+
 function StatusCardMock() {
   return (
     <div className="lp-card">
@@ -112,7 +123,12 @@ function StatusCardMock() {
         <span className="lp-card-shop">Your shop</span>
         <span className="lp-card-tag">Today&apos;s drop</span>
       </div>
-      <div className="lp-card-img ph">product photo</div>
+      {HERO_PHOTO ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img className="lp-card-img lp-card-photo" src={HERO_PHOTO} alt="" />
+      ) : (
+        <div className="lp-card-img ph">product photo</div>
+      )}
       <div className="lp-card-name">Hoodie grey</div>
       <div className="lp-card-price">UGX 55,000</div>
       <div className="lp-card-meta">
