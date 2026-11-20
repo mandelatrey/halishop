@@ -1,11 +1,7 @@
 import type { NextConfig } from "next";
-
-const isDev = process.env.NODE_ENV === "development";
+import { withDomEditor } from "domeditor/next/config";
 
 const nextConfig: NextConfig = {
-  // Files named `*.dev.ts(x)` are routes only under `next dev`: the style editor's endpoint
-  // (app/api/dev/style-editor/route.dev.ts), which writes CSS edits back into app/, never ships.
-  pageExtensions: isDev ? ["dev.tsx", "dev.ts", "tsx", "ts", "jsx", "js"] : ["tsx", "ts", "jsx", "js"],
   serverExternalPackages: ["mongodb"],
   webpack: (config, { isServer }) => {
     // `serverExternalPackages` covers Server Components + Server Actions but
@@ -25,4 +21,6 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// withDomEditor: the dev-only visual CSS editor's route (app/api/dev/domeditor/route.dev.ts) exists
+// only under `next dev`; see https://github.com/mandelatrey/domeditor
+export default withDomEditor(nextConfig);

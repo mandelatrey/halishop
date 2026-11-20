@@ -1,6 +1,4 @@
 @import "tailwindcss";
-/* the dev-only style editor's panel uses its own classes; keep its source out of the utility scan */
-@source not "../devtools";
 
 /* Dark mode follows the theme switch: an explicit choice sets data-theme on
    <html>; with no choice it follows the system. Tailwind's `dark:` variant
