@@ -76,16 +76,15 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 150px;
-  padding: 14px 22px;
-  border-radius: 4px;
+  min-width: 136px;
+  padding: 12px 18px;
+  border-radius: 8px;
   background: var(--color-accent-fill);
   color: #fff;
-  font: 500 14px/1 var(--f-sans);
+  font: 500 13.5px/1 var(--f-sans);
   border: 1px solid transparent;
   transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
-.lp-hero .lp-btn { border-radius: 8px; min-width: 136px; padding: 12px 18px; font-size: 13.5px; }
 .lp-btn:hover { background: var(--color-accent-fill-hover); color: #fff; }
 .lp-btn-sec { background: var(--color-panel); color: var(--lp-ink); border-color: var(--stroke-soft); }
 .lp-btn-sec:hover { background: var(--color-surface); color: var(--lp-ink); }

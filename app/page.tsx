@@ -131,14 +131,14 @@ export default function Landing() {
       <section className="lp-hero">
         <CircuitLines />
         <div className="lp-hero-copy">
-          <Pill>Built for WhatsApp sellers</Pill>
+          <Pill>Built for entrepreneurs</Pill>
           <h1 className="lp-h1">
             <span className="lp-line">
-              <span className="lp-line-in">Turn Your Status</span>
+              <span className="lp-line-in">Turn your status</span>
             </span>
             <span className="lp-line">
               <span className="lp-line-in">
-                Into an Online Marketplace
+                into an online marketplace
               </span>
             </span>
           </h1>
