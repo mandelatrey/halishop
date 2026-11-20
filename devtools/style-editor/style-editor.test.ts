@@ -33,6 +33,10 @@ describe("style editor: matching the browser's rules to the source", () => {
     const refs = sourceRules(css, "/x.css").rules.map((r) => r.ref);
     expect(refs.map((r) => [r.context, r.occurrence, r.line])).toEqual([[[], 0, 1], [["media (max-width:960px)"], 0, 2], [[], 1, 3]]);
   });
+  it("leaves out Tailwind directives, which never reach the browser", () => {
+    const css = "@custom-variant dark {\n  @media (prefers-color-scheme: dark) { &:where(:root *) { @slot; } }\n}\n.a { gap: 1px; }";
+    expect(sourceRules(css, "/x.css").rules.map((r) => r.ref.selector)).toEqual([".a"]);
+  });
 });
 
 describe("style editor: lining up the compiled CSS with the source", () => {

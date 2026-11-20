@@ -8,12 +8,17 @@ import { normCondition, normSelector, sameDecls, type Decl, type RuleRef, type S
 
 export class EditError extends Error {}
 
+const TAILWIND_ONLY = new Set(["custom-variant", "variant", "utility", "theme"]);
+
 function contextOf(rule: Rule): string[] | null {
   const ctx: string[] = [];
   for (let p = rule.parent; p && p.type !== "root"; p = p.parent) {
     if (p.type === "atrule") {
       const a = p as AtRule;
       if (/keyframes$/i.test(a.name)) return null; // keyframe steps are not selectors
+      // Tailwind directives (`@custom-variant dark { &:where(...) }`, `@utility`...) are compiled away,
+      // so their selectors never reach the browser as rules of their own
+      if (TAILWIND_ONLY.has(a.name.toLowerCase())) return null;
       ctx.unshift(`${a.name.toLowerCase()} ${normCondition(a.params)}`);
     } else if (p.type === "rule") ctx.unshift(`rule ${normSelector((p as Rule).selector)}`);
   }
