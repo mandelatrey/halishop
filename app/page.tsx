@@ -143,8 +143,8 @@ export default function Landing() {
             </span>
           </h1>
           <p className="lp-lede">
-            Create branded WhatsApp status cards, build an online product catalog, and let customers
-            browse, shop, and send orders directly to WhatsApp.
+            Create branded posts, track your product catalog, let customers browse your product catalogue
+            and send orders directly to WhatsApp.
           </p>
           <div className="lp-ctas lp-ctas-center">
             <Link href="/brand-kit" className="lp-btn">
