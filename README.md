@@ -103,6 +103,9 @@ font sizes, alignment, padding, margins and gaps by pointing at the page:
   is flagged (e.g. `.panel` in `globals.css` vs `.ad-page .panel` in `admin.css`).
 - Changes preview live. **Save** (Ctrl/⌘+S) writes them into the `.css` file under `app/` the rule lives in;
   review them with `git diff`.
+  Next then hot-swaps the rebuilt CSS. Safari sometimes keeps its old copy of the stylesheet (WebKit bug
+  187726), which made a saved edit look as if it had been undone; the editor checks the page's CSS against
+  the dev server's after each save and re-loads any stale sheet.
 - Tailwind's generated utilities are listed read-only, and inline `style={{...}}` in a component beats the CSS:
   the editor flags it, but those are changed in the TSX.
 

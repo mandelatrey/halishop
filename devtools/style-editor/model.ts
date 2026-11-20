@@ -194,6 +194,8 @@ class Store {
     this.edits.clear();
     this.message = { kind: "ok", text: `Saved to ${r.files.map(shortFile).join(", ")}` };
     this.emit();
+    // Next rebuilds the CSS and swaps it in; check it did, in case the browser kept an old copy
+    for (const ms of [1500, 4000]) setTimeout(() => void refreshSavedSheets(r.files), ms);
   }
 
   async createRule(file: string, selector: string) {
@@ -364,7 +366,9 @@ function sheetFiles(sheet: CSSStyleSheet): Promise<FileOf | null> {
       if (!href || new URL(href).origin !== location.origin || !new URL(href).pathname.startsWith("/_next/")) return null;
       try {
         const rules = Array.from(sheet.cssRules); // before the fetch, so later edits cannot shift it
-        const text = await (await fetch(href, { cache: "no-store" })).text();
+        loaded.set(sheet, rules.filter(notImport).map(ruleText));
+        const text = await serverCss(href);
+        if (refreshIfStale(sheet, text)) return null; // a fresh copy is on its way; it is indexed when it lands
         const marks = [...text.matchAll(MARKER)];
         if (!marks.length) return null;
         const fileOf: FileOf = new WeakMap();
@@ -374,6 +378,7 @@ function sheetFiles(sheet: CSSStyleSheet): Promise<FileOf | null> {
           const scratch = new CSSStyleSheet(); // counts the file's top-level rules the way the browser does
           scratch.replaceSync(chunk);
           const file = m[1] === "project" ? m[2]! : `[next]/${m[2]}`;
+          if (scratch.cssRules.length) filesIn.set(sheet, (filesIn.get(sheet) ?? new Set()).add(file));
           for (let k = 0; k < scratch.cssRules.length; k++) if (rules[n + k]) fileOf.set(rules[n + k]!, file);
           n += scratch.cssRules.length;
         });
@@ -385,6 +390,67 @@ function sheetFiles(sheet: CSSStyleSheet): Promise<FileOf | null> {
     fileMaps.set(sheet, p);
   }
   return p;
+}
+
+// ---------- keeping the page's CSS current after a save
+
+/** What the browser loaded for each sheet (each rule's text), read before the editor changes anything. */
+const loaded = new WeakMap<CSSStyleSheet, string[]>();
+/** The project files each sheet was built from. */
+const filesIn = new WeakMap<CSSStyleSheet, Set<string>>();
+/** Links the editor added, and the server's text each was loaded for (so it never loops). */
+const madeFor = new WeakMap<Element, string>();
+
+/** A stylesheet as the dev server sends it now: a unique URL, so no cache can answer instead. */
+async function serverCss(href: string): Promise<string> {
+  const url = new URL(href);
+  url.searchParams.set("se", `${Date.now()}${Math.random().toString(36).slice(2, 6)}`);
+  return (await fetch(url, { cache: "no-store" })).text();
+}
+
+const notImport = (r: CSSRule) => !(typeof CSSImportRule !== "undefined" && r instanceof CSSImportRule);
+// url()s are left out: a browser may serialise them resolved against different base URLs
+const ruleText = (r: CSSRule) => r.cssText.replace(/url\([^)]*\)/g, "url()");
+
+/**
+ * When a .css file changes, Next (Turbopack) swaps in a new <link> to the same URL. Safari can reuse
+ * its old copy of that URL instead of downloading it again (WebKit bug 187726; Turbopack only adds a
+ * cache-busting query for Firefox), so the page keeps the old CSS and the edit seems to vanish.
+ * If what the browser loaded differs from what the server sends now, load the sheet again under a
+ * unique URL, the same way Turbopack does for Firefox. Returns true if it did.
+ */
+function refreshIfStale(sheet: CSSStyleSheet, serverText: string): boolean {
+  const link = sheet.ownerNode;
+  const had = loaded.get(sheet);
+  if (!(link instanceof HTMLLinkElement) || !had || !link.isConnected) return false;
+  const scratch = new CSSStyleSheet();
+  scratch.replaceSync(serverText);
+  const now = Array.from(scratch.cssRules).filter(notImport).map(ruleText);
+  if (now.length === had.length && now.every((t, i) => t === had[i])) return false;
+  const base = (link.getAttribute("href") ?? "").split("?")[0]!;
+  if (!base || madeFor.get(link) === serverText) return false; // our own fresh copy: never loop
+  const fresh = document.createElement("link");
+  madeFor.set(fresh, serverText);
+  for (const a of Array.from(link.attributes)) fresh.setAttribute(a.name, a.value);
+  // keep the URL's start: Turbopack finds the sheet for its next update by `href^="<url>?"`
+  fresh.setAttribute("href", `${base}?ts=${Date.now()}`);
+  fresh.addEventListener("load", () => link.remove(), { once: true });
+  link.after(fresh);
+  return true;
+}
+
+/** After a save: once the dev server has rebuilt, re-load any sheet with the saved files that the
+ *  browser still holds an old copy of (covers Safari, and an update that never arrived). */
+async function refreshSavedSheets(files: string[]) {
+  for (const sheet of Array.from(document.styleSheets)) {
+    const own = filesIn.get(sheet);
+    if (!sheet.href || !own || !files.some((f) => own.has(f))) continue;
+    try {
+      refreshIfStale(sheet, await serverCss(sheet.href));
+    } catch {
+      /* the dev server restarted; its own reload takes care of it */
+    }
+  }
 }
 
 /** Every style rule in a sheet, in cascade order, with the at-rules around it and its file. */
