@@ -280,6 +280,7 @@ a.by-card:hover .by-card-img > div:first-child { transform: scale(1.03); }
   color: #fff;
   font: 500 13px/1 var(--f-sans);
   transition: background 0.15s ease;
+  width: 94.6px;
 }
 .by-card-order svg { transition: transform 0.15s ease; }
 a.by-card:hover .by-card-order { background: var(--color-accent-fill-hover); }
