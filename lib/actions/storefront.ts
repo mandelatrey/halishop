@@ -8,7 +8,7 @@ import { sanitizeStorefront } from "../storefront";
 import { getShopSlug } from "./_slug";
 
 export async function saveStorefront(input: Storefront): Promise<Storefront> {
-  const slug = getShopSlug();
+  const slug = await getShopSlug();
   await ensureSeeded(slug);
   const clean = sanitizeStorefront(input);
   const db = await getDb();

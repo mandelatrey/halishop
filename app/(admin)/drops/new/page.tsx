@@ -3,7 +3,7 @@ import { getShopSlug } from "@/lib/actions/_slug";
 import NewDropClient from "./Client";
 
 export default async function NewDropPage() {
-  const slug = getShopSlug();
+  const slug = await getShopSlug();
   const [shop, products, customs] = await Promise.all([
     getShop(slug),
     listProducts(slug),

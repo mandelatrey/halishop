@@ -3,7 +3,7 @@ import { getShopSlug } from "@/lib/actions/_slug";
 import SettingsClient from "./Client";
 
 export default async function SettingsPage() {
-  const slug = getShopSlug();
+  const slug = await getShopSlug();
   const shop = await getShop(slug);
   return (
     <SettingsClient

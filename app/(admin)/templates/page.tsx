@@ -3,6 +3,6 @@ import { getShopSlug } from "@/lib/actions/_slug";
 import TemplatesClient from "./Client";
 
 export default async function TemplatesPage() {
-  const templates = await listCustomTemplates(getShopSlug());
+  const templates = await listCustomTemplates(await getShopSlug());
   return <TemplatesClient initialTemplates={templates} />;
 }

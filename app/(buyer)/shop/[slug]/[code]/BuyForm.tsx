@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { recordOrder } from "@/lib/actions/orders";
+import { newId } from "@/lib/id";
 import PhoneInput from "@/components/PhoneInput";
 import { useBuyerRecall } from "@/lib/buyer-recall";
 import { formatPrice } from "@/lib/format";
@@ -14,8 +16,18 @@ import ReadTicks from "@/components/ReadTicks";
 import type { Product, Shop } from "@/lib/types";
 import { getOptions } from "@/lib/variants";
 
-export default function BuyForm({ shop, product }: { shop: Shop; product: Product }) {
-  const { recall, save, clear, ready } = useBuyerRecall();
+export default function BuyForm({
+  shop,
+  product,
+  accountPhone,
+}: {
+  shop: Shop;
+  product: Product;
+  /** A signed-in buyer's number: used when this device hasn't remembered one. */
+  accountPhone?: string;
+}) {
+  const { recall: saved, save, clear, ready } = useBuyerRecall();
+  const recall = saved?.whatsapp ? saved : accountPhone ? { whatsapp: accountPhone, area: saved?.area } : null;
   const [compact, setCompact] = useState(true);
   // One pick per option (Size, Colour, Storage…), defaulting to the first value.
   const options = useMemo(() => getOptions(product), [product]);
@@ -114,6 +126,8 @@ export default function BuyForm({ shop, product }: { shop: Shop; product: Produc
     save({ whatsapp: effectiveWhatsapp, area: effectiveArea || undefined });
   }
 
+  // One id per order: sending the same message again updates it; a changed message is a new order.
+  const sentOrder = useRef<{ id: string; text: string } | null>(null);
   function handleOrder(e: React.MouseEvent<HTMLAnchorElement>) {
     if (!effectiveWhatsapp) {
       e.preventDefault();
@@ -121,6 +135,16 @@ export default function BuyForm({ shop, product }: { shop: Shop; product: Produc
       return;
     }
     persistRecall();
+    const id = sentOrder.current && sentOrder.current.text === orderText ? sentOrder.current.id : newId();
+    sentOrder.current = { id, text: orderText };
+    // Recorded for the seller's Orders page and the buyer's account; WhatsApp opens regardless.
+    void recordOrder({
+      id,
+      slug: shop.slug,
+      items: [{ code: product.code, variant: variant || undefined, qty }],
+      buyerPhone: effectiveWhatsapp,
+      area: effectiveArea || undefined,
+    }).catch(() => {});
     // Browser opens wa.me in a new tab via target=_blank
   }
 

@@ -188,7 +188,7 @@ export const BUILTIN_TEMPLATES: BuiltinTemplate[] = [
 
 /* -------------------------------------------------------------------------
  * Shop — the multi-tenant root. Phase 1 has one shop per deployment
- * identified by NEXT_PUBLIC_SHOP_SLUG.
+ * Many shops per deployment; each run by one seller account (ownerId).
  * ------------------------------------------------------------------------- */
 export type ShopContact = {
   /** E.164, stored with leading + (e.g. "+256772145908"). */
@@ -207,6 +207,8 @@ export type Shop = {
   contact: ShopContact;
   /** Prefix used to build the full ref code (e.g. "SH-4F2" → "SH-4F2-B3"). */
   refPrefix: string;
+  /** The seller account that runs this shop (users._id). Unset: not claimed yet. */
+  ownerId?: string;
   createdAt: number;
   updatedAt: number;
 };
@@ -322,4 +324,54 @@ export type Storefront = {
   buttons: "haali" | "accent" | "primary";
   menu: StorefrontMenu;
   updatedAt?: number;
+};
+
+/* -------------------------------------------------------------------------
+ * Orders — recorded when a buyer taps Send (one product or a cart). The order
+ * itself still happens in WhatsApp; the seller updates the status here.
+ * ------------------------------------------------------------------------- */
+export type OrderStatus = "new" | "confirmed" | "delivered" | "cancelled";
+
+export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
+  new: "Sent to seller",
+  confirmed: "Confirmed",
+  delivered: "Delivered",
+  cancelled: "Cancelled",
+};
+
+export type OrderItem = {
+  code: string;
+  title: string;
+  variant?: string;
+  qty: number;
+  /** Unit price from the catalogue at the time of the order. */
+  price: number;
+  currency: string;
+};
+
+export type Order = {
+  id: string;
+  shopSlug: string;
+  /** Signed-in buyer's account, if any. */
+  userId?: string;
+  /** The WhatsApp number the buyer gave (E.164). */
+  buyerPhone: string;
+  area?: string;
+  items: OrderItem[];
+  status: OrderStatus;
+  createdAt: number;
+  updatedAt: number;
+};
+
+/** A shop as the directory lists it. */
+export type ShopCard = {
+  slug: string;
+  name: string;
+  logo?: string;
+  city?: string;
+  primary: string;
+  inStock: number;
+  from?: { price: number; currency: string };
+  /** Codes of up to three in-stock products with photos. */
+  photos: string[];
 };

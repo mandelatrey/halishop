@@ -5,37 +5,51 @@ import { usePathname } from "next/navigation";
 import { Menu } from "@base-ui/react/menu";
 import {
   GalleryHorizontal,
+  Inbox,
   LayoutTemplate,
+  LogIn,
+  LogOut,
   MenuIcon,
   Package,
   Palette,
   Settings,
   SquarePlus,
   Store,
+  User,
   XIcon,
   type LucideIcon,
 } from "lucide-react";
 import ThemeSwitch from "./ThemeSwitch";
+import { signOut } from "@/lib/actions/auth";
+import type { NavIcon, NavModel } from "./nav-model";
 
-const SHOP_SLUG = process.env.NEXT_PUBLIC_SHOP_SLUG || "shania";
-
-const MANAGE: { href: string; label: string; icon: LucideIcon }[] = [
-  { href: "/products", label: "Products", icon: Package },
-  { href: "/drops/new", label: "New drop", icon: SquarePlus },
-  { href: "/templates", label: "Templates", icon: LayoutTemplate },
-  { href: "/storefront", label: "Shop page", icon: GalleryHorizontal },
-  { href: "/brand-kit", label: "Brand kit", icon: Palette },
-  { href: "/settings", label: "Settings", icon: Settings },
-];
+const ICONS: Record<NavIcon, LucideIcon> = {
+  store: Store,
+  user: User,
+  inbox: Inbox,
+  package: Package,
+  plus: SquarePlus,
+  template: LayoutTemplate,
+  gallery: GalleryHorizontal,
+  palette: Palette,
+  settings: Settings,
+  login: LogIn,
+};
 
 /**
- * Mobile menu: a round trigger that opens a floating card — icon links to
- * each admin page, the storefront as the one filled action, and the theme
- * switch at the foot (it is hidden from the bar on small screens).
+ * Phone menu (and sellers' on mid-size screens): a round trigger that opens a
+ * floating card — the visitor's links, the one filled action (View shop /
+ * Sell on Haali), sign in or out, and the theme switch at the foot.
  */
-export default function AdminMenu() {
+export default function AdminMenu({ nav }: { nav: NavModel }) {
   const path = usePathname() ?? "";
   const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`);
+  // The visitor's links; then sign in, or (sellers) their own buyer account.
+  const items = [
+    ...nav.links,
+    ...(nav.signIn ? [nav.signIn] : []),
+    ...(nav.account?.seller ? [{ href: "/account", label: "My orders & favourites", icon: "user" as const }] : []),
+  ];
 
   return (
     <Menu.Root>
@@ -47,7 +61,9 @@ export default function AdminMenu() {
         <Menu.Positioner className="mm-positioner" side="bottom" align="end" sideOffset={10}>
           <Menu.Popup className="mm-popup">
             <Menu.Group className="mm-group">
-              {MANAGE.map(({ href, label, icon: Icon }) => (
+              {items.map(({ href, label, icon }) => {
+                const Icon = ICONS[icon];
+                return (
                 <Menu.Item
                   key={href}
                   className="mm-item"
@@ -56,13 +72,22 @@ export default function AdminMenu() {
                   <Icon className="mm-item-icon" aria-hidden />
                   {label}
                 </Menu.Item>
-              ))}
+                );
+              })}
+              {nav.account && (
+                <Menu.Item className="mm-item" onClick={() => void signOut()}>
+                  <LogOut className="mm-item-icon" aria-hidden />
+                  Sign out
+                </Menu.Item>
+              )}
             </Menu.Group>
 
-            <Menu.Item className="mm-cta" render={<Link href={`/shop/${SHOP_SLUG}`} />}>
-              <Store className="mm-item-icon" aria-hidden />
-              View shop
-            </Menu.Item>
+            {nav.cta && (
+              <Menu.Item className="mm-cta" render={<Link href={nav.cta.href} />}>
+                <Store className="mm-item-icon" aria-hidden />
+                {nav.cta.label}
+              </Menu.Item>
+            )}
 
             <div className="mm-foot">
               <span className="mm-foot-label">Theme</span>

@@ -54,6 +54,27 @@ A single-shop app for the Status Commerce wedge. A reseller:
 - `lib/captions.ts` — 3 default templates (default/scarcity/restock) with `{token}` substitution.
 - Tokens: `{shop} {product} {price} {variants} {variantsLine} {stock} {code} {ref} {trackedLink} {shopLink} {cityCopy} {city}`.
 
+## Accounts and shops
+
+Many shops per deployment. Each is run by one seller account.
+
+| Who | Sees |
+|---|---|
+| Signed out | Landing page, `/shops` directory, every shop's pages; can order without an account |
+| Buyer | + `/account`: **My orders** (with the seller's status) and **Favourite shops** (heart on each shop) |
+| Seller | + their shop's tools (`/orders`, `/products`, drops, templates, shop page, brand kit, settings) — only their own shop |
+
+- **Sign in** with WhatsApp number + password (`/signup`, `/login`). Passwords are hashed with scrypt;
+  sessions are an httpOnly cookie holding a random token (only its SHA-256 is stored), 30 days.
+  Numbers are **not verified** yet (no SMS/WhatsApp code), and there's no self-serve password reset.
+- **Sellers** sign up, then `/seller/setup` creates their shop (name, link, order number, area).
+  A shop from before accounts (no `ownerId`) is offered to the account whose number is that shop's order
+  number — that's how the existing shop gets its owner.
+- **Orders** are recorded when a buyer taps Send (one product or a cart): prices come from the catalogue,
+  and the browser's order id makes a resend update rather than duplicate. Sellers move them along on
+  `/orders` (Confirmed → Delivered, or Cancelled); signed-in buyers see the status.
+- Short links are now `/o/<shop>/<code>`; old `/o/<code>` links still resolve (see `app/o/[...path]`).
+
 ## Stack
 
 - Next.js 15 (App Router) · React 19 · TypeScript
@@ -69,8 +90,11 @@ A single-shop app for the Status Commerce wedge. A reseller:
    ```
    MONGODB_URI="mongodb+srv://…"
    MONGODB_DB="hali"
-   NEXT_PUBLIC_SHOP_SLUG="shania"
    NEXT_PUBLIC_APP_HOST="shop.app"
+   # optional: where old single-shop short links (/o/<code>) point
+   NEXT_PUBLIC_SHOP_SLUG="shania"
+   # optional: create the Shania demo shop in production too
+   HALI_SEED_DEMO="1"
    ```
 
    `atlas-credentials.env` has the current cluster URI.
@@ -136,6 +160,9 @@ shops              _id = slug              — Shop { brandKit, contact, refPref
 products           _id = `${slug}:${code}` — Product + shopSlug
 custom_templates   _id = uuid              — CustomTemplate + shopSlug
 drops              _id = `${slug}:${id}`   — Drop with items + captions + expiry
+users              _id = uuid              — phone (unique), name, password hash + salt, shopSlug?, favorites
+sessions           _id = sha256(token)     — userId, expiresAt (TTL index)
+orders             _id = browser order id  — shopSlug, userId?, buyerPhone, area, items, status
 storefronts        _id = slug              — Storefront { banners, autoplay, menu } (own doc so banner images stay off getShop())
 ```
 

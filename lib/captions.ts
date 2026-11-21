@@ -32,10 +32,10 @@ function variantsLine(product: Product): string {
   return `${label} ${variants[0]} to ${variants[variants.length - 1]}, still available. `;
 }
 
-/** Absolute host for the tracked link — falls back to "shop.app" in prod. */
-export function trackedLinkFor(code: string): string {
+/** Tracked link for a product: host/o/<shop>/<code> (app/o/[...path] redirects it). */
+export function trackedLinkFor(slug: string, code: string): string {
   const host = process.env.NEXT_PUBLIC_APP_HOST || "shop.app";
-  return `${host}/o/${code}`;
+  return `${host}/o/${slug}/${code}`;
 }
 
 /**
@@ -62,7 +62,7 @@ export function captionTokensFor(shop: Shop, product: Product): Record<string, s
     stock: String(product.stock ?? ""),
     code: product.code,
     ref: buildRef(shop, product.code, "full"),
-    trackedLink: trackedLinkFor(product.code),
+    trackedLink: trackedLinkFor(shop.slug, product.code),
     shopLink: shop.brandKit.shopUrl,
     cityCopy: shop.contact.cityCopy ?? "",
     city: shop.contact.city ?? "",

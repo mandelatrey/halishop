@@ -183,7 +183,7 @@ export default function DropOutputClient({
           const captionMap = new Map(it.captions.map((c) => [c.variant, c.text]));
           const activeTemplate = captionMap.get(it.activeCaption) ?? "";
           const rendered = renderCaption(activeTemplate, tokens);
-          const trackedLink = trackedLinkFor(it.code);
+          const trackedLink = trackedLinkFor(shop.slug, it.code);
           const copied = copiedCode === it.code;
           return (
             <section key={it.code} className="panel ad-drop-card">

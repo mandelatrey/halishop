@@ -5,7 +5,7 @@ import DropOutputClient from "./Client";
 
 export default async function DropOutputPage({ params }: { params: Promise<{ dropId: string }> }) {
   const { dropId } = await params;
-  const slug = getShopSlug();
+  const slug = await getShopSlug();
   const [shop, drop, products, customs] = await Promise.all([
     getShop(slug),
     getDrop(slug, dropId),

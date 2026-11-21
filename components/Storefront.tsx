@@ -19,6 +19,7 @@ import { buttonScope } from "@/lib/brand-accent";
 import AskWhatsApp from "./AskWhatsApp";
 import AskDock from "./storefront/AskDock";
 import { CartButton, CartSheet } from "./Cart";
+import FavoriteButton from "./FavoriteButton";
 import BannerCarousel from "./storefront/BannerCarousel";
 import { BannerSlide, BrandSlide } from "./storefront/BannerSlide";
 import { ShopBrowse } from "./storefront/ShopMenu";
@@ -53,6 +54,8 @@ export default function Storefront({
   dropHref,
   storefront,
   initialFilter = "all",
+  favorite = null,
+  accountPhone,
 }: {
   shop: Shop;
   products: Product[];
@@ -62,6 +65,10 @@ export default function Storefront({
   storefront: StorefrontConfig;
   /** From `?c=` so a shared filtered link renders filtered. */
   initialFilter?: ShopFilter;
+  /** Whether the signed-in buyer follows this shop; null when signed out. */
+  favorite?: boolean | null;
+  /** The signed-in buyer's number, to prefill orders. */
+  accountPhone?: string;
 }) {
   const inStock = products.filter((p) => !p.soldOut);
   const soldOut = products.filter((p) => p.soldOut);
@@ -105,7 +112,10 @@ export default function Storefront({
           </span>
         )}
         <div className="by-shopbar-id">
-          <h1 className="by-shopname">{shopName}</h1>
+          <div className="by-shopname-row">
+            <h1 className="by-shopname">{shopName}</h1>
+            <FavoriteButton slug={slug} favorite={favorite} />
+          </div>
           <p className="by-shopfacts">
             {cityLine && <span className="by-shopfacts-city">{cityLine}</span>}
             <span className="by-shopfacts-nums">
@@ -138,6 +148,7 @@ export default function Storefront({
         sellerWhatsapp={shop.contact.whatsapp}
         defaultArea={shop.contact.area}
         refPrefix={shop.refPrefix}
+        accountPhone={accountPhone}
       />
 
       <BannerCarousel autoplay={storefront.autoplay} label={`${shopName} highlights`}>

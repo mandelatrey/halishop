@@ -2,33 +2,36 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { NavModel } from "./nav-model";
+import AccountMenu from "./AccountMenu";
 
-const SHOP_SLUG = process.env.NEXT_PUBLIC_SHOP_SLUG || "shania";
-
-const LINKS = [
-  { href: `/shop/${SHOP_SLUG}`, label: "View shop" },
-  { href: "/products", label: "Products" },
-  { href: "/drops/new", label: "New drop" },
-  { href: "/templates", label: "Templates" },
-  { href: "/storefront", label: "Shop page" },
-  { href: "/brand-kit", label: "Brand kit" },
-  { href: "/settings", label: "Settings" },
-];
-
-/** Inline admin links; the current section is marked like the atlas sidebar. */
-export default function NavLinks() {
+/** Desktop: inline links, then sign in / the filled action / the account menu. */
+export default function NavLinks({ nav }: { nav: NavModel }) {
   const path = usePathname() ?? "";
+  const current = (href: string) => path === href || path.startsWith(`${href}/`);
   return (
-    <nav className="app-nav-links" aria-label="Manage">
-      {LINKS.map((l) => (
-        <Link
-          key={l.href}
-          href={l.href}
-          aria-current={path === l.href || path.startsWith(`${l.href}/`) ? "page" : undefined}
-        >
+    <nav className="app-nav-links" aria-label="Main">
+      {nav.links.map((l) => (
+        <Link key={l.href} href={l.href} aria-current={current(l.href) ? "page" : undefined}>
           {l.label}
         </Link>
       ))}
+      {nav.cta && nav.account && (
+        <Link href={nav.cta.href} aria-current={current(nav.cta.href) ? "page" : undefined}>
+          {nav.cta.label}
+        </Link>
+      )}
+      {nav.signIn && (
+        <Link href={nav.signIn.href} aria-current={current(nav.signIn.href) ? "page" : undefined}>
+          {nav.signIn.label}
+        </Link>
+      )}
+      {nav.cta && !nav.account && (
+        <Link href={nav.cta.href} className="app-nav-cta">
+          {nav.cta.label}
+        </Link>
+      )}
+      {nav.account && <AccountMenu account={nav.account} />}
     </nav>
   );
 }

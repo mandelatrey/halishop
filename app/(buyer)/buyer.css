@@ -731,3 +731,6 @@ a.by-card:hover .by-card-order svg { transform: translateX(2px); }
 .by-watarget button:hover { color: var(--color-text); }
 .by-watarget button.on { background: var(--color-panel); color: var(--color-text); box-shadow: 0 1px 3px rgb(16 18 22 / 0.12); }
 .by-watarget button:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 1px; }
+
+/* Shop name + favourite heart */
+.by-shopname-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
