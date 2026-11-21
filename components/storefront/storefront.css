@@ -466,7 +466,7 @@ a.by-menu-item.on:hover .by-menu-ic {
   height: 42px;
   padding: 0 15px 0 6px;
   border: 1px solid var(--stroke-soft);
-  border-radius: 999px;
+  border-radius: 10px;
   background: var(--color-panel);
   color: var(--color-text);
   font: 500 13px/1 var(--f-sans);
