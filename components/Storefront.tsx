@@ -17,6 +17,7 @@ import {
 import { CATEGORY_LABEL, type Product, type Shop, type Storefront as StorefrontConfig } from "@/lib/types";
 import { buttonScope } from "@/lib/brand-accent";
 import AskWhatsApp from "./AskWhatsApp";
+import AskDock from "./storefront/AskDock";
 import BannerCarousel from "./storefront/BannerCarousel";
 import { BannerSlide, BrandSlide } from "./storefront/BannerSlide";
 import { ShopBrowse } from "./storefront/ShopMenu";
@@ -112,17 +113,20 @@ export default function Storefront({
             </span>
           </p>
         </div>
-        <AskWhatsApp
-          number={shop.contact.whatsapp}
-          shopName={shopName}
-          area={shop.contact.area}
-          className="btn sec by-shopbar-ask"
-          openOn={ASK_EVENT}
-        >
-          <MessageCircle size={16} aria-hidden />
-          <span className="by-shopbar-ask-full">Ask on WhatsApp</span>
-          <span className="by-shopbar-ask-short">Ask</span>
-        </AskWhatsApp>
+        {/* Stays in reach on scroll: docks under the nav once the bar scrolls away. */}
+        <AskDock>
+          <AskWhatsApp
+            number={shop.contact.whatsapp}
+            shopName={shopName}
+            area={shop.contact.area}
+            className="btn sec by-shopbar-ask"
+            openOn={ASK_EVENT}
+          >
+            <MessageCircle size={16} aria-hidden />
+            <span className="by-shopbar-ask-full">Ask on WhatsApp</span>
+            <span className="by-shopbar-ask-short">Ask</span>
+          </AskWhatsApp>
+        </AskDock>
       </header>
 
       <BannerCarousel autoplay={storefront.autoplay} label={`${shopName} highlights`}>
@@ -258,11 +262,11 @@ export default function Storefront({
             {shopName} · {shop.contact.whatsapp}
             {shop.contact.area ? ` · ${shop.contact.area}` : ""}
           </div>
-          <p>Questions about sizes, colours or delivery? {firstName} answers on WhatsApp.</p>
+          <p>
+            Questions about sizes, colours or delivery? Tap <b>Ask on WhatsApp</b> and {firstName} answers
+            there.
+          </p>
         </div>
-        <a href={askHref} data-shop-ask="" className="btn sec" target="_blank" rel="noopener noreferrer">
-          Ask a question on WhatsApp
-        </a>
       </footer>
     </main>
   );
