@@ -1,4 +1,4 @@
-/* Global top nav (components/AppNav.tsx). Its own file, not a <style> block in the
+/* Global top nav (components/AppNav.tsx). Its own file, not a \3c style> block in the
  * component, so it is plain CSS that editors and tools (domeditor) can read and write. */
 .app-nav {
   position: sticky;
@@ -41,12 +41,13 @@
   gap: 4px;
 }
 .app-nav-links a {
-  font: 500 14px/1 var(--f-sans);
+  font: 400 14px/1 var(--f-sans);
   color: var(--color-mute);
   padding: 9px 12px;
-  border-radius: 12px;
+  border-radius: 5px;
   white-space: nowrap;
-  transition: color 0.15s ease, background 0.15s ease;
+  transition: color 0.25s ease, background 0.25s ease;
+  letter-spacing: 0.01em;
 }
 .app-nav-links a:hover {
   color: var(--color-text);
@@ -54,7 +55,7 @@
 }
 .app-nav-links a[aria-current="page"] {
   color: var(--color-text);
-  background: var(--color-panel);
+  background: color-mix(in srgb, var(--color-panel) 20%, transparent);
   box-shadow: var(--shadow);
   font-weight: 600;
 }
