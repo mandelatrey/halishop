@@ -24,35 +24,39 @@ export function ShopMenuBar({
   dropHref,
   askHref,
   preview = false,
+  variant = "hang",
 }: {
   entries: MenuEntry[];
   active: ShopFilter;
   dropHref?: string;
   askHref: string;
   preview?: boolean;
+  /** "hang": the icon menu under the banners. "pinned": compact chips in the strip that stays under the nav. */
+  variant?: "hang" | "pinned";
 }) {
   if (entries.length === 0) return null;
+  const pinned = variant === "pinned";
   return (
     <nav
-      className="by-menu"
-      aria-label="Browse the shop"
-      // Its width follows the number of entries (storefront.css).
-      style={{ "--n": entries.length } as React.CSSProperties}
+      className={pinned ? "by-pin-nav" : "by-menu"}
+      aria-label={pinned ? "Browse the shop (pinned)" : "Browse the shop"}
+      // The hanging menu's width follows the number of entries (storefront.css).
+      style={pinned ? undefined : ({ "--n": entries.length } as React.CSSProperties)}
     >
-      <ul className="by-menu-list">
+      <ul className={pinned ? "by-pin-list" : "by-menu-list"}>
         {entries.map((e) => {
           const Icon = menuIcon(e.icon);
           const on = e.kind === "filter" && e.filter === active;
           const body = (
             <>
               <span className="by-menu-ic">
-                <Icon size={19} strokeWidth={1.8} aria-hidden />
+                <Icon size={pinned ? 15 : 19} strokeWidth={1.8} aria-hidden />
                 {e.kind === "drop" && <span className="by-menu-live" aria-hidden />}
               </span>
               <span className="by-menu-l">{e.label}</span>
             </>
           );
-          const cls = `by-menu-item${on ? " on" : ""}${e.kind === "drop" ? " is-drop" : ""}`;
+          const cls = `${pinned ? "by-pin-item" : "by-menu-item"}${on ? " on" : ""}${e.kind === "drop" ? " is-drop" : ""}`;
           let item: ReactNode;
           if (preview) item = <span className={cls}>{body}</span>;
           else if (e.kind === "filter")
@@ -85,6 +89,9 @@ export function ShopMenuBar({
   );
 }
 
+/** Height of the pinned menu strip (storefront.css: 7px + 42px chips + 7px + 1px border). */
+const PIN_STRIP_H = 57;
+
 /**
  * Owns the shop's current filter. Renders the hanging menu, the section head
  * and the (server-rendered) grid passed as children, and narrows the grid with
@@ -114,6 +121,37 @@ export function ShopBrowse({
 }) {
   const [filter, setFilter] = useState<ShopFilter>(initialFilter);
   const section = useRef<HTMLElement>(null);
+
+  // Pin a compact copy of the menu under the site nav once the hanging menu
+  // has scrolled up behind it.
+  const hang = useRef<HTMLDivElement>(null);
+  const pinList = useRef<HTMLDivElement>(null);
+  const [pinTop, setPinTop] = useState<number | null>(null);
+  useEffect(() => {
+    let raf = 0;
+    const measure = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const nav = (document.querySelector(".app-nav") as HTMLElement | null)?.offsetHeight ?? 0;
+        const r = hang.current?.getBoundingClientRect();
+        // Pin once the strip would cover the hanging menu's bottom edge, so the
+        // two never show at once and a pick made from the strip keeps it.
+        setPinTop(r && r.height && r.bottom < nav + PIN_STRIP_H ? nav : null);
+      });
+    };
+    measure();
+    window.addEventListener("scroll", measure, { passive: true });
+    window.addEventListener("resize", measure);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", measure);
+      window.removeEventListener("resize", measure);
+    };
+  }, []);
+  // Keep the chosen chip in view in the pinned strip.
+  useEffect(() => {
+    pinList.current?.querySelector(".by-pin-item.on")?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [filter, pinTop]);
 
   useEffect(() => {
     function pick(f: ShopFilter) {
@@ -148,7 +186,16 @@ export function ShopBrowse({
 
   return (
     <>
-      <ShopMenuBar entries={entries} active={filter} dropHref={dropHref} askHref={askHref} />
+      <div ref={hang}>
+        <ShopMenuBar entries={entries} active={filter} dropHref={dropHref} askHref={askHref} />
+      </div>
+      {pinTop !== null && entries.length > 0 && (
+        <div className="by-pin" style={{ top: pinTop }}>
+          <div className="by-pin-inner" ref={pinList}>
+            <ShopMenuBar entries={entries} active={filter} dropHref={dropHref} askHref={askHref} variant="pinned" />
+          </div>
+        </div>
+      )}
 
       <section id="shop-items" ref={section} className="by-browse" data-filter={filter}>
         <div className="by-sec-head">

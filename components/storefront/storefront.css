@@ -391,7 +391,8 @@ a.by-menu-item.on:hover .by-menu-ic {
 @media (prefers-reduced-motion: reduce) { .by-menu-live { animation: none; } }
 
 /* ---------- Filtering (driven by ShopBrowse's data-filter) ---------- */
-.by-browse { scroll-margin-top: 84px; }
+/* Clear the site nav and the pinned menu strip when scrolling to the grid. */
+.by-browse { scroll-margin-top: 136px; }
 .by-browse[data-filter="low"] .by-card:not([data-low]),
 .by-browse[data-filter="general"] .by-card:not([data-cat="general"]),
 .by-browse[data-filter="clothing"] .by-card:not([data-cat="clothing"]),
@@ -418,3 +419,65 @@ a.by-menu-item.on:hover .by-menu-ic {
 }
 .by-empty p { margin: 0; font: 400 14.5px/1.5 var(--f-sans); color: var(--color-mute); }
 .by-empty .btn { width: auto; }
+
+/* ---------- Pinned menu ----------
+ * Once the hanging menu scrolls up behind the site nav, a compact copy pins
+ * just under it (ShopBrowse). Full width and frosted like the nav; its chips
+ * share the page column and leave room on the right for the docked
+ * Cart / Ask buttons (--by-dock-w, set by AskDock). */
+.by-pin {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 24; /* under the docked buttons (25) and the nav (30) */
+  background: color-mix(in srgb, var(--color-bg) 88%, transparent);
+  backdrop-filter: saturate(1.4) blur(10px);
+  border-bottom: 1px solid var(--stroke-hair);
+  animation: by-pin-in 0.18s ease-out;
+}
+@keyframes by-pin-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .by-pin { animation: none; } }
+.by-pin-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 calc(16px + var(--by-dock-w, 0px) + 10px) 0 16px;
+}
+@media (min-width: 720px) {
+  .by-pin-inner { padding: 0 calc(24px + var(--by-dock-w, 0px) + 14px) 0 24px; }
+}
+.by-pin-list {
+  list-style: none;
+  margin: 0;
+  padding: 7px 0;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  /* fade the edge so chips that scroll on read as more */
+  mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+}
+.by-pin-list::-webkit-scrollbar { display: none; }
+.by-pin-list > li { flex: none; }
+.by-pin-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 42px;
+  padding: 0 15px 0 6px;
+  border: 1px solid var(--stroke-soft);
+  border-radius: 999px;
+  background: var(--color-panel);
+  color: var(--color-text);
+  font: 500 13px/1 var(--f-sans);
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.by-pin-item .by-menu-ic { width: 30px; height: 30px; }
+.by-pin-item .by-menu-live { width: 8px; height: 8px; top: 0; right: 0; }
+a.by-pin-item:hover { border-color: var(--stroke-strong); color: var(--color-text); }
+.by-pin-item.on,
+a.by-pin-item.on:hover { background: var(--color-accent-fill); border-color: transparent; color: #fff; }
+.by-pin-item.on .by-menu-ic { background: rgb(255 255 255 / 0.2); color: #fff; }
+.by-pin-item.is-drop:not(.on) .by-menu-ic { background: var(--color-accent-soft); color: var(--color-accent-dark); }
+.by-pin-item:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }

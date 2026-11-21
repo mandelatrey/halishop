@@ -25,13 +25,19 @@ export default function AskDock({ children }: { children: ReactNode }) {
         const r = el.getBoundingClientRect();
         // Dock once the button's own spot has gone up behind the nav.
         if (r.top < nav + 8) {
+          // Its width lets the pinned menu strip (ShopMenu.tsx) leave room for it.
+          document.documentElement.style.setProperty("--by-dock-w", `${Math.round(r.width)}px`);
           setDock({
-            top: nav + 10,
+            // 7px: centred in the 56px pinned menu strip when that is showing too
+            top: nav + 7,
             right: document.documentElement.clientWidth - r.right,
             w: r.width,
             h: r.height,
           });
-        } else setDock(null);
+        } else {
+          document.documentElement.style.removeProperty("--by-dock-w");
+          setDock(null);
+        }
       });
     };
     measure();
@@ -39,6 +45,7 @@ export default function AskDock({ children }: { children: ReactNode }) {
     window.addEventListener("resize", measure);
     return () => {
       cancelAnimationFrame(raf);
+      document.documentElement.style.removeProperty("--by-dock-w");
       window.removeEventListener("scroll", measure);
       window.removeEventListener("resize", measure);
     };
