@@ -3,7 +3,8 @@ import { optionsSummary } from "@/lib/variants";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { notFound } from "next/navigation";
-import { getDrop, getShop, listProducts } from "@/lib/server-store";
+import { getDrop, getShop, getStorefrontButtons, listProducts } from "@/lib/server-store";
+import { buttonScope } from "@/lib/brand-accent";
 import { getShopSlug } from "@/lib/actions/_slug";
 import { formatPrice } from "@/lib/format";
 
@@ -15,8 +16,9 @@ export default async function BuyerDropPage({
   const { slug, dropId } = await params;
   if (slug !== getShopSlug()) notFound();
 
-  const [shop, drop, products] = await Promise.all([
+  const [shop, buttons, drop, products] = await Promise.all([
     getShop(slug),
+    getStorefrontButtons(slug),
     getDrop(slug, dropId),
     listProducts(slug),
   ]);
@@ -39,7 +41,7 @@ export default async function BuyerDropPage({
       : `Posted ${hh}:${mm}`;
 
   return (
-    <main className="by-wrap">
+    <main {...buttonScope(shop.brandKit, buttons, "by-wrap")}>
       <header className="panel-dark by-drop-banner">
         <span className="pill dark">Live drop · {shop.brandKit.shopName}</span>
         <h1 className="by-h1">{drop.name}</h1>

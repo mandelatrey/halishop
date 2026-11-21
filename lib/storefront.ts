@@ -24,6 +24,7 @@ export const MAX_MENU_LABEL = 24;
 export const DEFAULT_STOREFRONT: Storefront = {
   banners: [],
   autoplay: true,
+  buttons: "haali",
   menu: { order: [], hidden: [], labels: {} },
 };
 
@@ -246,6 +247,7 @@ export function sanitizeStorefront(input: unknown): Storefront {
       .filter((b): b is Banner => !!b)
       .slice(0, MAX_BANNERS),
     autoplay: o.autoplay !== false,
+    buttons: o.buttons === "accent" || o.buttons === "primary" ? o.buttons : "haali",
     menu: {
       order: (Array.isArray(m.order) ? m.order : []).filter(isMenuKey),
       // "All" can't be hidden — it's the way back from a filter.

@@ -15,6 +15,7 @@ import {
   type ShopFilter,
 } from "@/lib/storefront";
 import { CATEGORY_LABEL, type Product, type Shop, type Storefront as StorefrontConfig } from "@/lib/types";
+import { buttonScope } from "@/lib/brand-accent";
 import AskWhatsApp from "./AskWhatsApp";
 import BannerCarousel from "./storefront/BannerCarousel";
 import { BannerSlide, BrandSlide } from "./storefront/BannerSlide";
@@ -91,7 +92,7 @@ export default function Storefront({
   const photos = inStock.filter((p) => p.image).slice(0, 3);
 
   return (
-    <main className="by-wrap by-shop">
+    <main {...buttonScope(shop.brandKit, storefront.buttons, "by-wrap by-shop")}>
       <header className="by-shopbar">
         {shop.brandKit.logo ? (
           // eslint-disable-next-line @next/next/no-img-element

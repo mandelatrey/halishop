@@ -42,6 +42,15 @@ export async function getStorefront(slug: string): Promise<Storefront> {
   };
 }
 
+/** Just the button colour — for buyer pages that don't show the banners. */
+export async function getStorefrontButtons(slug: string): Promise<Storefront["buttons"]> {
+  const db = await getDb();
+  const doc = await db
+    .collection<Storefront & { _id: string }>("storefronts")
+    .findOne({ _id: slug }, { projection: { buttons: 1 } });
+  return doc?.buttons ?? DEFAULT_STOREFRONT.buttons;
+}
+
 export async function listProducts(slug: string): Promise<Product[]> {
   await ensureSeeded(slug);
   const db = await getDb();

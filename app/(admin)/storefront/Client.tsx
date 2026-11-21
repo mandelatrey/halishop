@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState, useTransition, type KeyboardEvent, type MouseEvent } from "react";
 import Link from "next/link";
-import { ArrowDown, ArrowUp, ImagePlus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowRight, ArrowUp, ImagePlus, Trash2 } from "lucide-react";
 import Button from "@/components/Button";
 import PageHeader from "@/components/PageHeader";
 import SegmentedControl from "@/components/SegmentedControl";
@@ -10,6 +10,7 @@ import BannerCarousel from "@/components/storefront/BannerCarousel";
 import { BannerSlide, BrandSlide } from "@/components/storefront/BannerSlide";
 import { ShopMenuBar, menuIcon } from "@/components/storefront/ShopMenu";
 import { saveStorefront } from "@/lib/actions/storefront";
+import { accentTones, buttonScopeFor } from "@/lib/brand-accent";
 import { prepareBannerImage } from "@/lib/image-prep";
 import { fileToDataUrl } from "@/lib/render-card";
 import {
@@ -78,6 +79,7 @@ export default function StorefrontClient({
   slug,
   shopName,
   primary,
+  accent,
   cityLine,
   dropLive,
   products,
@@ -87,6 +89,7 @@ export default function StorefrontClient({
   slug: string;
   shopName: string;
   primary: string;
+  accent: string;
   cityLine?: string;
   dropLive: boolean;
   products: LiteProduct[];
@@ -166,6 +169,14 @@ export default function StorefrontClient({
     }));
   const labelRow = (key: ShopMenuKey, label: string) =>
     setDraft((d) => ({ ...d, menu: { ...d.menu, labels: { ...d.menu.labels, [key]: label } } }));
+
+  /* ---------- Buttons ---------- */
+  const buttonOptions: { value: Storefront["buttons"]; label: string; hex: string | null }[] = [
+    { value: "haali", label: "Haali orange", hex: null },
+    { value: "accent", label: "Brand accent", hex: accent },
+    { value: "primary", label: "Brand main colour", hex: primary },
+  ];
+  const chosenHex = buttonOptions.find((o) => o.value === draft.buttons)?.hex ?? null;
 
   /* ---------- Preview ---------- */
   const productCodes = products.map((p) => p.code);
@@ -342,6 +353,44 @@ export default function StorefrontClient({
               })}
             </ul>
           </section>
+
+          <section className="panel">
+            <h2 className="section-title">Button colour</h2>
+            <p className="ad-hint sf-intro">
+              Order buttons, the selected menu entry and other highlights on your shop, product and drop
+              pages. Brand colours come from your{" "}
+              <Link href="/brand-kit">brand kit</Link>.
+            </p>
+            <div className="sf-colours" role="radiogroup" aria-label="Button colour">
+              {buttonOptions.map((o) => {
+                const tones = o.hex ? accentTones(o.hex) : null;
+                const on = draft.buttons === o.value;
+                return (
+                  <button
+                    key={o.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={on}
+                    className={`sf-colour${on ? " on" : ""}`}
+                    onClick={() => setDraft({ ...draft, buttons: o.value })}
+                  >
+                    <span {...buttonScopeFor(o.hex, "sf-colour-sample")}>
+                      <span className="sf-colour-btn">
+                        Order <ArrowRight size={14} aria-hidden />
+                      </span>
+                    </span>
+                    <span className="sf-colour-l">
+                      {o.hex && <span className="sf-colour-sw" style={{ background: o.hex }} aria-hidden />}
+                      {o.label}
+                    </span>
+                    {tones?.adjusted && (
+                      <span className="ad-hint">Shown a little darker so white text stays readable.</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
         </div>
 
         <aside className="ad-aside panel" aria-label="Shop page preview">
@@ -353,7 +402,7 @@ export default function StorefrontClient({
               if ((e.target as Element).closest("a")) e.preventDefault();
             }}
           >
-            <div className="sf-preview">
+            <div {...buttonScopeFor(chosenHex, "sf-preview")}>
               <BannerCarousel autoplay={draft.autoplay} label="Preview">
                 {draft.banners.length > 0
                   ? draft.banners.map((b, i) => (

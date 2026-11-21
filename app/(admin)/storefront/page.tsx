@@ -19,6 +19,7 @@ export default async function StorefrontEditorPage() {
       slug={slug}
       shopName={shop.brandKit.shopName.trim()}
       primary={shop.brandKit.palette.primary}
+      accent={shop.brandKit.palette.accent}
       cityLine={
         shop.contact.cityCopy ? `${shop.contact.city ? `${shop.contact.city} · ` : ""}same-day boda` : undefined
       }

@@ -1,10 +1,11 @@
 import ProductPhoto from "@/components/ProductPhoto";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getProduct, getShop } from "@/lib/server-store";
+import { getProduct, getShop, getStorefrontButtons } from "@/lib/server-store";
+import { buttonScope } from "@/lib/brand-accent";
 import { getShopSlug } from "@/lib/actions/_slug";
 import BuyForm from "./BuyForm";
-import type { Product, Shop } from "@/lib/types";
+import type { Product, Shop, Storefront } from "@/lib/types";
 
 export default async function BuyerProductPage({
   params,
@@ -14,15 +15,27 @@ export default async function BuyerProductPage({
   const { slug, code } = await params;
   if (slug !== getShopSlug()) notFound();
 
-  const [shop, product] = await Promise.all([getShop(slug), getProduct(slug, code)]);
+  const [shop, product, buttons] = await Promise.all([
+    getShop(slug),
+    getProduct(slug, code),
+    getStorefrontButtons(slug),
+  ]);
   if (!product) notFound();
 
-  return <BuyerProductScreen shop={shop} product={product} />;
+  return <BuyerProductScreen shop={shop} product={product} buttons={buttons} />;
 }
 
-function BuyerProductScreen({ shop, product }: { shop: Shop; product: Product }) {
+function BuyerProductScreen({
+  shop,
+  product,
+  buttons,
+}: {
+  shop: Shop;
+  product: Product;
+  buttons: Storefront["buttons"];
+}) {
   return (
-    <main className="by-wrap">
+    <main {...buttonScope(shop.brandKit, buttons, "by-wrap")}>
       <Link href={`/shop/${shop.slug}`} className="by-back">
         <span aria-hidden>←</span> Back
       </Link>

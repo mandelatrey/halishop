@@ -1003,3 +1003,38 @@ input, textarea, select { font-family: inherit; }
   border-top: 1px solid var(--stroke-hair);
 }
 .mm-foot-label { font: 500 13px/1 var(--f-sans); color: var(--color-mute-2); }
+
+/* -------------------------------------------------------------------------
+ * Seller's button colour on buyer pages (lib/brand-accent.ts). The scope
+ * element carries --bb-* tones computed for contrast; this maps them onto the
+ * accent tokens so every button, chip, link and focus ring below follows.
+ * ------------------------------------------------------------------------- */
+.brand-buttons {
+  --color-accent-fill: var(--bb-fill);
+  --color-accent-fill-hover: var(--bb-fill-hover);
+  --color-accent: var(--bb-fill);
+  --color-focus: var(--bb-fill);
+  --color-accent-dark: var(--bb-ink);
+  --color-accent-soft: color-mix(in srgb, var(--bb-fill) 12%, #ffffff);
+  --color-brand-orange: var(--bb-fill);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .brand-buttons {
+    --color-accent-fill: var(--bb-fill-d);
+    --color-accent-fill-hover: var(--bb-fill-hover-d);
+    --color-accent: var(--bb-ink-d);
+    --color-focus: var(--bb-ink-d);
+    --color-accent-dark: var(--bb-ink-d);
+    --color-accent-soft: color-mix(in srgb, var(--bb-fill-d) 26%, #17191c);
+    --color-brand-orange: var(--bb-ink-d);
+  }
+}
+:root[data-theme="dark"] .brand-buttons {
+  --color-accent-fill: var(--bb-fill-d);
+  --color-accent-fill-hover: var(--bb-fill-hover-d);
+  --color-accent: var(--bb-ink-d);
+  --color-focus: var(--bb-ink-d);
+  --color-accent-dark: var(--bb-ink-d);
+  --color-accent-soft: color-mix(in srgb, var(--bb-fill-d) 26%, #17191c);
+  --color-brand-orange: var(--bb-ink-d);
+}

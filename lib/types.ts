@@ -310,6 +310,11 @@ export type Storefront = {
   banners: Banner[];
   /** Slides advance on their own (paused on hover/touch and reduced motion). */
   autoplay: boolean;
+  /**
+   * Colour of buttons and highlights on the buyer pages: Haali orange, or
+   * one of the seller's brand-kit colours (lib/brand-accent.ts).
+   */
+  buttons: "haali" | "accent" | "primary";
   menu: StorefrontMenu;
   updatedAt?: number;
 };
