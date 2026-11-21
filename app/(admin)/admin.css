@@ -537,7 +537,6 @@
     padding: 12px 24px calc(12px + env(safe-area-inset-bottom));
     background: color-mix(in srgb, var(--color-bg) 92%, transparent);
     backdrop-filter: saturate(1.4) blur(10px);
-    -webkit-backdrop-filter: saturate(1.4) blur(10px);
     border-top: 1px solid var(--stroke-hair);
   }
   .ad-savebar .btn { width: auto; flex: none; }

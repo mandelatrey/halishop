@@ -5,8 +5,9 @@
   top: 0;
   z-index: 30;
   background: color-mix(in srgb, var(--color-bg) 88%, transparent);
+  /* No hand-written -webkit- copy: Next's CSS compiler (Lightning CSS) adds it for Safari, and
+     when both are written it keeps only the last one, which Chrome ignores. */
   backdrop-filter: saturate(1.4) blur(10px);
-  -webkit-backdrop-filter: saturate(1.4) blur(10px);
   border-bottom: 1px solid var(--stroke-hair);
 }
 .app-nav-inner {

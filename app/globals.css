@@ -419,7 +419,6 @@ input, textarea, select { font-family: inherit; }
   border-bottom: 1px solid var(--stroke-hair);
   background: color-mix(in srgb, var(--color-bg) 88%, transparent);
   backdrop-filter: saturate(1.4) blur(8px);
-  -webkit-backdrop-filter: saturate(1.4) blur(8px);
   position: sticky;
   top: 0;
   z-index: 10;

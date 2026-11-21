@@ -194,7 +194,6 @@ a.by-card:hover .by-card-img > div:first-child { transform: scale(1.03); }
   border-radius: 5px;
   background: color-mix(in srgb, var(--color-panel) 92%, transparent);
   backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
   /* hairline so the chip still reads on white product backgrounds */
   box-shadow: 0 0 0 1px var(--stroke-soft), 0 1px 2px rgb(16 18 22 / 0.08);
   z-index: 1;
