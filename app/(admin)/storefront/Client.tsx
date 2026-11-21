@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useRef, useState, useTransition, type KeyboardEvent, type MouseEvent } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition, type KeyboardEvent, type MouseEvent } from "react";
 import Link from "next/link";
-import { ArrowDown, ArrowRight, ArrowUp, ImagePlus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowRight, ArrowUp, ImagePlus, Pencil, Trash2, Wand2 } from "lucide-react";
 import Button from "@/components/Button";
 import PageHeader from "@/components/PageHeader";
 import SegmentedControl from "@/components/SegmentedControl";
@@ -11,6 +11,7 @@ import { BannerSlide, BrandSlide } from "@/components/storefront/BannerSlide";
 import { ShopMenuBar, menuIcon } from "@/components/storefront/ShopMenu";
 import { saveStorefront } from "@/lib/actions/storefront";
 import { accentTones, buttonScopeFor } from "@/lib/brand-accent";
+import { MENU_ICON_NAMES, isMenuIconName, menuIconFor, type MenuIconName } from "@/lib/menu-icons";
 import { prepareBannerImage } from "@/lib/image-prep";
 import { fileToDataUrl } from "@/lib/render-card";
 import {
@@ -167,6 +168,13 @@ export default function StorefrontClient({
         hidden: show ? d.menu.hidden.filter((k) => k !== key) : [...d.menu.hidden, key],
       },
     }));
+  const iconRow = (key: ShopMenuKey, icon: MenuIconName | null) =>
+    setDraft((d) => {
+      const icons = { ...d.menu.icons };
+      if (icon) icons[key] = icon;
+      else delete icons[key];
+      return { ...d, menu: { ...d.menu, icons } };
+    });
   const labelRow = (key: ShopMenuKey, label: string) =>
     setDraft((d) => ({ ...d, menu: { ...d.menu, labels: { ...d.menu.labels, [key]: label } } }));
 
@@ -289,7 +297,8 @@ export default function StorefrontClient({
             </p>
             <ul className="sf-menu">
               {menuRows.map((key, i) => {
-                const Icon = menuIcon(key);
+                const icon = menuIconFor(key, draft.menu);
+                const picked = isMenuIconName(draft.menu.icons?.[key]);
                 const shown = !draft.menu.hidden.includes(key);
                 const note =
                   key === "drop"
@@ -305,9 +314,12 @@ export default function StorefrontClient({
                     : undefined;
                 return (
                   <li key={key} className={`sf-menu-row${shown ? "" : " off"}`}>
-                    <span className="sf-menu-ic" aria-hidden>
-                      <Icon size={17} strokeWidth={1.8} />
-                    </span>
+                    <IconPicker
+                      value={icon}
+                      picked={picked}
+                      label={draft.menu.labels[key]?.trim() || defaultMenuLabel(key)}
+                      onPick={(n) => iconRow(key, n)}
+                    />
                     <label className="sf-menu-name">
                       <span className="sr-only">Label for {defaultMenuLabel(key)}</span>
                       <input
@@ -705,4 +717,109 @@ function defaultCta(kind: BannerLink["kind"]): string {
     default:
       return "Shop now";
   }
+}
+
+/* -------------------------------------------------------------------------
+ * Icon picker for a menu entry
+ * ------------------------------------------------------------------------- */
+
+function IconPicker({
+  value,
+  picked,
+  label,
+  onPick,
+}: {
+  value: MenuIconName;
+  /** The seller chose this icon (vs. automatic). */
+  picked: boolean;
+  label: string;
+  /** null = automatic: follow the entry's name. */
+  onPick: (icon: MenuIconName | null) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const wrap = useRef<HTMLDivElement>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
+  const Icon = menuIcon(value);
+
+  useEffect(() => {
+    if (!open) return;
+    const away = (e: PointerEvent) => {
+      if (!wrap.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const esc = (e: globalThis.KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        trigger.current?.focus();
+      }
+    };
+    document.addEventListener("pointerdown", away);
+    document.addEventListener("keydown", esc);
+    // Focus the current icon so arrow-free Tab browsing starts where you are.
+    wrap.current?.querySelector<HTMLButtonElement>('[aria-pressed="true"]')?.focus();
+    return () => {
+      document.removeEventListener("pointerdown", away);
+      document.removeEventListener("keydown", esc);
+    };
+  }, [open]);
+
+  const choose = (n: MenuIconName | null) => {
+    onPick(n);
+    setOpen(false);
+    trigger.current?.focus();
+  };
+
+  return (
+    <div className="sf-icpick" ref={wrap}>
+      <button
+        ref={trigger}
+        type="button"
+        className="sf-menu-ic sf-icpick-btn"
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        aria-label={`Icon for ${label}: change`}
+        title="Change icon"
+        onClick={() => setOpen((o) => !o)}
+      >
+        <Icon size={17} strokeWidth={1.8} aria-hidden />
+        <span className="sf-icpick-badge" aria-hidden>
+          <Pencil size={8} strokeWidth={2.5} />
+        </span>
+      </button>
+      {open && (
+        <div className="sf-icpick-pop" role="dialog" aria-label={`Icon for ${label}`}>
+          <button
+            type="button"
+            className={`sf-icpick-auto${picked ? "" : " on"}`}
+            aria-pressed={!picked}
+            onClick={() => choose(null)}
+          >
+            <Wand2 size={14} aria-hidden />
+            <span>
+              <b>Automatic</b>
+              <span>Matches the name</span>
+            </span>
+          </button>
+          <div className="sf-icpick-grid">
+            {MENU_ICON_NAMES.map((n) => {
+              const I = menuIcon(n);
+              const on = picked && n === value;
+              return (
+                <button
+                  key={n}
+                  type="button"
+                  className={`sf-icpick-i${on ? " on" : ""}`}
+                  aria-pressed={on}
+                  aria-label={n.replace(/([a-z])([A-Z0-9])/g, "$1 $2").replace(/\d+$/, "")}
+                  title={n.replace(/([a-z])([A-Z0-9])/g, "$1 $2").replace(/\d+$/, "")}
+                  onClick={() => choose(n)}
+                >
+                  <I size={17} strokeWidth={1.8} aria-hidden />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

@@ -1,40 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import {
-  Flame,
-  Footprints,
-  Headphones,
-  LayoutGrid,
-  MessageCircle,
-  Shirt,
-  ShoppingBag,
-  Sofa,
-  Sparkles,
-  UtensilsCrossed,
-  Zap,
-  type LucideIcon,
-} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { MENU_ICONS } from "./menu-icon-map";
 import { ASK_EVENT, parseFilter, type MenuEntry, type ShopFilter } from "@/lib/storefront";
-import type { ShopMenuKey } from "@/lib/types";
+import type { MenuIconName } from "@/lib/menu-icons";
 import "./storefront.css";
 
-const ICONS: Record<ShopMenuKey, LucideIcon> = {
-  all: LayoutGrid,
-  drop: Zap,
-  low: Flame,
-  ask: MessageCircle,
-  "cat:general": ShoppingBag,
-  "cat:clothing": Shirt,
-  "cat:electronics": Headphones,
-  "cat:shoes": Footprints,
-  "cat:beauty": Sparkles,
-  "cat:food": UtensilsCrossed,
-  "cat:home": Sofa,
-};
-
-export function menuIcon(key: ShopMenuKey): LucideIcon {
-  return ICONS[key] ?? ShoppingBag;
+/** A menu icon's component by name (names: lib/menu-icons.ts). */
+export function menuIcon(name: MenuIconName): LucideIcon {
+  return MENU_ICONS[name] ?? MENU_ICONS.ShoppingBag;
 }
 
 /**
@@ -61,7 +36,7 @@ export function ShopMenuBar({
     <nav className="by-menu" aria-label="Browse the shop">
       <ul className="by-menu-list">
         {entries.map((e) => {
-          const Icon = menuIcon(e.key);
+          const Icon = menuIcon(e.icon);
           const on = e.kind === "filter" && e.filter === active;
           const body = (
             <>

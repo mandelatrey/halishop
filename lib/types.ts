@@ -304,6 +304,11 @@ export type StorefrontMenu = {
   hidden: ShopMenuKey[];
   /** Seller's own labels; blank = default label. */
   labels: Partial<Record<ShopMenuKey, string>>;
+  /**
+   * Seller's icon picks (lucide names from lib/menu-icons.ts). Without one, a
+   * renamed entry gets an icon that fits its new name.
+   */
+  icons?: Partial<Record<ShopMenuKey, string>>;
 };
 
 export type Storefront = {

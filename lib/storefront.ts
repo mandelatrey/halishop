@@ -9,6 +9,7 @@ import {
   type Storefront,
   type StorefrontMenu,
 } from "./types";
+import { isMenuIconName, menuIconFor, type MenuIconName } from "./menu-icons";
 
 /**
  * Storefront helpers shared by the buyer page, the editor and the save action.
@@ -25,7 +26,7 @@ export const DEFAULT_STOREFRONT: Storefront = {
   banners: [],
   autoplay: true,
   buttons: "haali",
-  menu: { order: [], hidden: [], labels: {} },
+  menu: { order: [], hidden: [], labels: {}, icons: {} },
 };
 
 const CATEGORIES = Object.keys(CATEGORY_LABEL) as ProductCategory[];
@@ -74,6 +75,7 @@ export type ShopFilter = "all" | "low" | ProductCategory;
 export type MenuEntry = {
   key: ShopMenuKey;
   label: string;
+  icon: MenuIconName;
   /** Filter entries narrow the grid; `drop` links away; `ask` opens the WhatsApp sheet. */
   kind: "filter" | "drop" | "ask";
   filter?: ShopFilter;
@@ -119,14 +121,15 @@ export function menuCandidates(menu: StorefrontMenu, ctx: MenuContext): (MenuEnt
   for (const key of orderedKeys(menu)) {
     const label = menu.labels[key]?.trim() || DEFAULT_LABEL[key];
     const hidden = menu.hidden.includes(key);
-    if (key === "all") out.push({ key, label, kind: "filter", filter: "all", count: inStock.length, hidden });
-    else if (key === "drop") ctx.hasDrop && out.push({ key, label, kind: "drop", hidden });
-    else if (key === "ask") out.push({ key, label, kind: "ask", hidden });
-    else if (key === "low") low > 0 && out.push({ key, label, kind: "filter", filter: "low", count: low, hidden });
+    const icon = menuIconFor(key, menu);
+    if (key === "all") out.push({ key, label, icon, kind: "filter", filter: "all", count: inStock.length, hidden });
+    else if (key === "drop") ctx.hasDrop && out.push({ key, label, icon, kind: "drop", hidden });
+    else if (key === "ask") out.push({ key, label, icon, kind: "ask", hidden });
+    else if (key === "low") low > 0 && out.push({ key, label, icon, kind: "filter", filter: "low", count: low, hidden });
     else {
       const cat = key.slice(4) as ProductCategory;
       if (showCats && usedCats.has(cat)) {
-        out.push({ key, label, kind: "filter", filter: cat, count: perCat.get(cat) ?? 0, hidden });
+        out.push({ key, label, icon, kind: "filter", filter: cat, count: perCat.get(cat) ?? 0, hidden });
       }
     }
   }
@@ -241,6 +244,10 @@ export function sanitizeStorefront(input: unknown): Storefront {
     const s = clip(v, MAX_MENU_LABEL)?.trim();
     if (isMenuKey(k) && s) labels[k] = s;
   }
+  const icons: StorefrontMenu["icons"] = {};
+  for (const [k, v] of Object.entries((m.icons ?? {}) as Record<string, unknown>)) {
+    if (isMenuKey(k) && isMenuIconName(v)) icons[k] = v;
+  }
   return {
     banners: (Array.isArray(o.banners) ? o.banners : [])
       .map(cleanBanner)
@@ -253,6 +260,7 @@ export function sanitizeStorefront(input: unknown): Storefront {
       // "All" can't be hidden — it's the way back from a filter.
       hidden: (Array.isArray(m.hidden) ? m.hidden : []).filter(isMenuKey).filter((k) => k !== "all"),
       labels,
+      icons,
     },
   };
 }
