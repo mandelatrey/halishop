@@ -275,7 +275,7 @@
   padding: 88px 0 96px;
 }
 .lp-statement {
-  font: 500 clamp(24px, 3.4vw, 36px)/1.18 var(--f-sans);
+  font: 600 clamp(24px, 3.4vw, 36px)/1.18 var(--f-sans);
   letter-spacing: -0.025em;
   text-wrap: balance;
   max-width: 24ch;
