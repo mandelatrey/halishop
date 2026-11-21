@@ -2,7 +2,8 @@
 
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { buildWhatsAppHref, composeQuestionMessage, MAX_PREFILL_CHARS } from "@/lib/wa";
-import { useIsDesktop } from "@/lib/use-desktop";
+import { useWhatsAppTarget } from "@/lib/wa-target";
+import WhatsAppTargetPicker from "./WhatsAppTargetPicker";
 import ReadTicks from "./ReadTicks";
 
 /**
@@ -10,9 +11,8 @@ import ReadTicks from "./ReadTicks";
  * here, sees exactly what will be sent, then Send opens WhatsApp with that
  * text — instead of opening WhatsApp with a canned message.
  *
- * On phones Send uses wa.me (opens the app directly). On desktop it goes
- * straight to WhatsApp Web, skipping wa.me's "Open app / Continue to WhatsApp
- * Web" page, with the desktop app offered as an alternative.
+ * On phones Send uses wa.me (opens the app directly). On desktop the buyer
+ * picks WhatsApp Web or the desktop app (WhatsAppTargetPicker, remembered).
  */
 export default function AskWhatsApp({
   number,
@@ -44,7 +44,7 @@ export default function AskWhatsApp({
   const dialogRef = useRef<HTMLDialogElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [question, setQuestion] = useState("");
-  const desktop = useIsDesktop();
+  const { desktop, target } = useWhatsAppTarget();
   const titleId = useId();
   const first = shopName.split(/\s+/)[0];
 
@@ -90,8 +90,7 @@ export default function AskWhatsApp({
     }, 150);
   }
 
-  const primaryHref = canSend ? buildWhatsAppHref(number, message, desktop ? "web" : "wa.me") : undefined;
-  const appHref = canSend ? buildWhatsAppHref(number, message, "app") : undefined;
+  const primaryHref = canSend ? buildWhatsAppHref(number, message, target) : undefined;
 
   return (
     <>
@@ -162,10 +161,12 @@ export default function AskWhatsApp({
           </div>
 
           <div className="by-ask-actions">
+            <WhatsAppTargetPicker />
             <a
               className="btn by-order"
               href={primaryHref ?? "#"}
-              target="_blank"
+              // the desktop app opens via whatsapp:// — no empty tab for it
+              target={target === "app" ? undefined : "_blank"}
               rel="noopener noreferrer"
               aria-disabled={!canSend}
               onClick={(e) => {
@@ -177,13 +178,8 @@ export default function AskWhatsApp({
                 sent();
               }}
             >
-              {desktop ? "Send on WhatsApp Web" : "Send on WhatsApp"}
+              {!desktop ? "Send on WhatsApp" : target === "app" ? "Send in the WhatsApp app" : "Send on WhatsApp Web"}
             </a>
-            {desktop && canSend && (
-              <a className="btn gh" href={appHref} onClick={sent}>
-                Use the WhatsApp desktop app instead
-              </a>
-            )}
           </div>
         </div>
       </dialog>

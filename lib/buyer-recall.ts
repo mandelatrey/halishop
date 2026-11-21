@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import type { BuyerRecall } from "./types";
 
 const KEY = "hali:buyer";
+/** Lets every useBuyerRecall on the page (product form, cart) follow a save or clear. */
+const EVENT = "hali:buyer-recall";
 
 function read(): BuyerRecall | null {
   if (typeof window === "undefined") return null;
@@ -29,12 +31,16 @@ export function useBuyerRecall() {
   useEffect(() => {
     setRecall(read());
     setReady(true);
+    const sync = () => setRecall(read());
+    window.addEventListener(EVENT, sync);
+    return () => window.removeEventListener(EVENT, sync);
   }, []);
 
   const save = useCallback((next: BuyerRecall) => {
     setRecall(next);
     if (typeof window !== "undefined") {
       window.localStorage.setItem(KEY, JSON.stringify(next));
+      window.dispatchEvent(new Event(EVENT));
     }
   }, []);
 
@@ -42,6 +48,7 @@ export function useBuyerRecall() {
     setRecall(null);
     if (typeof window !== "undefined") {
       window.localStorage.removeItem(KEY);
+      window.dispatchEvent(new Event(EVENT));
     }
   }, []);
 

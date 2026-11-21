@@ -8,6 +8,8 @@ import { parsePhone } from "./country-codes";
  */
 
 export const MAX_PREFILL_CHARS = 300;
+/** A cart order lists every item, so it gets more room. Links this long still open in WhatsApp. */
+export const MAX_CART_PREFILL_CHARS = 1500;
 
 /**
  * Normalize any user input to a wa.me-compatible phone: digits only, with
@@ -48,8 +50,8 @@ export function buildWaLink(number: string, text: string): string {
   return buildWhatsAppHref(number, text, "wa.me");
 }
 
-function capPrefill(text: string): string {
-  return text.length > MAX_PREFILL_CHARS ? text.slice(0, MAX_PREFILL_CHARS - 1) + "…" : text;
+function capPrefill(text: string, max = MAX_PREFILL_CHARS): string {
+  return text.length > max ? text.slice(0, max - 1) + "…" : text;
 }
 
 /**
@@ -61,9 +63,14 @@ function capPrefill(text: string): string {
  */
 export type WhatsAppTarget = "wa.me" | "web" | "app";
 
-export function buildWhatsAppHref(number: string, text: string, target: WhatsAppTarget): string {
+export function buildWhatsAppHref(
+  number: string,
+  text: string,
+  target: WhatsAppTarget,
+  maxChars = MAX_PREFILL_CHARS
+): string {
   const n = normalizePhone(number);
-  const t = encodeURIComponent(capPrefill(text));
+  const t = encodeURIComponent(capPrefill(text, maxChars));
   if (target === "web") return `https://web.whatsapp.com/send?phone=${n}&text=${t}`;
   if (target === "app") return `whatsapp://send?phone=${n}&text=${t}`;
   return `https://wa.me/${n}?text=${t}`;
@@ -125,4 +132,42 @@ export function composeAskMessage(input: {
 }): string {
   const shopFirstName = input.shopName.split(/\s+/)[0];
   return `Hi ${shopFirstName}, I saw the ${input.productTitle} on your page. Is it still there? ${input.ref}`;
+}
+
+export type CartLine = {
+  title: string;
+  variant?: string;
+  quantity: number;
+  /** Already formatted line total, e.g. "UGX 70,000". */
+  formattedTotal: string;
+  ref: string;
+};
+
+/**
+ * One WhatsApp message for a whole cart:
+ *
+ *   Hi Shania, I'd like to order:
+ *   1. JBL Charge 6 (Orange) x1 — UGX 650,000 · Ref SH-4F2-B7
+ *   2. T-shirt black (M) x2 — UGX 70,000 · Ref SH-4F2-B3
+ *   Total: UGX 720,000
+ *   Delivery: Ntinda
+ */
+export function composeCartMessage(input: {
+  shopName: string;
+  lines: CartLine[];
+  /** Formatted total(s) — one per currency, joined by the caller. */
+  formattedTotal: string;
+  area?: string;
+}): string {
+  const first = input.shopName.split(/\s+/)[0];
+  const items = input.lines.map((l, i) => {
+    const variant = l.variant ? ` (${l.variant})` : "";
+    return `${i + 1}. ${l.title}${variant} x${l.quantity} — ${l.formattedTotal} · Ref ${l.ref}`;
+  });
+  return [
+    `Hi ${first}, I'd like to order:`,
+    ...items,
+    `Total: ${input.formattedTotal}`,
+    ...(input.area ? [`Delivery: ${input.area}`] : []),
+  ].join("\n");
 }

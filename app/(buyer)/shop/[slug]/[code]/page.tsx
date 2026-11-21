@@ -5,6 +5,7 @@ import { getProduct, getShop, getStorefrontButtons } from "@/lib/server-store";
 import { buttonScope } from "@/lib/brand-accent";
 import { getShopSlug } from "@/lib/actions/_slug";
 import BuyForm from "./BuyForm";
+import { CartButton, CartSheet } from "@/components/Cart";
 import type { Product, Shop, Storefront } from "@/lib/types";
 
 export default async function BuyerProductPage({
@@ -36,9 +37,19 @@ function BuyerProductScreen({
 }) {
   return (
     <main {...buttonScope(shop.brandKit, buttons, "by-wrap")}>
-      <Link href={`/shop/${shop.slug}`} className="by-back">
-        <span aria-hidden>←</span> Back
-      </Link>
+      <div className="by-toprow">
+        <Link href={`/shop/${shop.slug}`} className="by-back">
+          <span aria-hidden>←</span> Back
+        </Link>
+        <CartButton slug={shop.slug} />
+      </div>
+      <CartSheet
+        slug={shop.slug}
+        shopName={shop.brandKit.shopName.trim()}
+        sellerWhatsapp={shop.contact.whatsapp}
+        defaultArea={shop.contact.area}
+        refPrefix={shop.refPrefix}
+      />
 
       <div className="by-product">
         <div className="by-product-media">

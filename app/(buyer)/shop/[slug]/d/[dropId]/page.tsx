@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getDrop, getShop, getStorefrontButtons, listProducts } from "@/lib/server-store";
 import { buttonScope } from "@/lib/brand-accent";
+import { CartButton, CartSheet } from "@/components/Cart";
 import { getShopSlug } from "@/lib/actions/_slug";
 import { formatPrice } from "@/lib/format";
 
@@ -42,6 +43,19 @@ export default async function BuyerDropPage({
 
   return (
     <main {...buttonScope(shop.brandKit, buttons, "by-wrap")}>
+      <div className="by-toprow">
+        <a href={`/shop/${slug}`} className="by-back">
+          <span aria-hidden>←</span> {shop.brandKit.shopName}
+        </a>
+        <CartButton slug={slug} />
+      </div>
+      <CartSheet
+        slug={slug}
+        shopName={shop.brandKit.shopName.trim()}
+        sellerWhatsapp={shop.contact.whatsapp}
+        defaultArea={shop.contact.area}
+        refPrefix={shop.refPrefix}
+      />
       <header className="panel-dark by-drop-banner">
         <span className="pill dark">Live drop · {shop.brandKit.shopName}</span>
         <h1 className="by-h1">{drop.name}</h1>

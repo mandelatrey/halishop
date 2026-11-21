@@ -32,12 +32,22 @@ A single-shop app for the Status Commerce wedge. A reseller:
 | `/shop/[slug]/d/[dropId]` | 1d | Today's-drop page (only items in this drop) |
 | `/shop/[slug]/[code]` | 1f / 1g / 1h | Product + inline buy form, message preview, one-tap repeat buyer |
 | `/o/[code]` | — | 302 tracked short link → `/shop/[slug]/[code]` |
+| `/shop/[slug]/[code]/photo` | — | A product's photo as a plain image (for the cart) |
 
 ### WhatsApp handoff
 
 - `lib/wa.ts` — `normalizePhone`, `buildWaLink`, `composeOrderMessage`, `composeAskMessage`.
 - Numbers with a leading `0` are treated as Uganda (`+256`). Otherwise assumed E.164.
-- Prefill truncates at 300 chars (some WhatsApp builds truncate long prefills).
+- Prefill truncates at 300 chars (some WhatsApp builds truncate long prefills). A cart order lists every item, so it gets 1,500.
+- On desktop, buyers pick **WhatsApp Web** or the **desktop app** (`components/WhatsAppTargetPicker.tsx`,
+  remembered in `localStorage` as `hali:wa-target`). Phones always use wa.me.
+
+### Cart
+
+- Buyers **Add to cart** on a product page (options + quantity), then send the whole cart as one WhatsApp
+  message from the cart sheet (`components/Cart.tsx`): items with refs, total, delivery area.
+- The cart lives on the buyer's device (`localStorage`, `hali:cart:<slug>`, `lib/cart.ts`); nothing is stored
+  server-side. Quantities are capped at the stock when added.
 
 ### Captions
 

@@ -6,7 +6,9 @@ import { useBuyerRecall } from "@/lib/buyer-recall";
 import { formatPrice } from "@/lib/format";
 import { buildRef } from "@/lib/ref";
 import { buildWhatsAppHref, composeOrderMessage } from "@/lib/wa";
-import { useIsDesktop } from "@/lib/use-desktop";
+import { useWhatsAppTarget } from "@/lib/wa-target";
+import { openCart, useCart } from "@/lib/cart";
+import WhatsAppTargetPicker from "@/components/WhatsAppTargetPicker";
 import AskWhatsApp from "@/components/AskWhatsApp";
 import ReadTicks from "@/components/ReadTicks";
 import type { Product, Shop } from "@/lib/types";
@@ -51,13 +53,49 @@ export default function BuyForm({ shop, product }: { shop: Shop; product: Produc
     [shop.brandKit.shopName, product.title, variant, qty, product.price, product.currency, effectiveArea, ref]
   );
 
-  // Desktop browsers go straight to WhatsApp Web; wa.me would first show an
-  // "Open app / Continue to WhatsApp Web" page. Phones keep wa.me (opens the app).
-  const desktop = useIsDesktop();
+  // Phones use wa.me (opens the app). On desktop the buyer picks WhatsApp Web or
+  // the desktop app (remembered), skipping wa.me's "Open app / Continue" page.
+  const { target } = useWhatsAppTarget();
   const orderLink =
     effectiveWhatsapp
-      ? buildWhatsAppHref(shop.contact.whatsapp, orderText, desktop ? "web" : "wa.me")
+      ? buildWhatsAppHref(shop.contact.whatsapp, orderText, target)
       : "";
+  // whatsapp:// opens the desktop app; a new tab for it would just sit empty.
+  const linkTarget = target === "app" ? undefined : "_blank";
+
+  // Cart: collect several items, send them in one message (components/Cart.tsx).
+  const cart = useCart(shop.slug);
+  const [added, setAdded] = useState<number | null>(null);
+  function addToCart() {
+    const lineQty = cart.add({
+      code: product.code,
+      title: product.title,
+      price: product.price,
+      currency: product.currency,
+      variant: variant || undefined,
+      qty,
+      max: typeof product.stock === "number" && product.stock > 0 ? product.stock : undefined,
+      photo: !!product.image,
+    });
+    setAdded(lineQty);
+    // A number typed here is remembered, so the cart doesn't ask for it again.
+    persistRecall();
+  }
+  const cartButtons = (
+    <div className="by-addcart">
+      <button type="button" className="btn sec" onClick={addToCart}>
+        {added ? "Add another" : "Add to cart"}
+      </button>
+      {added !== null && (
+        <span className="by-addcart-done" role="status">
+          In your cart{added > 1 ? ` (${added})` : ""} ·{" "}
+          <button type="button" className="by-addcart-view" onClick={openCart}>
+            View cart{cart.count ? ` · ${cart.count}` : ""}
+          </button>
+        </span>
+      )}
+    </div>
+  );
 
   const askButton = (label: string) => (
     <AskWhatsApp
@@ -157,9 +195,10 @@ export default function BuyForm({ shop, product }: { shop: Shop; product: Produc
           </div>
 
           <div className="by-cta">
+            <WhatsAppTargetPicker />
             <a
               href={orderLink}
-              target="_blank"
+              target={linkTarget}
               rel="noopener noreferrer"
               onClick={handleOrder}
               className="btn by-order"
@@ -167,6 +206,7 @@ export default function BuyForm({ shop, product }: { shop: Shop; product: Produc
               Order — 1 tap · {formatPrice(product.price * qty, product.currency)}
             </a>
 
+            {cartButtons}
             {askButton("Ask a question first →")}
           </div>
         </div>
@@ -223,9 +263,10 @@ export default function BuyForm({ shop, product }: { shop: Shop; product: Produc
           </div>
 
           <div className="by-cta">
+            <WhatsAppTargetPicker />
             <a
               href={orderLink || "#"}
-              target="_blank"
+              target={linkTarget}
               rel="noopener noreferrer"
               onClick={handleOrder}
               className="btn by-order"
@@ -233,6 +274,7 @@ export default function BuyForm({ shop, product }: { shop: Shop; product: Produc
             >
               Order on WhatsApp — {formatPrice(product.price * qty, product.currency)}
             </a>
+            {cartButtons}
             {askButton("Or just ask a question first →")}
           </div>
         </div>

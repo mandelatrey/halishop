@@ -18,6 +18,7 @@ import { CATEGORY_LABEL, type Product, type Shop, type Storefront as StorefrontC
 import { buttonScope } from "@/lib/brand-accent";
 import AskWhatsApp from "./AskWhatsApp";
 import AskDock from "./storefront/AskDock";
+import { CartButton, CartSheet } from "./Cart";
 import BannerCarousel from "./storefront/BannerCarousel";
 import { BannerSlide, BrandSlide } from "./storefront/BannerSlide";
 import { ShopBrowse } from "./storefront/ShopMenu";
@@ -113,21 +114,31 @@ export default function Storefront({
             </span>
           </p>
         </div>
-        {/* Stays in reach on scroll: docks under the nav once the bar scrolls away. */}
+        {/* Cart + Ask stay in reach on scroll: they dock under the nav once the bar scrolls away. */}
         <AskDock>
-          <AskWhatsApp
-            number={shop.contact.whatsapp}
-            shopName={shopName}
-            area={shop.contact.area}
-            className="btn sec by-shopbar-ask"
-            openOn={ASK_EVENT}
-          >
-            <MessageCircle size={16} aria-hidden />
-            <span className="by-shopbar-ask-full">Ask on WhatsApp</span>
-            <span className="by-shopbar-ask-short">Ask</span>
-          </AskWhatsApp>
+          <span className="by-shopbar-actions">
+            <CartButton slug={slug} />
+            <AskWhatsApp
+              number={shop.contact.whatsapp}
+              shopName={shopName}
+              area={shop.contact.area}
+              className="btn sec by-shopbar-ask"
+              openOn={ASK_EVENT}
+            >
+              <MessageCircle size={16} aria-hidden />
+              <span className="by-shopbar-ask-full">Ask on WhatsApp</span>
+              <span className="by-shopbar-ask-short">Ask</span>
+            </AskWhatsApp>
+          </span>
         </AskDock>
       </header>
+      <CartSheet
+        slug={slug}
+        shopName={shopName}
+        sellerWhatsapp={shop.contact.whatsapp}
+        defaultArea={shop.contact.area}
+        refPrefix={shop.refPrefix}
+      />
 
       <BannerCarousel autoplay={storefront.autoplay} label={`${shopName} highlights`}>
         {storefront.banners.length > 0
