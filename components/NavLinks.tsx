@@ -10,6 +10,7 @@ const LINKS = [
   { href: "/products", label: "Products" },
   { href: "/drops/new", label: "New drop" },
   { href: "/templates", label: "Templates" },
+  { href: "/storefront", label: "Shop page" },
   { href: "/brand-kit", label: "Brand kit" },
   { href: "/settings", label: "Settings" },
 ];

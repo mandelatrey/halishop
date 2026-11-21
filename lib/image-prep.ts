@@ -162,3 +162,46 @@ export async function prepareProductImage(src: string): Promise<PreparedImage> {
     meta: { w: crop.w, h: crop.h, kind: cutout ? "cutout" : "photo", bg: bg ? toHex(bg) : null },
   };
 }
+
+/* -------------------------------------------------------------------------
+ * Banner slides (storefront carousel)
+ * ------------------------------------------------------------------------- */
+
+/** Wide enough for a 1180px page on a 2× screen without bloating the shop doc. */
+const BANNER_MAX_W = 1920;
+const BANNER_MAX_H = 1280;
+
+export type PreparedBanner = { dataUrl: string; tone: "light" | "dark" };
+
+/**
+ * Downscale and re-encode a banner photo, and suggest a text tone: banner text
+ * sits on the left, so if that side is bright, ink text reads better than white.
+ */
+export async function prepareBannerImage(src: string): Promise<PreparedBanner> {
+  const img = await loadImage(src);
+  const scale = Math.min(1, BANNER_MAX_W / img.naturalWidth, BANNER_MAX_H / img.naturalHeight);
+  const w = Math.max(1, Math.round(img.naturalWidth * scale));
+  const h = Math.max(1, Math.round(img.naturalHeight * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
+  // Flatten transparency onto white — JPEG has no alpha.
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, w, h);
+  ctx.drawImage(img, 0, 0, w, h);
+
+  // Mean luminance of the left 55% (where the text goes).
+  const sw = Math.max(1, Math.round(w * 0.55));
+  const { data } = ctx.getImageData(0, 0, sw, h);
+  const step = Math.max(1, Math.round((sw * h) / 40000)) * 4;
+  let sum = 0;
+  let n = 0;
+  for (let i = 0; i < data.length; i += step) {
+    sum += 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
+    n++;
+  }
+  const lum = n ? sum / n / 255 : 0;
+
+  return { dataUrl: canvas.toDataURL("image/jpeg", 0.82), tone: lum > 0.62 ? "dark" : "light" };
+}

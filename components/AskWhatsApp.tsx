@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { buildWhatsAppHref, composeQuestionMessage, MAX_PREFILL_CHARS } from "@/lib/wa";
 import { useIsDesktop } from "@/lib/use-desktop";
 import ReadTicks from "./ReadTicks";
@@ -22,6 +22,7 @@ export default function AskWhatsApp({
   area,
   className = "btn sec",
   children = "Ask a question on WhatsApp",
+  openOn,
 }: {
   /** Seller's WhatsApp number (shop.contact.whatsapp). */
   number: string;
@@ -33,6 +34,12 @@ export default function AskWhatsApp({
   area?: string;
   className?: string;
   children?: ReactNode;
+  /**
+   * Window event name that also opens this sheet — lets links elsewhere on the
+   * page (banner buttons, the shop menu) reuse one sheet. Only one instance per
+   * page should listen.
+   */
+  openOn?: string;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -58,6 +65,13 @@ export default function AskWhatsApp({
     // Focus after the dialog paints so mobile keyboards open reliably.
     requestAnimationFrame(() => inputRef.current?.focus());
   }
+
+  useEffect(() => {
+    if (!openOn) return;
+    const onOpen = () => open();
+    window.addEventListener(openOn, onOpen);
+    return () => window.removeEventListener(openOn, onOpen);
+  }, [openOn]);
 
   function close() {
     dialogRef.current?.close();

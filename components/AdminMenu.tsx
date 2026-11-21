@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu } from "@base-ui/react/menu";
 import {
+  GalleryHorizontal,
   LayoutTemplate,
   MenuIcon,
   Package,
@@ -22,6 +23,7 @@ const MANAGE: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/products", label: "Products", icon: Package },
   { href: "/drops/new", label: "New drop", icon: SquarePlus },
   { href: "/templates", label: "Templates", icon: LayoutTemplate },
+  { href: "/storefront", label: "Shop page", icon: GalleryHorizontal },
   { href: "/brand-kit", label: "Brand kit", icon: Palette },
   { href: "/settings", label: "Settings", icon: Settings },
 ];

@@ -257,3 +257,59 @@ export type BuyerRecall = {
   whatsapp?: string;
   area?: string;
 };
+
+/* -------------------------------------------------------------------------
+ * Storefront — how the buyer-facing shop page looks. Stored in its own
+ * `storefronts` collection (_id = slug) so the banner images don't ride along
+ * on every `getShop()` read.
+ * ------------------------------------------------------------------------- */
+
+/** Where a banner's button goes. */
+export type BannerLink =
+  | { kind: "none" }
+  | { kind: "drop" }
+  | { kind: "category"; category: ProductCategory }
+  | { kind: "low" }
+  | { kind: "product"; code: string }
+  | { kind: "whatsapp" }
+  | { kind: "url"; url: string };
+
+export type Banner = {
+  id: string;
+  /** Data URL — prepared on upload (lib/image-prep.ts `prepareBannerImage`). */
+  image: string;
+  /** Focal point in % (0–100) so the crop keeps the subject on every screen. */
+  focusX: number;
+  focusY: number;
+  /** "light" = white text on a dark wash; "dark" = ink text on a light wash. */
+  tone: "light" | "dark";
+  /** Small label above the headline ("New collection"). */
+  eyebrow?: string;
+  headline?: string;
+  subline?: string;
+  /** Button label; the button only shows when there's a label and a link. */
+  cta?: string;
+  link: BannerLink;
+};
+
+/**
+ * Keys of the hanging menu under the banners.
+ *   all · cat:<category> · low (almost gone) · drop (today's drop) · ask (WhatsApp)
+ */
+export type ShopMenuKey = "all" | `cat:${ProductCategory}` | "low" | "drop" | "ask";
+
+export type StorefrontMenu = {
+  /** Seller's order. Keys not listed fall in after, in the default order. */
+  order: ShopMenuKey[];
+  hidden: ShopMenuKey[];
+  /** Seller's own labels; blank = default label. */
+  labels: Partial<Record<ShopMenuKey, string>>;
+};
+
+export type Storefront = {
+  banners: Banner[];
+  /** Slides advance on their own (paused on hover/touch and reduced motion). */
+  autoplay: boolean;
+  menu: StorefrontMenu;
+  updatedAt?: number;
+};

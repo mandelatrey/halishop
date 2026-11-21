@@ -1,6 +1,7 @@
 import ProductPhoto from "@/components/ProductPhoto";
 import { optionsSummary } from "@/lib/variants";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getDrop, getShop, listProducts } from "@/lib/server-store";
 import { getShopSlug } from "@/lib/actions/_slug";
@@ -61,27 +62,26 @@ export default async function BuyerDropPage({
         {dropProducts.map((p) => {
           const variantsText = optionsSummary(p);
           return (
-            <Link key={p.code} href={`/shop/${slug}/${p.code}`} className="by-card">
+            <Link key={p.code} href={`/shop/${slug}/${p.code}`} className="by-card" aria-label={`Order ${p.title}`}>
               <div className="by-card-img">
                 <ProductPhoto src={p.image} meta={p.imageMeta} fit={p.imageFit} label={p.code} />
                 <span className="by-chip">{p.code}</span>
+                {typeof p.stock === "number" && p.stock <= 2 && p.stock > 0 && (
+                  <span className="by-flag">Only {p.stock} left</span>
+                )}
               </div>
               <div className="by-card-body">
-                <div>
-                  <h3 className="by-card-title">{p.title}</h3>
-                  <div className="by-card-price">{formatPrice(p.price, p.currency)}</div>
-                </div>
-                {(variantsText || (typeof p.stock === "number" && p.stock <= 2 && p.stock > 0)) && (
+                <h3 className="by-card-title">{p.title}</h3>
+                {variantsText && (
                   <div className="by-tags">
-                    {variantsText && <span className="tag">{variantsText}</span>}
-                    {typeof p.stock === "number" && p.stock <= 2 && p.stock > 0 && (
-                      <span className="tag acc">Only {p.stock} left</span>
-                    )}
+                    <span className="tag">{variantsText}</span>
                   </div>
                 )}
                 <div className="by-card-foot">
-                  <span className="btn">
-                    Order this <span className="arrow" aria-hidden>→</span>
+                  <span className="by-card-price">{formatPrice(p.price, p.currency)}</span>
+                  <span className="by-card-order">
+                    <span className="by-card-order-l">Order</span>
+                    <ArrowRight size={15} aria-hidden />
                   </span>
                 </div>
               </div>

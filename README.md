@@ -16,6 +16,7 @@ A single-shop app for the Status Commerce wedge. A reseller:
 |---|---|---|
 | `/` | — | Landing page explaining Haali, with links into setup and the live shop |
 | `/brand-kit` | 2e | Shop name, URL, logo, palette, frame, WhatsApp number |
+| `/storefront` | — | Shop page look: banner slides (carousel) + the hanging menu under them, with live phone preview |
 | `/templates` | — | List custom templates |
 | `/templates/[id]` | — | Custom template editor with live preview + instructions |
 | `/products` | — | Catalogue + inline add/edit |
@@ -103,7 +104,7 @@ adding, then reload the page.
 ## Reseeding
 
 The seeder is idempotent. To reseed the Shania fixture from scratch, drop the
-Atlas collections (`shops`, `products`, `custom_templates`, `drops`) and reload
+Atlas collections (`shops`, `products`, `custom_templates`, `drops`, `storefronts`) and reload
 the app.
 
 ## Data model
@@ -113,6 +114,7 @@ shops              _id = slug              — Shop { brandKit, contact, refPref
 products           _id = `${slug}:${code}` — Product + shopSlug
 custom_templates   _id = uuid              — CustomTemplate + shopSlug
 drops              _id = `${slug}:${id}`   — Drop with items + captions + expiry
+storefronts        _id = slug              — Storefront { banners, autoplay, menu } (own doc so banner images stay off getShop())
 ```
 
 See `lib/types.ts` for full shapes.

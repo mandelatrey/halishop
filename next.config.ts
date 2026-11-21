@@ -2,6 +2,14 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["mongodb"],
+  experimental: {
+    serverActions: {
+      // Images travel to Mongo as data URLs inside Server Action payloads.
+      // The 1 MB default is too small for a storefront save carrying several
+      // banner slides (each ~150–400 KB after lib/image-prep.ts downscales it).
+      bodySizeLimit: "12mb",
+    },
+  },
   webpack: (config, { isServer }) => {
     // `serverExternalPackages` covers Server Components + Server Actions but
     // not the `instrumentation` entry. Without this, webpack tries to bundle

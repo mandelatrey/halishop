@@ -1,5 +1,6 @@
 import "server-only";
-import type { CustomTemplate, Drop, Product, Shop } from "./types";
+import type { CustomTemplate, Drop, Product, Shop, Storefront } from "./types";
+import { DEFAULT_STOREFRONT } from "./storefront";
 import { getDb } from "./db";
 import { ensureSeeded } from "./seed";
 
@@ -25,6 +26,20 @@ export async function getShop(slug: string): Promise<Shop> {
   const doc = await db.collection<ShopDoc>("shops").findOne({ _id: slug });
   if (!doc) throw new Error(`Shop not found after seed: ${slug}`);
   return strip(doc as unknown as Record<string, unknown>, ["_id"]) as unknown as Shop;
+}
+
+/** The shop page's look (banners + menu). Defaults until the seller saves one. */
+export async function getStorefront(slug: string): Promise<Storefront> {
+  const db = await getDb();
+  const doc = await db.collection<Storefront & { _id: string }>("storefronts").findOne({ _id: slug });
+  if (!doc) return DEFAULT_STOREFRONT;
+  const { _id, ...rest } = doc;
+  void _id;
+  return {
+    ...DEFAULT_STOREFRONT,
+    ...rest,
+    menu: { ...DEFAULT_STOREFRONT.menu, ...rest.menu },
+  };
 }
 
 export async function listProducts(slug: string): Promise<Product[]> {
