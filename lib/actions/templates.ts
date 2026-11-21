@@ -9,7 +9,7 @@ import { getShopSlug } from "./_slug";
 type TemplateDoc = CustomTemplate & { _id: string; shopSlug: string };
 
 export async function upsertCustomTemplate(template: CustomTemplate): Promise<void> {
-  const slug = getShopSlug();
+  const slug = await getShopSlug();
   await ensureSeeded(slug);
   const db = await getDb();
   await db.collection<TemplateDoc>("custom_templates").updateOne(
@@ -28,7 +28,7 @@ export async function upsertCustomTemplate(template: CustomTemplate): Promise<vo
 }
 
 export async function removeCustomTemplate(id: string): Promise<void> {
-  const slug = getShopSlug();
+  const slug = await getShopSlug();
   const db = await getDb();
   await db.collection<TemplateDoc>("custom_templates").deleteOne({ _id: id, shopSlug: slug });
   revalidatePath("/templates");

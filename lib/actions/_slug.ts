@@ -1,6 +1,11 @@
 import "server-only";
+import { requireSeller } from "../auth";
 
-/** The single shop slug for this deployment. Read from the env, defaults to "shania". */
-export function getShopSlug(): string {
-  return process.env.NEXT_PUBLIC_SHOP_SLUG || "shania";
+/**
+ * The shop the signed-in seller runs. Every seller page and action reads its
+ * shop from here, so a seller can only ever see and change their own shop.
+ * Signed out → /login; signed in without a shop → /seller/setup.
+ */
+export async function getShopSlug(): Promise<string> {
+  return (await requireSeller()).shopSlug;
 }

@@ -12,7 +12,6 @@ export const metadata: Metadata = {
     "Turn your catalogue into WhatsApp status cards, share one shop link, and get orders straight into your WhatsApp, already written out.",
 };
 
-const SHOP_SLUG = process.env.NEXT_PUBLIC_SHOP_SLUG || "shania";
 
 /** Product facts, not vanity metrics — every number here is true of the app. */
 const STATS: { value: string; count?: number; suffix?: string; label: string }[] = [
@@ -162,11 +161,11 @@ export default function Landing() {
             Branded posts, tracked products, let customers browse your product catalogue and order directly to your desired number.
           </p>
           <div className="lp-ctas lp-ctas-center">
-            <Link href="/brand-kit" className="lp-btn">
+            <Link href="/signup?as=seller" className="lp-btn">
               Set up your shop
             </Link>
-            <Link href={`/shop/${SHOP_SLUG}`} className="lp-btn lp-btn-sec">
-              See a live shop
+            <Link href="/shops" className="lp-btn lp-btn-sec">
+              Browse shops
             </Link>
           </div>
         </div>
@@ -340,11 +339,11 @@ export default function Landing() {
             </h2>
             <p className="lp-sub-light">Set up your brand kit, add a few products, and post your first drop today.</p>
             <div className="lp-ctas lp-ctas-center">
-              <Link href="/brand-kit" className="lp-btn">
+              <Link href="/signup?as=seller" className="lp-btn">
                 Get started
               </Link>
-              <Link href="/products" className="lp-btn lp-btn-ghost">
-                Add products
+              <Link href="/shops" className="lp-btn lp-btn-ghost">
+                Browse shops
               </Link>
             </div>
           </div>

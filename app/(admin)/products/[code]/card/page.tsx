@@ -5,7 +5,7 @@ import CardGeneratorClient from "./Client";
 
 export default async function CardGeneratorPage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
-  const slug = getShopSlug();
+  const slug = await getShopSlug();
   const [shop, product, customs] = await Promise.all([
     getShop(slug),
     getProduct(slug, code),

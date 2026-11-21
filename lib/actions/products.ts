@@ -9,7 +9,7 @@ import { getShopSlug } from "./_slug";
 type ProductDoc = Product & { _id: string; shopSlug: string; updatedAt: number };
 
 export async function upsertProduct(product: Product): Promise<void> {
-  const slug = getShopSlug();
+  const slug = await getShopSlug();
   await ensureSeeded(slug);
   const db = await getDb();
   const id = `${slug}:${product.code}`;
@@ -32,7 +32,7 @@ export async function upsertProduct(product: Product): Promise<void> {
 }
 
 export async function removeProduct(code: string): Promise<void> {
-  const slug = getShopSlug();
+  const slug = await getShopSlug();
   const db = await getDb();
   await db.collection<ProductDoc>("products").deleteOne({ _id: `${slug}:${code}` });
   revalidatePath("/products");

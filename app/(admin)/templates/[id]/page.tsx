@@ -5,7 +5,7 @@ import TemplateEditorClient from "./Client";
 
 export default async function TemplateEditorPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const slug = getShopSlug();
+  const slug = await getShopSlug();
   const [shop, template, products] = await Promise.all([
     getShop(slug),
     getCustomTemplate(slug, id),

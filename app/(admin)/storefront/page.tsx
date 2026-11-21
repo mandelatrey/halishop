@@ -4,7 +4,7 @@ import { isDropLive } from "@/lib/storefront";
 import StorefrontClient from "./Client";
 
 export default async function StorefrontEditorPage() {
-  const slug = getShopSlug();
+  const slug = await getShopSlug();
   const [shop, products, drops, storefront] = await Promise.all([
     getShop(slug),
     listProducts(slug),

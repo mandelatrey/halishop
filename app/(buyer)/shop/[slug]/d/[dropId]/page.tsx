@@ -3,10 +3,9 @@ import { optionsSummary } from "@/lib/variants";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { notFound } from "next/navigation";
-import { getDrop, getShop, getStorefrontButtons, listProducts } from "@/lib/server-store";
+import { findShop, getDrop, getStorefrontButtons, listProducts } from "@/lib/server-store";
 import { buttonScope } from "@/lib/brand-accent";
 import { CartButton, CartSheet } from "@/components/Cart";
-import { getShopSlug } from "@/lib/actions/_slug";
 import { formatPrice } from "@/lib/format";
 
 export default async function BuyerDropPage({
@@ -15,16 +14,15 @@ export default async function BuyerDropPage({
   params: Promise<{ slug: string; dropId: string }>;
 }) {
   const { slug, dropId } = await params;
-  if (slug !== getShopSlug()) notFound();
 
   const [shop, buttons, drop, products] = await Promise.all([
-    getShop(slug),
+    findShop(slug),
     getStorefrontButtons(slug),
     getDrop(slug, dropId),
     listProducts(slug),
   ]);
 
-  if (!drop) notFound();
+  if (!shop || !drop) notFound();
 
   const byCode = new Map(products.map((p) => [p.code, p]));
   const dropProducts = drop.items

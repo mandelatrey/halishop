@@ -9,7 +9,7 @@ import { getShopSlug } from "./_slug";
 type ShopDoc = Shop & { _id: string };
 
 export async function saveBrandKit(brandKit: BrandKit): Promise<void> {
-  const slug = getShopSlug();
+  const slug = await getShopSlug();
   await ensureSeeded(slug);
   const db = await getDb();
   await db.collection<ShopDoc>("shops").updateOne(
@@ -22,7 +22,7 @@ export async function saveBrandKit(brandKit: BrandKit): Promise<void> {
 }
 
 export async function saveShopContact(contact: ShopContact): Promise<void> {
-  const slug = getShopSlug();
+  const slug = await getShopSlug();
   await ensureSeeded(slug);
   const db = await getDb();
   await db.collection<ShopDoc>("shops").updateOne(

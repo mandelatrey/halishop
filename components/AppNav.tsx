@@ -3,16 +3,20 @@ import Link from "next/link";
 import AdminMenu from "./AdminMenu";
 import NavLinks from "./NavLinks";
 import ThemeSwitch from "./ThemeSwitch";
+import { navFor } from "./nav-model";
+import { getCurrentUser } from "@/lib/auth";
 import "./app-nav.css";
 
 /**
- * Global top nav — Haali wordmark on the left, admin links and the theme
- * switch on the right. Desktop shows the links inline; mobile collapses them
- * behind the hamburger from `AdminMenu`.
+ * Global top nav — Haali wordmark on the left; on the right, what this visitor
+ * can do (components/nav-model.ts): shops and sign in when signed out, their
+ * account for buyers, their shop's tools for sellers. Desktop shows the links
+ * inline (sellers' long list only on wide screens); otherwise the menu button.
  */
-export default function AppNav() {
+export default async function AppNav() {
+  const nav = navFor(await getCurrentUser());
   return (
-    <header className="app-nav">
+    <header className={`app-nav${nav.links.length > 3 ? " app-nav-many" : ""}`}>
       <div className="app-nav-inner">
         <Link href="/" className="app-nav-brand" aria-label="Haali — home">
           <Image
@@ -35,14 +39,14 @@ export default function AppNav() {
           />
         </Link>
 
-        <NavLinks />
+        <NavLinks nav={nav} />
 
         <div className="app-nav-theme">
           <ThemeSwitch />
         </div>
 
         <div className="app-nav-hamburger">
-          <AdminMenu />
+          <AdminMenu nav={nav} />
         </div>
       </div>
     </header>

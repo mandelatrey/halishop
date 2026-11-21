@@ -1,5 +1,4 @@
 import { getProduct } from "@/lib/server-store";
-import { getShopSlug } from "@/lib/actions/_slug";
 
 /**
  * A product's photo as an ordinary image, for places that only know the
@@ -8,7 +7,6 @@ import { getShopSlug } from "@/lib/actions/_slug";
  */
 export async function GET(req: Request, { params }: { params: Promise<{ slug: string; code: string }> }) {
   const { slug, code } = await params;
-  if (slug !== getShopSlug()) return new Response("Not found", { status: 404 });
   const product = await getProduct(slug, code);
   // A photo stored as a path or URL (seed photos): send the browser there.
   if (product?.image && /^(\/|https?:\/\/)/.test(product.image)) {

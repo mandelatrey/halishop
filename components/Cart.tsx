@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { recordOrder } from "@/lib/actions/orders";
+import { newId } from "@/lib/id";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import PhoneInput from "./PhoneInput";
 import ReadTicks from "./ReadTicks";
@@ -45,6 +47,7 @@ export function CartSheet({
   sellerWhatsapp,
   defaultArea,
   refPrefix,
+  accountPhone,
 }: {
   slug: string;
   shopName: string;
@@ -52,12 +55,16 @@ export function CartSheet({
   sellerWhatsapp: string;
   defaultArea?: string;
   refPrefix: string;
+  /** A signed-in buyer's number: used when this device hasn't remembered one. */
+  accountPhone?: string;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const phoneWrap = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const { items, count, setQty, remove, clear, lineId } = useCart(slug);
-  const { recall, save, ready } = useBuyerRecall();
+  const { recall: saved, save, ready } = useBuyerRecall();
+  const recall = saved?.whatsapp ? saved : accountPhone ? { whatsapp: accountPhone, area: saved?.area } : null;
+  const sentOrder = useRef<{ id: string; text: string } | null>(null);
   const { target } = useWhatsAppTarget();
   const [whatsapp, setWhatsapp] = useState("");
   const [area, setArea] = useState("");
@@ -266,6 +273,15 @@ export function CartSheet({
                     return;
                   }
                   save({ whatsapp: buyer, area: where || undefined });
+                  const id = sentOrder.current && sentOrder.current.text === message ? sentOrder.current.id : newId();
+                  sentOrder.current = { id, text: message };
+                  void recordOrder({
+                    id,
+                    slug,
+                    items: items.map((i) => ({ code: i.code, variant: i.variant, qty: i.qty })),
+                    buyerPhone: buyer,
+                    area: where || undefined,
+                  }).catch(() => {});
                   setTimeout(() => setSent(true), 150);
                 }}
               >

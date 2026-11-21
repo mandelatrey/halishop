@@ -33,7 +33,7 @@ export async function saveShopSettings(input: ShopContact): Promise<SaveSettings
     cityCopy: input.cityCopy?.trim() || undefined,
   };
 
-  const slug = getShopSlug();
+  const slug = await getShopSlug();
   await ensureSeeded(slug);
   const db = await getDb();
   await db.collection<ShopDoc>("shops").updateOne(

@@ -14,22 +14,27 @@ declare global {
 const seeded = globalThis._haliSeeded ?? new Map<string, Promise<void>>();
 if (process.env.NODE_ENV !== "production") globalThis._haliSeeded = seeded;
 
+/** The demo shop (Shania, six products) — seeded outside production, or with HALI_SEED_DEMO=1. */
+export const DEMO_SLUG = "shania";
+const demoAllowed = () => process.env.NODE_ENV !== "production" || process.env.HALI_SEED_DEMO === "1";
+
 /**
- * Ensure a shop doc exists for `slug`. Idempotent via `$setOnInsert` upsert
- * plus a per-process memoization so subsequent requests inside the same Node
- * process short-circuit — otherwise every page render would run 5 parallel
- * createIndex calls against Atlas.
+ * Get the database ready: indexes, once per process — and, for the demo slug
+ * where allowed, the Shania fixture (idempotent: `$setOnInsert` upsert).
+ * Never creates any other shop: sellers create theirs in /seller/setup.
+ * Memoised per slug so requests don't repeat the round-trips.
  */
-export async function ensureSeeded(slug: string): Promise<void> {
-  const cached = seeded.get(slug);
+export async function ensureSeeded(slug: string = DEMO_SLUG): Promise<void> {
+  const key = slug === DEMO_SLUG && demoAllowed() ? slug : "";
+  const cached = seeded.get(key);
   if (cached) return cached;
 
-  const work = runSeed(slug).catch((err) => {
+  const work = (key ? runSeed(key) : ensureIndexes()).catch((err) => {
     // Don't poison the cache if seeding fails — allow a retry next request.
-    seeded.delete(slug);
+    seeded.delete(key);
     throw err;
   });
-  seeded.set(slug, work);
+  seeded.set(key, work);
   return work;
 }
 
@@ -66,10 +71,16 @@ async function runSeed(slug: string): Promise<void> {
     );
   }
 
-  // Ensure indexes (safe to call repeatedly, but round-trips every time — so
-  // gated by the seeded-memo above so we only do it once per process).
+  await ensureIndexes();
+}
+
+async function ensureIndexes(): Promise<void> {
+  const db = await getDb();
+  const shops = db.collection<ShopDoc>("shops");
+  const products = db.collection<ProductDoc>("products");
   await Promise.all([
     shops.createIndex({ slug: 1 }, { unique: true }),
+    shops.createIndex({ ownerId: 1 }),
     products.createIndex({ shopSlug: 1, code: 1 }, { unique: true }),
     db.collection("custom_templates").createIndex({ shopSlug: 1, createdAt: -1 }),
     db.collection("drops").createIndex({ shopSlug: 1, id: 1 }, { unique: true }),

@@ -75,3 +75,38 @@
   .app-nav-theme { display: block; }
   .app-nav-hamburger { display: none; }
 }
+
+/* Sellers' long link list: inline only on wide screens, the menu button below that. */
+@media (min-width: 720px) and (max-width: 1239px) {
+  .app-nav-many .app-nav-links { display: none; }
+  .app-nav-many .app-nav-hamburger { display: block; }
+}
+.app-nav-links { align-items: center; }
+/* Signed out: the one filled action */
+.app-nav-links a.app-nav-cta {
+  margin-left: 6px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: var(--color-accent-fill);
+  color: #fff;
+  font-weight: 500;
+}
+.app-nav-links a.app-nav-cta:hover { background: var(--color-accent-fill-hover); color: #fff; }
+/* Signed in: the account menu's round button */
+.app-nav-avatar {
+  width: 36px;
+  height: 36px;
+  margin-left: 6px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-text);
+  color: var(--color-on-ink);
+  font: 600 14px/1 var(--f-sans);
+  cursor: pointer;
+}
+.app-nav-avatar:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.mm-who { display: flex; flex-direction: column; gap: 3px; padding: 6px 10px 10px; border-bottom: 1px solid var(--stroke-hair); margin-bottom: 6px; }
+.mm-who b { font: 600 14px/1.2 var(--f-sans); color: var(--color-text); }
+.mm-who span { font: 400 12.5px/1.2 var(--f-sans); color: var(--color-mute-2); }

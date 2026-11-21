@@ -56,7 +56,7 @@ export type CreateDropInput = {
 };
 
 export async function createDrop(input: CreateDropInput): Promise<Drop> {
-  const slug = getShopSlug();
+  const slug = await getShopSlug();
   await ensureSeeded(slug);
   const db = await getDb();
   const id = await generateDropId(slug);
@@ -92,7 +92,7 @@ export async function createDrop(input: CreateDropInput): Promise<Drop> {
 }
 
 export async function updateDropItems(dropId: string, items: DropItem[]): Promise<void> {
-  const slug = getShopSlug();
+  const slug = await getShopSlug();
   const db = await getDb();
   await db.collection<DropDoc>("drops").updateOne(
     { _id: `${slug}:${dropId}` },
@@ -103,7 +103,7 @@ export async function updateDropItems(dropId: string, items: DropItem[]): Promis
 }
 
 export async function deleteDrop(dropId: string): Promise<void> {
-  const slug = getShopSlug();
+  const slug = await getShopSlug();
   const db = await getDb();
   await db.collection<DropDoc>("drops").deleteOne({ _id: `${slug}:${dropId}` });
   revalidatePath("/drops");

@@ -12,9 +12,8 @@ export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
 
   const { warmup } = await import("./instrumentation-node");
-  const slug = process.env.NEXT_PUBLIC_SHOP_SLUG || "shania";
 
   // Fire and forget — errors are logged inside `warmup`, and the first real
   // request will retry via the same cached promises in `lib/db.ts`.
-  void warmup(slug);
+  void warmup();
 }
