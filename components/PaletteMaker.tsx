@@ -168,7 +168,7 @@ export default function PaletteMaker({ value, onChange }: Props) {
             <span className="pm-swatch-role">Card sample</span>
             <span
               style={{
-                fontFamily: "'DM Sans', sans-serif",
+                fontFamily: "var(--font-dm-sans), 'DM Sans', sans-serif",
                 fontWeight: 800,
                 fontSize: 13,
                 lineHeight: 1.1,
@@ -178,7 +178,7 @@ export default function PaletteMaker({ value, onChange }: Props) {
             </span>
             <span
               style={{
-                fontFamily: "'DM Sans', sans-serif",
+                fontFamily: "var(--font-dm-sans), 'DM Sans', sans-serif",
                 fontWeight: 800,
                 fontSize: 16,
                 color: derived.accent,

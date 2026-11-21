@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { DM_Sans, Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import AppNav from "@/components/AppNav";
 import { DomEditor } from "domeditor/next";
 import { THEME_BOOT_SCRIPT } from "@/lib/theme";
@@ -18,11 +19,16 @@ const geistMono = Geist_Mono({
 });
 // Status cards (components/StatusCard.tsx) are artwork sellers export and post;
 // they keep their own typeface so existing templates render unchanged.
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
+//
+// Self-hosted (app/fonts, OFL), not next/font/google: Google now sometimes serves
+// DM Sans from `fonts.gstatic.com/l/font?kit=…&skey=…` URLs, and Turbopack's
+// next/font/google (Next 15.5) breaks on the `&`s ("next/font/google queries have
+// exactly one entry"), stopping `next dev`. One variable file covers 100–1000.
+const dmSans = localFont({
+  src: [{ path: "./fonts/DMSans-latin-variable.woff2", weight: "100 1000", style: "normal" }],
   variable: "--font-dm-sans",
   display: "swap",
+  fallback: ["system-ui", "sans-serif"],
 });
 
 export const metadata: Metadata = {

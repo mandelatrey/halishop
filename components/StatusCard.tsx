@@ -882,7 +882,7 @@ function renderCustom(
       {showTitle && (
         <span
           style={{
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "var(--font-dm-sans), 'DM Sans', sans-serif",
             fontWeight: 800,
             fontSize: s(15),
             lineHeight: 1.05,
@@ -896,7 +896,7 @@ function renderCustom(
       {showPrice && (
         <span
           style={{
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "var(--font-dm-sans), 'DM Sans', sans-serif",
             fontWeight: 800,
             fontSize: s(20),
             lineHeight: 1,
