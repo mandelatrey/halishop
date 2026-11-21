@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { DM_Sans, Geist, Geist_Mono } from "next/font/google";
 import AppNav from "@/components/AppNav";
+import { DomEditor } from "domeditor/next";
 import { THEME_BOOT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
@@ -50,6 +51,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body suppressHydrationWarning>
         <AppNav />
         {children}
+        {/* Development only: domeditor, the visual CSS editor (Shift+Alt+E) */}
+        {process.env.NODE_ENV === "development" && <DomEditor />}
       </body>
     </html>
   );

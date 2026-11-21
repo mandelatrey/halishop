@@ -143,7 +143,7 @@ export default function Storefront({
                 shopName={shopName}
                 primary={shop.brandKit.palette.primary}
                 eyebrow={cityLine ?? "Order on WhatsApp"}
-                lede={`Tap anything you like and your order opens in WhatsApp, already written out for ${firstName}.`}
+                lede={`Tap anything you like and your order opens in WhatsApp, already written out with the order details, ready to send to ${firstName}.`}
                 dropHref={dropHref}
                 photos={photos}
               />,

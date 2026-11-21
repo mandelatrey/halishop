@@ -20,8 +20,8 @@
 
 /* ---------- Display type ---------- */
 .by-h1 {
-  font: 650 clamp(32px, 5vw, 56px)/1.04 var(--f-sans);
-  letter-spacing: -0.03em;
+  font: 500 clamp(32px, 5vw, 44px)/1.04 var(--f-sans);
+  letter-spacing: -0.015em;
   text-wrap: balance;
   color: var(--color-text);
   margin: 0;
@@ -29,10 +29,10 @@
 }
 .by-h1-sm { font-size: clamp(32px, 4.4vw, 48px); line-height: 1.02; letter-spacing: -0.045em; }
 .by-lede {
-  font: 400 15px/1.55 var(--f-sans);
-  color: var(--color-mute);
+  font: 400 17px/1.3 var(--f-sans);
+  color: var(--color-mute-2);
   margin: 0;
-  max-width: 46ch;
+  max-width: 45ch;
 }
 .by-label {
   font: 600 10.5px/1 var(--f-mono);
@@ -570,3 +570,6 @@ a.by-card:hover .by-card-order svg { transform: translateX(2px); }
 .by-ask-actions .btn.by-order { display: flex; align-items: center; justify-content: center; min-height: 50px; font-size: 15px; }
 .by-ask-actions .btn.by-order[aria-disabled="true"] { opacity: 0.45; }
 .by-ask-actions .btn.gh { align-self: center; }
+@media (max-width: 640px) {
+  .by-stats { justify-content: space-between; align-items: flex-start; }
+}

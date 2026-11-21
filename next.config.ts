@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withDomEditor } from "domeditor/next/config";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["mongodb"],
@@ -28,4 +29,6 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// withDomEditor: the dev-only visual CSS editor's route (app/api/dev/domeditor/route.dev.ts) exists
+// only under `next dev`; see https://github.com/mandelatrey/domeditor
+export default withDomEditor(nextConfig);

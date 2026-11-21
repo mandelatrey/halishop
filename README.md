@@ -91,6 +91,18 @@ problems.` on startup — that's expected. `next.config.ts`'s webpack block
 exists for `next build` (which still uses webpack); Turbopack just notes it
 isn't applying the config in dev.
 
+### Visual CSS editor (dev only)
+
+With `npm run dev` running, press **Shift+Alt+E** (or the "Styles" button, bottom right), then **Pick** an
+element or **Alt+click** anything: adjust font sizes, alignment, padding, margins, gaps and widths with live
+preview, and **Save** (Ctrl/⌘+S) to write the change into the `.css` file under `app/` the rule lives in.
+Review it with `git diff`.
+
+The editor is [domeditor](https://github.com/mandelatrey/domeditor), a dev dependency. It is wired up in three
+places: `withDomEditor` in `next.config.ts`, the route `app/api/dev/domeditor/route.dev.ts` (only exists under
+`next dev`), and `<DomEditor />` in `app/layout.tsx` (only rendered in development). None of it is in
+`npm run build`. Update it with `npm i -D github:mandelatrey/domeditor`.
+
 ### Troubleshooting Atlas
 
 If pages 500 with `MongoServerSelectionError · SSL alert internal error`, the

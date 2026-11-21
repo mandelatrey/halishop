@@ -16,13 +16,13 @@ const SHOP_SLUG = process.env.NEXT_PUBLIC_SHOP_SLUG || "shania";
 
 /** Product facts, not vanity metrics — every number here is true of the app. */
 const STATS: { value: string; count?: number; suffix?: string; label: string }[] = [
-  { value: "9:16", label: "Status-ready cards, sized for stories" },
+  { value: "9:16", label: "Status-ready cards for stories" },
   { value: "3", count: 3, label: "Caption styles for every card" },
   { value: "1 tap", count: 1, suffix: " tap", label: "From your status to a WhatsApp order" },
 ];
 
 const STATEMENT =
-  "Haali gives social sellers one place to manage their catalogue, post drops that look like a brand, and turn every status view into an order they can actually fulfil.";
+  "Haali gives entrepreneurs one place to manage their catalogue, post drops that look like a brand, and turn every status into an opportunity.";
 
 /** Split a sentence into word spans so GSAP can light them up one by one. */
 function Words({ text }: { text: string }) {
@@ -159,8 +159,7 @@ export default function Landing() {
             </span>
           </h1>
           <p className="lp-lede">
-            Create branded posts, track your products, let customers browse your product catalogue and
-            send orders directly to your DM.
+            Branded posts, tracked products, let customers browse your product catalogue and order directly to your desired number.
           </p>
           <div className="lp-ctas lp-ctas-center">
             <Link href="/brand-kit" className="lp-btn">
@@ -182,7 +181,7 @@ export default function Landing() {
               <span className="lp-chip">Restock</span>
             </div>
             <p className="lp-float-text">
-              🔥 Black flats are back. Sizes 37–39, only 3 left. Tap to order: haali.app/o/C4
+              🔥 These cute black flats are back in stock! Sizes 37–39, only 3 left.
             </p>
             </div>
           </div>
@@ -240,7 +239,7 @@ export default function Landing() {
           <div className="lp-center">
             <Pill dark>Features</Pill>
             <h2 className="lp-h2 lp-h2-light">
-              Everything a status seller needs
+              Everything an online seller needs
             </h2>
             <p className="lp-sub-light">Make the post, share the link, take the order.</p>
           </div>
@@ -354,7 +353,7 @@ export default function Landing() {
 
       <footer className="lp-footer lp-inner">
         <span>Haali</span>
-        <span>Made for social sellers in Kampala and beyond</span>
+        <span>Made for hustlers in East Africa and. beyond</span>
       </footer>
     </LandingMotion>
   );
