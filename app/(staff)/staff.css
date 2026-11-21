@@ -1,0 +1,63 @@
+/* Haali admin (/admin) — `sf-` classes on top of admin.css and site.css. */
+.sf-toolbar { display: flex; gap: 8px; max-width: 560px; margin-bottom: 14px; }
+.sf-toolbar .inp { flex: 1; min-width: 0; min-height: 44px; }
+.sf-toolbar .btn { width: auto; }
+.st-tabs a {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--stroke-soft);
+  border-radius: 999px;
+  background: var(--color-panel);
+  color: var(--color-mute);
+  font: 500 13px/1 var(--f-sans);
+}
+.st-tabs a.on { background: var(--color-text); color: var(--color-on-ink); border-color: transparent; }
+
+.sf-table-wrap { overflow-x: auto; }
+.sf-count { margin: 0 0 10px; font: 400 13px/1.4 var(--f-sans); color: var(--color-mute-2); }
+.sf-table { width: 100%; border-collapse: collapse; font: 400 14px/1.4 var(--f-sans); }
+.sf-table th { text-align: left; padding: 8px 10px; font: 600 10.5px/1 var(--f-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-mute-2); border-bottom: 1px solid var(--stroke-soft); white-space: nowrap; }
+.sf-table td { padding: 11px 10px; border-bottom: 1px solid var(--stroke-hair); vertical-align: middle; }
+.sf-table tr.off td { opacity: 0.6; }
+.sf-user { font-weight: 600; color: var(--color-text); }
+.sf-user:hover { color: var(--color-accent-dark); }
+.sf-mono { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sf-muted { color: var(--color-mute-2); }
+.sf-badges { display: flex; flex-wrap: wrap; gap: 5px; }
+.sf-badge { padding: 4px 8px; border-radius: 999px; background: var(--color-surface); color: var(--color-mute); font: 500 12px/1.2 var(--f-sans); white-space: nowrap; }
+.sf-badge.seller { background: var(--color-accent-soft); color: var(--color-accent-dark); }
+.sf-badge.admin { background: var(--color-text); color: var(--color-on-ink); }
+.sf-badge.off { background: var(--color-error-container); color: var(--color-error); }
+.sf-badge.temp { background: var(--color-warning-bg); color: var(--color-warning-ink); }
+.sf-pages { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 14px; font: 400 13.5px/1 var(--f-sans); color: var(--color-mute-2); }
+
+.sf-log-panel { margin-top: 16px; }
+.sf-log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.sf-log li { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 12px; padding: 9px 0; border-top: 1px solid var(--stroke-hair); font: 400 13.5px/1.45 var(--f-sans); }
+.sf-log li:first-child { border-top: 0; }
+@media (max-width: 560px) { .sf-log li { grid-template-columns: minmax(0, 1fr); gap: 2px; } }
+
+.sf-back { margin-bottom: 8px; }
+.sf-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 16px; }
+.sf-facts > div { display: flex; flex-direction: column; gap: 6px; padding: 14px; border: 1px solid var(--stroke-soft); border-radius: 14px; background: var(--color-panel); }
+.sf-facts b { font: 600 15px/1.3 var(--f-sans); color: var(--color-text); }
+.sf-facts .sf-muted { font: 400 12.5px/1.3 var(--f-sans); }
+
+.sf-actions { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+@media (min-width: 900px) { .sf-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); } .sf-actions > p { grid-column: 1 / -1; } }
+.sf-actions .panel { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
+.sf-actions .panel .section-title { margin: 0; }
+.sf-actions .panel .ad-hint { margin: 0; }
+.sf-actions .btn { width: auto; display: inline-flex; align-items: center; gap: 7px; }
+.sf-actions .st-form { width: 100%; }
+.sf-actions .st-form .btn { align-self: flex-start; }
+.sf-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; width: 100%; }
+.sf-grow { flex: 1 1 240px; min-width: 0; }
+.btn.sf-danger { color: var(--color-error); }
+.btn.sf-danger:hover { background: var(--color-error-container); color: var(--color-error); }
+.sf-temp { display: flex; flex-direction: column; gap: 10px; width: 100%; padding: 14px; border-radius: 12px; background: var(--color-surface); }
+.sf-temp-pw { font: 600 22px/1.2 var(--f-mono); letter-spacing: 0.06em; color: var(--color-text); user-select: all; }
+.sf-temp .by-watarget { align-self: flex-start; }

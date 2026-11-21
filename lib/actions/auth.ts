@@ -4,8 +4,11 @@ import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { getDb } from "../db";
 import {
+  currentSessionId,
+  endAllSessions,
   ensureAuthIndexes,
   endSession,
+  getCurrentUser,
   findUserByPhone,
   hashPassword,
   safeNext,
@@ -61,8 +64,42 @@ export async function signIn(_prev: AuthState, form: FormData): Promise<AuthStat
 
   const user = await findUserByPhone(phone);
   if (!user || !(await verifyPassword(password, user))) return wrong;
+  if (user.disabled) return { ...keep, error: "This account has been turned off. Contact the Haali team." };
   await startSession(user._id);
-  redirect(safeNext(form.get("next"), user.shopSlug ? "/orders" : "/account"));
+  const next = safeNext(form.get("next"), user.shopSlug ? "/orders" : "/account");
+  // A temporary password from an admin: choose a new one before anything else.
+  if (user.mustChangePassword) redirect(`/account/password?next=${encodeURIComponent(next)}`);
+  redirect(next);
+}
+
+export type PasswordState = { error?: string } | undefined;
+
+/**
+ * Change your password. Asks for the current one — except straight after
+ * signing in with a temporary password from an admin. Signs out your other
+ * devices.
+ */
+export async function changePassword(_prev: PasswordState, form: FormData): Promise<PasswordState> {
+  const me = await getCurrentUser();
+  if (!me) redirect("/login?next=/account/password");
+  const current = String(form.get("current") ?? "");
+  const next = String(form.get("password") ?? "");
+  const confirm = String(form.get("confirm") ?? "");
+  if (next.length < MIN_PASSWORD) return { error: `Use a password of at least ${MIN_PASSWORD} characters.` };
+  if (next !== confirm) return { error: "The two new passwords don't match." };
+
+  const db = await getDb();
+  const doc = await db.collection<UserDoc>("users").findOne({ _id: me.id });
+  if (!doc) redirect("/login");
+  if (!doc.mustChangePassword && !(await verifyPassword(current, doc))) return { error: "Your current password isn't right." };
+  if (await verifyPassword(next, doc)) return { error: "Choose a password different from the one you have now." };
+
+  await db
+    .collection<UserDoc>("users")
+    .updateOne({ _id: me.id }, { $set: await hashPassword(next), $unset: { mustChangePassword: "" } });
+  await endAllSessions(me.id, (await currentSessionId()) ?? undefined);
+  const dest = safeNext(form.get("next"), doc.shopSlug ? "/orders" : "/account");
+  redirect(`${dest}${dest.includes("?") ? "&" : "?"}password=changed`); // /account shows "Password changed"
 }
 
 export async function signOut(): Promise<void> {

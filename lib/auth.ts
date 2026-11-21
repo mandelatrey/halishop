@@ -1,9 +1,9 @@
 import "server-only";
-import { createHash, randomBytes, scrypt as scryptCb, timingSafeEqual } from "node:crypto";
+import { createHash, randomBytes, randomInt, scrypt as scryptCb, timingSafeEqual } from "node:crypto";
 import { promisify } from "node:util";
 import { cache } from "react";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getDb } from "./db";
 
 /**
@@ -35,6 +35,12 @@ export type UserDoc = {
   /** Shops they follow (slugs). */
   favorites: string[];
   createdAt: number;
+  /** Haali team: can manage users at /admin. Granted by scripts/make-admin.mjs or another admin. */
+  role?: "admin";
+  /** Turned off by an admin: can't sign in, sessions ended. */
+  disabled?: boolean;
+  /** Signed in with a temporary password from an admin: must choose a new one first. */
+  mustChangePassword?: boolean;
 };
 
 /** What pages and components get: never the password fields. */
@@ -49,6 +55,8 @@ const toUser = (d: UserDoc): User => ({
   shopSlug: d.shopSlug,
   favorites: d.favorites ?? [],
   createdAt: d.createdAt,
+  role: d.role,
+  mustChangePassword: d.mustChangePassword,
 });
 
 const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
@@ -75,6 +83,9 @@ export function ensureAuthIndexes(): Promise<void> {
       db.collection<SessionDoc>("sessions").createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
       db.collection("orders").createIndex({ shopSlug: 1, createdAt: -1 }),
       db.collection("orders").createIndex({ userId: 1, createdAt: -1 }),
+      db.collection<SessionDoc>("sessions").createIndex({ userId: 1 }),
+      db.collection("admin_log").createIndex({ targetId: 1, at: -1 }),
+      db.collection("admin_log").createIndex({ at: -1 }),
     ]);
   })().catch((e) => {
     indexed = null;
@@ -123,13 +134,36 @@ export const getCurrentUser = cache(async (): Promise<User | null> => {
   const session = await db.collection<SessionDoc>("sessions").findOne({ _id: sha256(token) });
   if (!session || session.expiresAt.getTime() < Date.now()) return null;
   const user = await db.collection<UserDoc>("users").findOne({ _id: session.userId });
-  return user ? toUser(user) : null;
+  return user && !user.disabled ? toUser(user) : null;
 });
 
-/** Signed-in user, or off to /login (and back to `next` afterwards). */
+/** End every session a user has (password reset, turned off, "sign out everywhere"). Keeps `except`. */
+export async function endAllSessions(userId: string, except?: string): Promise<number> {
+  const db = await getDb();
+  const filter = except ? { userId, _id: { $ne: except } } : { userId };
+  const res = await db.collection<SessionDoc>("sessions").deleteMany(filter);
+  return res.deletedCount;
+}
+
+/** The current session's stored id (hash), to keep it while ending the others. */
+export async function currentSessionId(): Promise<string | null> {
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  return token ? sha256(token) : null;
+}
+
+/** Signed-in user, or off to /login (and back to `next` afterwards). Someone on a temporary
+ *  password goes to choose a new one first. */
 export async function requireUser(next = "/"): Promise<User> {
   const user = await getCurrentUser();
   if (!user) redirect(`/login?next=${encodeURIComponent(next)}`);
+  if (user.mustChangePassword) redirect(`/account/password?next=${encodeURIComponent(next)}`);
+  return user;
+}
+
+/** Haali team only. Anyone else gets a plain 404 — the admin area doesn't announce itself. */
+export async function requireAdmin(): Promise<User> {
+  const user = await requireUser("/admin");
+  if (user.role !== "admin") notFound();
   return user;
 }
 
@@ -143,4 +177,11 @@ export async function requireSeller(next = "/orders"): Promise<User & { shopSlug
 /** Where to send someone after signing in: a safe same-site path only. */
 export function safeNext(next: unknown, fallback: string): string {
   return typeof next === "string" && next.startsWith("/") && !next.startsWith("//") ? next : fallback;
+}
+
+/** A temporary password an admin can read out or send: 12 easy characters in three groups. */
+export function temporaryPassword(): string {
+  const abc = "abcdefghjkmnpqrstuvwxyz23456789";
+  const pick = () => abc[randomInt(abc.length)];
+  return [0, 1, 2].map(() => Array.from({ length: 4 }, pick).join("")).join("-");
 }

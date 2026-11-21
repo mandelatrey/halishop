@@ -8,8 +8,9 @@ import { prettyPhone } from "@/lib/wa";
 
 export const metadata = { title: "Your account · Haali" };
 
-export default async function AccountPage() {
+export default async function AccountPage({ searchParams }: { searchParams: Promise<{ password?: string }> }) {
   const user = await requireUser("/account");
+  const { password } = await searchParams;
   const [orders, favorites] = await Promise.all([
     listOrdersForUser(user.id),
     user.favorites.length ? listShopCards(user.favorites) : Promise.resolve([]),
@@ -23,6 +24,11 @@ export default async function AccountPage() {
           <span className="pill">Your account</span>
           <h1>Hi {user.name.split(/\s+/)[0]}</h1>
           <p className="subtitle">Signed in as {prettyPhone(user.phone)}.</p>
+          {password === "changed" && (
+            <p className="st-done" role="status">
+              Password changed. Your other devices have been signed out.
+            </p>
+          )}
         </div>
         <div className="pg-head-actions">
           {user.shopSlug ? (
@@ -34,6 +40,14 @@ export default async function AccountPage() {
               Open a shop
             </Link>
           )}
+          {user.role === "admin" && (
+            <Link href="/admin" className="btn sec">
+              Admin
+            </Link>
+          )}
+          <Link href="/account/password" className="btn gh">
+            Change password
+          </Link>
           <form action={signOut}>
             <button type="submit" className="btn gh">
               Sign out

@@ -10,10 +10,10 @@ export type NavModel = {
   /** Signed out: the sign-in link. */
   signIn?: NavItem;
   /** Signed in: who, for the account menu. */
-  account?: { name: string; phone: string; seller: boolean };
+  account?: { name: string; phone: string; seller: boolean; admin: boolean };
 };
 
-export function navFor(user: { name: string; phone: string; shopSlug?: string } | null): NavModel {
+export function navFor(user: { name: string; phone: string; shopSlug?: string; role?: "admin" } | null): NavModel {
   if (!user) {
     return {
       links: [{ href: "/shops", label: "Shops", icon: "store" }],
@@ -21,18 +21,21 @@ export function navFor(user: { name: string; phone: string; shopSlug?: string } 
       cta: { href: "/signup?as=seller", label: "Sell on Haali", icon: "store" },
     };
   }
-  const account = { name: user.name, phone: user.phone, seller: !!user.shopSlug };
+  const account = { name: user.name, phone: user.phone, seller: !!user.shopSlug, admin: user.role === "admin" };
+  const admin: NavItem[] = account.admin ? [{ href: "/admin", label: "Admin", icon: "settings" }] : [];
   if (!user.shopSlug) {
     return {
       links: [
         { href: "/shops", label: "Shops", icon: "store" },
         { href: "/account", label: "My account", icon: "user" },
+        ...admin,
       ],
       account,
     };
   }
   return {
     links: [
+      ...admin,
       { href: "/orders", label: "Orders", icon: "inbox" },
       { href: "/products", label: "Products", icon: "package" },
       { href: "/drops/new", label: "New drop", icon: "plus" },

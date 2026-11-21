@@ -73,6 +73,18 @@ Many shops per deployment. Each is run by one seller account.
 - **Orders** are recorded when a buyer taps Send (one product or a cart): prices come from the catalogue,
   and the browser's order id makes a resend update rather than duplicate. Sellers move them along on
   `/orders` (Confirmed → Delivered, or Cancelled); signed-in buyers see the status.
+- **Admin** (`/admin`, Haali team only — everyone else gets a 404): find accounts by name, number or
+  shop; reset a password (a one-time password shown once, with a button to send it on WhatsApp — the
+  person is signed out everywhere and must choose a new one when they sign in); sign someone out
+  everywhere; turn an account off or on; edit name and number; make or remove admins; release or move a
+  shop. Every action is recorded in `admin_log` and shown on the person's page and the admin home.
+  Make the first admin from a machine with the database URL (sign up with that number first):
+
+  ```
+  npm run make-admin -- +256772145908
+  ```
+
+  Admins can't turn off or demote themselves. Everyone can change their password at `/account/password`.
 - Short links are now `/o/<shop>/<code>`; old `/o/<code>` links still resolve (see `app/o/[...path]`).
 
 ## Stack
@@ -163,6 +175,7 @@ drops              _id = `${slug}:${id}`   — Drop with items + captions + expi
 users              _id = uuid              — phone (unique), name, password hash + salt, shopSlug?, favorites
 sessions           _id = sha256(token)     — userId, expiresAt (TTL index)
 orders             _id = browser order id  — shopSlug, userId?, buyerPhone, area, items, status
+admin_log          _id = ObjectId          — at, adminId, adminName, targetId, targetName, action, detail
 storefronts        _id = slug              — Storefront { banners, autoplay, menu } (own doc so banner images stay off getShop())
 ```
 

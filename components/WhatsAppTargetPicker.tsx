@@ -1,6 +1,7 @@
 "use client";
 
 import { useWhatsAppTarget } from "@/lib/wa-target";
+import "./wa-target.css";
 
 /**
  * "Open in: WhatsApp Web | Desktop app" — desktop only (renders nothing on

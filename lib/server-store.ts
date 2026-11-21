@@ -3,6 +3,7 @@ import type { CustomTemplate, Drop, Order, Product, Shop, ShopCard, Storefront }
 import { DEFAULT_STOREFRONT } from "./storefront";
 import { getDb } from "./db";
 import { ensureSeeded } from "./seed";
+import type { UserDoc } from "./auth";
 
 type ShopDoc = Shop & { _id: string };
 type ProductDoc = Product & { _id: string; shopSlug: string; updatedAt?: number };
@@ -213,4 +214,106 @@ export async function shopNames(slugs: string[]): Promise<Record<string, string>
     .find({ _id: { $in: [...new Set(slugs)] } }, { projection: { "brandKit.shopName": 1 } })
     .toArray();
   return Object.fromEntries(docs.map((d) => [d._id, d.brandKit?.shopName?.trim() || d._id]));
+}
+
+/* -------------------------------------------------------------------------
+ * Admin (/admin) — never returns password hashes or salts
+ * ------------------------------------------------------------------------- */
+
+export type AdminUserRow = {
+  id: string;
+  name: string;
+  phone: string;
+  shopSlug?: string;
+  shopName?: string;
+  role?: "admin";
+  disabled?: boolean;
+  mustChangePassword?: boolean;
+  createdAt: number;
+};
+export type AdminFilter = "all" | "sellers" | "buyers" | "admins" | "disabled";
+const SAFE = { passwordHash: 0, salt: 0 } as const;
+
+export async function listUsersForAdmin(opts: { q?: string; filter?: AdminFilter; page?: number; perPage?: number }) {
+  const db = await getDb();
+  const perPage = opts.perPage ?? 50;
+  const page = Math.max(1, opts.page ?? 1);
+  const query: Record<string, unknown> = {};
+  const q = opts.q?.trim();
+  if (q) {
+    const rx = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+    const digits = q.replace(/\D/g, "");
+    query.$or = [{ name: rx }, { phone: rx }, ...(digits.length >= 3 ? [{ phone: new RegExp(digits) }] : []), { shopSlug: rx }];
+  }
+  if (opts.filter === "sellers") query.shopSlug = { $exists: true };
+  if (opts.filter === "buyers") query.shopSlug = { $exists: false };
+  if (opts.filter === "admins") query.role = "admin";
+  if (opts.filter === "disabled") query.disabled = true;
+  const users = db.collection<UserDoc>("users");
+  const [docs, total] = await Promise.all([
+    users.find(query, { projection: SAFE }).sort({ createdAt: -1 }).skip((page - 1) * perPage).limit(perPage).toArray(),
+    users.countDocuments(query),
+  ]);
+  const names = await shopNames(docs.flatMap((d) => (d.shopSlug ? [d.shopSlug] : [])));
+  const rows: AdminUserRow[] = docs.map((d) => ({
+    id: d._id,
+    name: d.name,
+    phone: d.phone,
+    shopSlug: d.shopSlug,
+    shopName: d.shopSlug ? names[d.shopSlug] : undefined,
+    role: d.role,
+    disabled: d.disabled,
+    mustChangePassword: d.mustChangePassword,
+    createdAt: d.createdAt,
+  }));
+  return { rows, total, page, pages: Math.max(1, Math.ceil(total / perPage)) };
+}
+
+export async function getUserForAdmin(id: string) {
+  const db = await getDb();
+  const d = await db.collection<UserDoc>("users").findOne({ _id: id }, { projection: SAFE });
+  if (!d) return null;
+  const [shop, ordersPlaced, shopOrders, sessions, log] = await Promise.all([
+    d.shopSlug ? db.collection<ShopDoc>("shops").findOne({ _id: d.shopSlug }, { projection: { "brandKit.shopName": 1, "contact.whatsapp": 1 } }) : null,
+    db.collection("orders").countDocuments({ userId: d._id }),
+    d.shopSlug ? db.collection("orders").countDocuments({ shopSlug: d.shopSlug }) : Promise.resolve(0),
+    db.collection("sessions").countDocuments({ userId: d._id, expiresAt: { $gt: new Date() } }),
+    db.collection<AdminLogDoc>("admin_log").find({ targetId: d._id }).sort({ at: -1 }).limit(30).toArray(),
+  ]);
+  return {
+    user: {
+      id: d._id,
+      name: d.name,
+      phone: d.phone,
+      shopSlug: d.shopSlug,
+      shopName: shop?.brandKit?.shopName,
+      shopWhatsapp: shop?.contact?.whatsapp,
+      role: d.role,
+      disabled: d.disabled,
+      mustChangePassword: d.mustChangePassword,
+      favorites: d.favorites?.length ?? 0,
+      createdAt: d.createdAt,
+    },
+    ordersPlaced,
+    shopOrders,
+    sessions,
+    log: log.map(({ _id: _i, ...e }) => e),
+  };
+}
+
+type AdminLogDoc = {
+  _id?: unknown;
+  at: number;
+  adminId: string | null;
+  adminName: string;
+  targetId: string;
+  targetName: string;
+  action: string;
+  detail?: string;
+};
+
+export async function recentAdminLog(limit = 20) {
+  const db = await getDb();
+  const docs = await db.collection<AdminLogDoc>("admin_log").find({}).sort({ at: -1 }).limit(limit).toArray();
+  return docs.map(({ _id: _i, ...e }) => e);
 }

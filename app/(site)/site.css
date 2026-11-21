@@ -203,3 +203,11 @@
 .st-tabs button span { font-variant-numeric: tabular-nums; color: var(--color-mute-2); }
 .st-tabs button.on { background: var(--color-text); color: var(--color-on-ink); border-color: transparent; }
 .st-tabs button.on span { color: inherit; opacity: 0.7; }
+.st-done {
+  margin: 10px 0 0;
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: var(--color-good-bg);
+  color: var(--color-good-ink);
+  font: 500 13.5px/1.4 var(--f-sans);
+}

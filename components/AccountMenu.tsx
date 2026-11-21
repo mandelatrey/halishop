@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Menu } from "@base-ui/react/menu";
-import { LogOut, Store, User } from "lucide-react";
+import { KeyRound, LogOut, ShieldCheck, Store, User } from "lucide-react";
 import { signOut } from "@/lib/actions/auth";
 import type { NavModel } from "./nav-model";
 import { prettyPhone } from "@/lib/wa";
@@ -30,6 +30,16 @@ export default function AccountMenu({ account }: { account: NonNullable<NavModel
                 <Store className="mm-item-icon" aria-hidden />
                 Browse shops
               </Menu.Item>
+              <Menu.Item className="mm-item" render={<Link href="/account/password" />}>
+                <KeyRound className="mm-item-icon" aria-hidden />
+                Change password
+              </Menu.Item>
+              {account.admin && (
+                <Menu.Item className="mm-item" render={<Link href="/admin" />}>
+                  <ShieldCheck className="mm-item-icon" aria-hidden />
+                  Admin · users
+                </Menu.Item>
+              )}
               <Menu.Item className="mm-item" onClick={() => void signOut()}>
                 <LogOut className="mm-item-icon" aria-hidden />
                 Sign out
