@@ -33,7 +33,12 @@ export function ShopMenuBar({
 }) {
   if (entries.length === 0) return null;
   return (
-    <nav className="by-menu" aria-label="Browse the shop">
+    <nav
+      className="by-menu"
+      aria-label="Browse the shop"
+      // Its width follows the number of entries (storefront.css).
+      style={{ "--n": entries.length } as React.CSSProperties}
+    >
       <ul className="by-menu-list">
         {entries.map((e) => {
           const Icon = menuIcon(e.icon);

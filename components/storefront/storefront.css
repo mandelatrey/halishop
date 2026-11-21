@@ -297,11 +297,24 @@
 .by-slide-fan-card:nth-child(3) { right: 0; transform: rotate(9deg) translateY(5%); z-index: 1; }
 .by-slide-fan-card:only-child { left: 50%; transform: translateX(-50%); }
 
-/* ---------- Hanging menu ---------- */
+/* ---------- Hanging menu ----------
+ * Sized from its entry count (--n, set by ShopMenuBar): exactly as wide as its
+ * items, centred under the banners, and never wider than the page — past
+ * that it scrolls sideways. Item width, gap and padding are tokens so the
+ * width sum and the layout can't drift apart. */
 .by-menu {
+  --item: 74px;
+  --gap: 2px;
+  --pad-x: 6px;
+  --edge: 10px; /* space kept to each side of the banners */
   position: relative;
   z-index: 4;
-  margin: calc(-1 * var(--hang)) 10px 0;
+  box-sizing: border-box;
+  width: min(
+    calc(var(--n, 6) * var(--item) + (var(--n, 6) - 1) * var(--gap) + 2 * var(--pad-x) + 2px),
+    calc(100% - 2 * var(--edge))
+  );
+  margin: calc(-1 * var(--hang)) auto 0;
   background: var(--color-panel);
   border: 1px solid var(--stroke-soft);
   border-radius: 12px;
@@ -310,9 +323,9 @@
 .by-menu-list {
   list-style: none;
   margin: 0;
-  padding: 10px 6px;
+  padding: 10px var(--pad-x);
   display: flex;
-  gap: 2px;
+  gap: var(--gap);
   overflow-x: auto;
   scroll-snap-type: x proximity;
   scrollbar-width: none;
@@ -321,14 +334,8 @@
 .by-menu-list::-webkit-scrollbar { display: none; }
 .by-menu-list > li { flex: none; scroll-snap-align: start; }
 @container shop (min-width: 720px) {
-  .by-menu {
-    width: fit-content;
-    max-width: calc(100% - 48px);
-    margin-left: auto;
-    margin-right: auto;
-    border-radius: 22px;
-  }
-  .by-menu-list { padding: 12px 12px; gap: 6px; }
+  .by-menu { --item: 84px; --gap: 6px; --pad-x: 12px; --edge: 24px; border-radius: 22px; }
+  .by-menu-list { padding-top: 12px; padding-bottom: 12px; }
 }
 
 .by-menu-item {
@@ -336,7 +343,7 @@
   flex-direction: column;
   align-items: center;
   gap: 7px;
-  width: 74px;
+  width: var(--item);
   padding: 4px 2px 2px;
   border-radius: 14px;
   color: var(--color-mute);
@@ -346,7 +353,7 @@
   transition: color 0.15s ease;
 }
 @container shop (min-width: 720px) {
-  .by-menu-item { width: 84px; font-size: 12.5px; }
+  .by-menu-item { font-size: 12.5px; }
 }
 .by-menu-ic {
   position: relative;
