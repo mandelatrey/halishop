@@ -3,6 +3,7 @@ import Link from "next/link";
 import AdminMenu from "./AdminMenu";
 import NavLinks from "./NavLinks";
 import ThemeSwitch from "./ThemeSwitch";
+import "./app-nav.css";
 
 /**
  * Global top nav — Haali wordmark on the left, admin links and the theme
@@ -44,82 +45,6 @@ export default function AppNav() {
           <AdminMenu />
         </div>
       </div>
-
-      <style>{`
-        .app-nav {
-          position: sticky;
-          top: 0;
-          z-index: 30;
-          background: color-mix(in srgb, var(--color-bg) 88%, transparent);
-          backdrop-filter: saturate(1.4) blur(10px);
-          -webkit-backdrop-filter: saturate(1.4) blur(10px);
-          border-bottom: 1px solid var(--stroke-hair);
-        }
-        .app-nav-inner {
-          max-width: 1180px;
-          margin: 0 auto;
-          padding: 14px 20px 12px;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-        .app-nav-brand {
-          display: inline-flex;
-          align-items: center;
-          padding: 4px 6px;
-          border-radius: var(--radius);
-          flex: none;
-          margin-right: auto;
-        }
-        .app-nav-brand:hover {
-          background: var(--color-surface);
-        }
-        .app-nav-brand-mark {
-          height: 30px;
-          width: auto;
-          display: block;
-        }
-
-        /* Desktop inline links */
-        .app-nav-links {
-          display: none;
-          gap: 4px;
-        }
-        .app-nav-links a {
-          font: 500 14px/1 var(--f-sans);
-          color: var(--color-mute);
-          padding: 9px 12px;
-          border-radius: 12px;
-          white-space: nowrap;
-          transition: color 0.15s ease, background 0.15s ease;
-        }
-        .app-nav-links a:hover {
-          color: var(--color-text);
-          background: var(--color-surface);
-        }
-        .app-nav-links a[aria-current="page"] {
-          color: var(--color-text);
-          background: var(--color-panel);
-          box-shadow: var(--shadow);
-          font-weight: 600;
-        }
-
-        /* Mobile hamburger container — AdminMenu absorbs its own positioning */
-        .app-nav-hamburger {
-          display: block;
-          position: relative;
-          width: 40px;
-          height: 40px;
-        }
-        /* On phones the theme switch lives in the menu */
-        .app-nav-theme { display: none; }
-
-        @media (min-width: 720px) {
-          .app-nav-links { display: flex; }
-          .app-nav-theme { display: block; }
-          .app-nav-hamburger { display: none; }
-        }
-      `}</style>
     </header>
   );
 }
