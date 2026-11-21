@@ -80,7 +80,7 @@ export default function Storefront({
           {nameRest.length > 0 && ` ${nameRest.join(" ")}`}
         </h1>
         <p className="by-lede">
-          Tap anything you like and your order opens in WhatsApp, already written out for {firstName}.
+          Tap anything you like and your order opens in WhatsApp, already written out with the order details, ready to send to {firstName}.
         </p>
 
         <div className="by-ctas">
