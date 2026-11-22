@@ -20,6 +20,7 @@ import AskWhatsApp from "./AskWhatsApp";
 import AskDock from "./storefront/AskDock";
 import { CartButton, CartSheet } from "./Cart";
 import FavoriteButton from "./FavoriteButton";
+import BackButton from "./BackButton";
 import BannerCarousel from "./storefront/BannerCarousel";
 import { BannerSlide, BrandSlide } from "./storefront/BannerSlide";
 import { ShopBrowse } from "./storefront/ShopMenu";
@@ -102,6 +103,7 @@ export default function Storefront({
 
   return (
     <main {...buttonScope(shop.brandKit, storefront.buttons, "by-wrap by-shop")}>
+      <BackButton fallbackHref="/shops" fallbackLabel="All shops" className="by-back by-back-shop" />
       <header className="by-shopbar">
         {shop.brandKit.logo ? (
           // eslint-disable-next-line @next/next/no-img-element

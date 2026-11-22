@@ -142,17 +142,17 @@ export async function listShopCards(only?: string[]): Promise<ShopCard[]> {
       .toArray(),
     db
       .collection("products")
-      .aggregate<{ _id: string; count: number; min: number; currency: string; photos: string[] }>([
+      .aggregate<{ _id: string; count: number; min: number; currency: string; photos: ShopCard["photos"] }>([
         { $match: { soldOut: { $ne: true }, ...(only ? { shopSlug: { $in: only } } : {}) } },
         { $sort: { price: 1 } },
-        { $project: { shopSlug: 1, code: 1, price: 1, currency: 1, hasImage: { $gt: ["$image", null] } } },
+        { $project: { shopSlug: 1, code: 1, price: 1, currency: 1, imageMeta: 1, imageFit: 1, hasImage: { $gt: ["$image", null] } } },
         {
           $group: {
             _id: "$shopSlug",
             count: { $sum: 1 },
             min: { $min: "$price" },
             currency: { $first: "$currency" },
-            photos: { $push: { $cond: ["$hasImage", "$code", "$$REMOVE"] } },
+            photos: { $push: { $cond: ["$hasImage", { code: "$code", meta: "$imageMeta", fit: "$imageFit" }, "$$REMOVE"] } },
           },
         },
       ])

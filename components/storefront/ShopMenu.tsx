@@ -120,6 +120,11 @@ export function ShopBrowse({
   children: ReactNode;
 }) {
   const [filter, setFilter] = useState<ShopFilter>(initialFilter);
+  // The page can come back from the router's cache (Back) with the filter only in
+  // the address (?c=, kept by replaceState): read it from there.
+  useEffect(() => {
+    setFilter(parseFilter(new URLSearchParams(window.location.search).get("c")));
+  }, []);
   const section = useRef<HTMLElement>(null);
 
   // Pin a compact copy of the menu under the site nav once the hanging menu

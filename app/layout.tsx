@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import AppNav from "@/components/AppNav";
+import NavHistory from "@/components/NavHistory";
 import { DomEditor } from "domeditor/next";
 import { THEME_BOOT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
@@ -55,6 +56,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
       </head>
       <body suppressHydrationWarning>
+        <NavHistory />
         <AppNav />
         {children}
         {/* Development only: domeditor, the visual CSS editor (Shift+Alt+E) */}

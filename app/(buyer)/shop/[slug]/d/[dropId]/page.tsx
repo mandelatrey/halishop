@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { findShop, getDrop, getStorefrontButtons, listProducts } from "@/lib/server-store";
 import { buttonScope } from "@/lib/brand-accent";
 import { CartButton, CartSheet } from "@/components/Cart";
+import BackButton from "@/components/BackButton";
 import { formatPrice } from "@/lib/format";
 
 export default async function BuyerDropPage({
@@ -42,9 +43,7 @@ export default async function BuyerDropPage({
   return (
     <main {...buttonScope(shop.brandKit, buttons, "by-wrap")}>
       <div className="by-toprow">
-        <a href={`/shop/${slug}`} className="by-back">
-          <span aria-hidden>←</span> {shop.brandKit.shopName}
-        </a>
+        <BackButton fallbackHref={`/shop/${slug}`} fallbackLabel={shop.brandKit.shopName.trim()} />
         <CartButton slug={slug} />
       </div>
       <CartSheet
