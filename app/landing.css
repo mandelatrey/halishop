@@ -116,16 +116,22 @@
 .lp-circuit circle { fill: var(--lp-paper); }
 /* ---------- Page grid + hero cloth ----------
  * Two thin rails inset from the edges run the length of the page, with
- * full-width dividers between sections. They sit behind the content (the
- * dark bands and panels cover them). In the hero, ClothGrid.tsx draws the
- * rails, a faint interior grid and the line under the nav on a soft cream
- * "cloth", and bends them with ripples; towards the hero's bottom its lines
- * settle and fade exactly as the cream does, handing over to the CSS rails. */
+ * full-width dividers between sections and small "+" stitches where they
+ * cross. They sit behind the content (the dark bands and panels cover them).
+ * In the hero, ClothGrid.tsx draws the rails, a faint interior grid, its
+ * stitches and the line under the nav on a soft cream "cloth", and animates
+ * them; towards the hero's bottom its lines settle and fade exactly as the
+ * cream does, handing over to the CSS rails.
+ *
+ * Full-bleed pieces use container units (100cqw = the page's width without
+ * the scrollbar), so stitches land exactly on the rails. */
 .lp {
   position: relative;
   isolation: isolate; /* lets the grid sit at z-index -1, under the sections */
+  container-type: inline-size;
   --lp-rail: clamp(16px, 5vw, 72px);    /* rail inset from the page edges */
   --lp-grid: rgb(110 98 80 / 0.24);      /* warm hairline */
+  --lp-stitch: rgb(110 98 80 / 0.5);     /* the "+" where lines cross */
 }
 .lp-rails {
   position: absolute;
@@ -134,26 +140,57 @@
   pointer-events: none;
   z-index: -1;
 }
+
+/* Dividers between sections */
 .lp-section,
 .lp-footer { position: relative; }
 .lp-section::before,
-.lp-footer::before {
+.lp-footer::before,
+.lp-section::after,
+.lp-footer::after,
+.lp-dark::before,
+.lp-dark::after {
   content: "";
   position: absolute;
   left: 50%;
-  width: 100vw;
+  width: 100cqw;
   transform: translateX(-50%);
+  pointer-events: none;
+}
+.lp-section::before,
+.lp-footer::before {
   top: 44px; /* midway through the gap above the section */
   border-top: 1px solid var(--lp-grid);
-  pointer-events: none;
   z-index: -1;
 }
 .lp-footer::before { top: 0; }
-/* The dark band already has its own edge lines */
-.lp-dark + .lp-section::before { display: none; }
+
+/* Stitches: a 9px "+" on each rail, centred on the divider (or band edge) */
+.lp-section::after,
+.lp-footer::after,
+.lp-dark::before,
+.lp-dark::after {
+  height: 9px;
+  z-index: 1;
+  --s: linear-gradient(var(--lp-stitch), var(--lp-stitch));
+  background:
+    var(--s) calc(var(--lp-rail) - 4px) 4px / 9px 1px no-repeat,
+    var(--s) var(--lp-rail) 0 / 1px 9px no-repeat,
+    var(--s) calc(100% - var(--lp-rail) + 4px) 4px / 9px 1px no-repeat,
+    var(--s) calc(100% - var(--lp-rail)) 0 / 1px 9px no-repeat;
+}
+.lp-section::after { top: 40px; }
+.lp-footer::after { top: -4px; }
+.lp-dark { position: relative; }
+.lp-dark::before { top: -4px; }    /* centred on the band's top edge */
+.lp-dark::after { bottom: -4px; }  /* and its bottom edge */
+/* The dark band already draws the line here; its stitch is enough */
+.lp-dark + .lp-section::before,
+.lp-dark + .lp-section::after { display: none; }
 
 .lp-hero {
   --cloth-bg: #f4efe5;       /* soft cream cloth */
+  --cloth-weave: none;       /* optional fabric texture, see below */
   --cloth-fade: 62%;         /* where the cream (and the hero's lines) start to fade */
 }
 /* Cream ground, behind the nav too; anything above the page top is off-screen */
@@ -162,7 +199,7 @@
   position: absolute;
   top: -80px;
   left: 50%;
-  width: 100vw;
+  width: 100cqw;
   /* A canvas doesn't stretch with top/bottom; give both an explicit height */
   height: calc(100% + 80px);
   transform: translateX(-50%);
@@ -171,7 +208,10 @@
 }
 .lp-hero::before {
   content: "";
-  background: var(--cloth-bg);
+  /* Optional weave: set --cloth-weave to url(/landing/weave.png) (a small,
+     seamless, light-grey fabric tile); multiply keeps it inside the cream. */
+  background: var(--cloth-weave) 0 0 / var(--cloth-weave-size, 240px) repeat, var(--cloth-bg);
+  background-blend-mode: multiply;
   mask-image: linear-gradient(to bottom, #000 var(--cloth-fade), transparent 100%);
 }
 @media (max-width: 719px) {
@@ -179,10 +219,10 @@
   .lp-hero { --cloth-fade: 80%; }
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .lp { --lp-grid: rgb(240 228 205 / 0.13); }
+  :root:not([data-theme="light"]) .lp { --lp-grid: rgb(240 228 205 / 0.13); --lp-stitch: rgb(240 228 205 / 0.32); }
   :root:not([data-theme="light"]) .lp-hero { --cloth-bg: #171510; }
 }
-:root[data-theme="dark"] .lp { --lp-grid: rgb(240 228 205 / 0.13); }
+:root[data-theme="dark"] .lp { --lp-grid: rgb(240 228 205 / 0.13); --lp-stitch: rgb(240 228 205 / 0.32); }
 :root[data-theme="dark"] .lp-hero { --cloth-bg: #171510; }
 
 

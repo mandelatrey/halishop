@@ -6,21 +6,27 @@ import { useEffect, useRef } from "react";
  * Hero background: the page's grid lines, printed on a soft piece of cloth.
  *
  * The landing page has two thin rails inset from the left and right edges and
- * divider lines between sections (plain CSS: `.lp-rails`, section ::before).
- * In the hero this canvas takes over drawing them, adds a faint interior grid,
- * and bends every line with a cloth surface:
- * - a damped wave equation on a coarse grid (one cell per 8 CSS px) carries
- *   ripples from the pointer and from scrolling;
- * - a resting pointer gently dents the cloth, pulling nearby lines in;
- * - a slow, tiny drift keeps it alive when nobody touches it.
- * Lines are displaced by the slope of the surface (like a grid seen through a
- * rippling sheet). Displacement and line strength fade towards the bottom of
- * the hero, where the CSS rails take over, so the hand-off is seamless.
+ * divider lines between sections (plain CSS: `.lp-rails`, section ::before,
+ * with "+" stitches where they cross). In the hero this canvas takes over
+ * drawing them, adds a faint interior grid, and brings it to life:
+ * - Cloth: a damped wave equation on a coarse grid (one cell per 8 CSS px)
+ *   carries ripples from the pointer and from scrolling; a resting pointer
+ *   gently dents it; a slow drift keeps it alive. Lines are displaced by the
+ *   slope of the surface, like a grid seen through a rippling sheet.
+ * - Threads: every line is also a string. Sweeping across one plucks it; the
+ *   pulse runs along the thread, wobbles and dies away.
+ * - Sheen: threads lighten where the cloth faces the light (upper left) and
+ *   darken where it turns away, so folds read as folds.
+ * - Stitches: small "+" marks where threads cross, riding both.
+ * - Drape: on load the cloth starts rumpled and relaxes flat, swinging once
+ *   past flat, in step with the hero's intro.
+ * Displacement and line strength fade towards the bottom of the hero, where
+ * the CSS rails take over, so the hand-off is seamless.
  *
- * Plain Canvas 2D: ~20 polylines a frame, well under a millisecond, the same in
- * every browser. Pauses off-screen / in background tabs; with reduced motion it
- * draws one still frame and ignores input. Colours come from CSS
- * (`--lp-grid`, `--cloth-fade`), re-read on theme changes.
+ * Plain Canvas 2D, a few hundred short strokes a frame, the same in every
+ * browser. Pauses off-screen / in background tabs; with reduced motion it
+ * draws one still, flat frame and ignores input. Colours come from CSS
+ * (`--lp-grid`, `--lp-stitch`, `--cloth-fade`), re-read on theme changes.
  */
 
 const TUNE = {
@@ -37,6 +43,21 @@ const TUNE = {
   pressDepth: 4, // dent under a resting pointer
   pressRadius: 14, // cells
   drift: 1.6, // px of idle drift
+  sheen: 2.4, // how much a thread lightens/darkens with the slope under it
+  thread: {
+    strength: 1.6, // pluck kick (px per substep)
+    width: 3, // pluck width, in samples (× step px)
+    tension: 0.5, // how fast a pluck runs along the thread (< 1)
+    spring: 0.004, // pull back to straight (sets the wobble rate)
+    damping: 0.992, // per substep
+    substeps: 3,
+  },
+  drape: {
+    amount: 18, // how rumpled the cloth starts on load
+    scale: 230, // CSS px, size of the rumples
+    settle: 1.8, // how quickly it relaxes
+    swing: 3, // how fast it swings past flat
+  },
   navOffset: 80, // the canvas starts this far above the hero (behind the nav)
   dprCap: 2,
 };
@@ -97,41 +118,56 @@ export default function ClothGrid({ className }: { className?: string }) {
     let cur = new Float32Array(0), prev = new Float32Array(0);
 
     /* ---------- colours ---------- */
-    let rgb = "110,98,80", lineA = 0.22;
-    let railGrad: CanvasGradient | string = "";
-    let innerGrad: CanvasGradient | string = "";
+    let rgb = "110,98,80", lineA = 0.22, stitchA = 0.45;
 
     const readTheme = () => {
       const cs = getComputedStyle(canvas);
       const [r, g, b, a] = parseColor(cs.getPropertyValue("--lp-grid").trim() || "rgb(110 98 80 / 0.22)");
       rgb = `${r},${g},${b}`;
       lineA = a;
+      const st = parseColor(cs.getPropertyValue("--lp-stitch").trim() || `rgba(${rgb},${a * 2})`);
+      stitchA = st[3];
       const f = parseFloat(cs.getPropertyValue("--cloth-fade"));
       fadeAt = Number.isFinite(f) ? f / 100 : 0.62;
-      buildGradients();
     };
-    // Vertical lines fade along their length: rails in step with the cream
-    // ground (so the CSS rails behind take over), interior lines earlier.
-    const buildGradients = () => {
-      const rg = ctx.createLinearGradient(0, 0, 0, H * dpr);
-      rg.addColorStop(0, `rgba(${rgb},${lineA})`);
-      rg.addColorStop(fadeAt, `rgba(${rgb},${lineA})`);
-      rg.addColorStop(1, `rgba(${rgb},0)`);
-      railGrad = rg;
-      const ig = ctx.createLinearGradient(0, 0, 0, H * dpr);
-      const ia = lineA * TUNE.innerAlpha;
-      ig.addColorStop(0, `rgba(${rgb},${ia})`);
-      ig.addColorStop(fadeAt * 0.7, `rgba(${rgb},${ia})`);
-      ig.addColorStop(Math.min(0.98, fadeAt + 0.2), `rgba(${rgb},0)`);
-      ig.addColorStop(1, `rgba(${rgb},0)`);
-      innerGrad = ig;
+    // Lines fade along their length: rails in step with the cream ground (so
+    // the CSS rails behind take over), the interior grid a little earlier.
+    const railAlphaAt = (y: number) => lineA * (1 - smooth(fadeAt, 1, y / H));
+    const innerAlphaAt = (y: number) =>
+      lineA * TUNE.innerAlpha * (1 - smooth(fadeAt * 0.7, Math.min(0.98, fadeAt + 0.2), y / H));
+
+    /* ---------- threads ----------
+     * Every grid line is also a string: a row of samples with their own
+     * sideways offset (u) and velocity (v), fixed at both ends. Sweeping the
+     * pointer across a line plucks it; the pulse runs along the thread,
+     * wobbles in place and dies away. */
+    type Thread = {
+      vertical: boolean;
+      pos: number; // x of a vertical thread, y of a horizontal one
+      a0: number; // start / end along the thread
+      a1: number;
+      n: number;
+      kind: "rail" | "inner" | "nav";
+      u: Float32Array;
+      v: Float32Array;
+      active: boolean;
     };
-    const innerAlphaAt = (y: number) => {
-      const t = y / H;
-      return lineA * TUNE.innerAlpha * (1 - smooth(fadeAt * 0.7, Math.min(0.98, fadeAt + 0.2), t));
+    let threads: Thread[] = [];
+    const makeThread = (vertical: boolean, pos: number, a0: number, a1: number, kind: Thread["kind"]): Thread => {
+      const n = Math.ceil((a1 - a0) / TUNE.step) + 1;
+      return { vertical, pos, a0, a1, n, kind, u: new Float32Array(n), v: new Float32Array(n), active: false };
+    };
+    const along = (t: Thread, i: number) => Math.min(t.a0 + i * TUNE.step, t.a1);
+    /** String offset of a thread at a distance `s` along it (linear between samples). */
+    const threadOffset = (t: Thread, s: number) => {
+      if (!t.active) return 0;
+      const f = Math.min(t.n - 1.001, Math.max(0, (s - t.a0) / TUNE.step));
+      const i = f | 0;
+      return t.u[i] + (t.u[i + 1] - t.u[i]) * (f - i);
     };
 
     const resize = () => {
+      readTheme(); // the fade point can change with the viewport
       rect = canvas.getBoundingClientRect();
       dpr = Math.min(window.devicePixelRatio || 1, TUNE.dprCap);
       W = Math.max(1, rect.width);
@@ -157,6 +193,16 @@ export default function ClothGrid({ className }: { className?: string }) {
       rowsY = [];
       for (let y = TUNE.navOffset + 0.5; y < H; y += colW) rowsY.push(y);
 
+      const st = TUNE.step;
+      threads = [];
+      for (const x of cols) threads.push(makeThread(true, x, -st, H + st, "inner"));
+      rowsY.forEach((y, i) => {
+        if (i === 0) threads.push(makeThread(false, y, -st, W + st, "nav"));
+        else if (innerAlphaAt(y) > 0.004) threads.push(makeThread(false, y, railL, railR, "inner"));
+      });
+      threads.push(makeThread(true, railL, -st, H + st, "rail"));
+      threads.push(makeThread(true, railR, -st, H + st, "rail"));
+
       const nw = Math.ceil(W / TUNE.cell) + 2, nh = Math.ceil(H / TUNE.cell) + 2;
       if (nw !== gw || nh !== gh) {
         gw = nw;
@@ -164,7 +210,6 @@ export default function ClothGrid({ className }: { className?: string }) {
         cur = new Float32Array(gw * gh);
         prev = new Float32Array(gw * gh);
       }
-      buildGradients();
     };
 
     /* ---------- physics ---------- */
@@ -180,6 +225,48 @@ export default function ClothGrid({ className }: { className?: string }) {
       const t = prev;
       prev = cur;
       cur = t;
+    };
+
+    const stepThreads = () => {
+      const { tension, spring, damping: damp, substeps } = TUNE.thread;
+      for (const t of threads) {
+        if (!t.active) continue;
+        const { u, v, n } = t;
+        for (let s = 0; s < substeps; s++) {
+          for (let i = 1; i < n - 1; i++) {
+            v[i] = (v[i] + tension * (u[i - 1] + u[i + 1] - 2 * u[i]) - spring * u[i]) * damp;
+          }
+          for (let i = 1; i < n - 1; i++) u[i] += v[i];
+        }
+        let e = 0;
+        for (let i = 0; i < n; i++) e = Math.max(e, Math.abs(u[i]), Math.abs(v[i]));
+        if (e < 0.01) {
+          u.fill(0);
+          v.fill(0);
+          t.active = false;
+        }
+      }
+    };
+
+    /** Pluck every thread the pointer crossed between two points (CSS px). */
+    const pluck = (x0: number, y0: number, x1: number, y1: number) => {
+      const { strength, width } = TUNE.thread;
+      for (const t of threads) {
+        const p0 = t.vertical ? x0 : y0, p1 = t.vertical ? x1 : y1;
+        if ((p0 - t.pos) * (p1 - t.pos) >= 0) continue;
+        const f = (t.pos - p0) / (p1 - p0);
+        const along0 = t.vertical ? y0 : x0, along1 = t.vertical ? y1 : x1;
+        const s = along0 + (along1 - along0) * f;
+        if (s < t.a0 || s > t.a1) continue;
+        const idx = (s - t.a0) / TUNE.step;
+        // Faster sweeps pluck harder; the thread is dragged the way the pointer went
+        const kick = Math.sign(p1 - p0) * strength * Math.min(1, Math.abs(p1 - p0) / 30 + 0.25);
+        const r = Math.ceil(width * 3);
+        for (let i = Math.max(1, Math.floor(idx - r)); i <= Math.min(t.n - 2, Math.ceil(idx + r)); i++) {
+          t.v[i] += kick * Math.exp(-((i - idx) ** 2) / (2 * width * width));
+        }
+        t.active = true;
+      }
     };
 
     /** Push the cloth along a segment (cell units). */
@@ -213,9 +300,19 @@ export default function ClothGrid({ className }: { className?: string }) {
     let time = 0;
     let still = false;
 
-    /** Displacement (CSS px) of a point on the cloth at (x, y) CSS px. */
-    const out = { x: 0, y: 0 };
-    const displace = (x: number, y: number) => {
+    /** How rumpled the cloth still is from loading: swings once past flat, then settles. */
+    const drapeAmount = () => {
+      if (still || time > 3) return 0;
+      const d = TUNE.drape;
+      return d.amount * Math.exp(-d.settle * time) * Math.cos(d.swing * time);
+    };
+
+    /**
+     * Displacement (CSS px) of the cloth at (x, y) CSS px, plus its slope
+     * (for the sheen) and how much of the motion survives this far down.
+     */
+    const out = { x: 0, y: 0, sx: 0, sy: 0, k: 1 };
+    const displace = (x: number, y: number, drape: number) => {
       const gx = x / TUNE.cell, gy = y / TUNE.cell;
       // Slope of the ripples, measured across a few cells so lines curve smoothly
       let sx = (heightAt(gx + 2, gy) - heightAt(gx - 2, gy)) * 0.25;
@@ -226,6 +323,12 @@ export default function ClothGrid({ className }: { className?: string }) {
         const e = TUNE.pressDepth * pointer.presence * Math.exp(-(dx * dx + dy * dy) / r2) * (2 / r2);
         sx += e * dx;
         sy += e * dy;
+      }
+      // Load-time rumples: large soft folds that relax away
+      if (drape !== 0) {
+        const sc = TUNE.drape.scale, e = 6;
+        sx += (drape * (noise((x + e) / sc, y / sc + 3.3) - noise((x - e) / sc, y / sc + 3.3)) * TUNE.cell) / (2 * e);
+        sy += (drape * (noise(x / sc, (y + e) / sc + 3.3) - noise(x / sc, (y - e) / sc + 3.3)) * TUNE.cell) / (2 * e);
       }
       let ox = -sx * TUNE.bend, oy = -sy * TUNE.bend;
       // Soft limit: big pushes saturate smoothly instead of kinking
@@ -243,51 +346,89 @@ export default function ClothGrid({ className }: { className?: string }) {
       const k = 1 - smooth(fadeAt, 1, y / H);
       out.x = ox * k;
       out.y = oy * k;
+      out.sx = sx * k;
+      out.sy = sy * k;
+      out.k = k;
       return out;
     };
 
     /* ---------- drawing ---------- */
-    const vline = (x: number) => {
-      ctx.beginPath();
-      for (let y = -TUNE.step; y <= H + TUNE.step; y += TUNE.step) {
-        const o = displace(x, y);
-        ctx.lineTo((x + o.x) * dpr, (y + o.y) * dpr);
+    // Light comes from the upper left. Slopes facing it catch the light and
+    // the thread almost disappears into the cream; slopes facing away darken.
+    const LX = -0.6, LY = -0.8;
+    const sheen = (sx: number, sy: number) =>
+      Math.min(2.2, Math.max(0.15, 1 - TUNE.sheen * -(sx * LX + sy * LY)));
+
+    const CHUNK = 3; // segments per stroke, so the sheen can vary along a line
+    const px = new Float32Array(4096), py = new Float32Array(4096), pa = new Float32Array(4096);
+    const drawThread = (t: Thread, drape: number) => {
+      const n = Math.min(t.n, px.length);
+      for (let i = 0; i < n; i++) {
+        const s = along(t, i);
+        const x = t.vertical ? t.pos : s, y = t.vertical ? s : t.pos;
+        const o = displace(x, y, drape);
+        // The thread's own vibration, and its tilt for the sheen
+        let tilt = 0;
+        let off = 0;
+        if (t.active) {
+          off = t.u[i] * o.k;
+          const a = t.u[Math.max(0, i - 1)], b = t.u[Math.min(t.n - 1, i + 1)];
+          tilt = ((b - a) / (2 * TUNE.step)) * o.k;
+        }
+        px[i] = x + o.x + (t.vertical ? off : 0);
+        py[i] = y + o.y + (t.vertical ? 0 : off);
+        const base = t.kind === "inner" ? innerAlphaAt(y) : t.kind === "rail" ? railAlphaAt(y) : lineA;
+        // A tilted thread faces the light like a tilted patch of cloth would
+        pa[i] = base * sheen(o.sx + (t.vertical ? -tilt : 0) * 0.5, o.sy + (t.vertical ? 0 : -tilt) * 0.5);
       }
-      ctx.stroke();
+      for (let i0 = 0; i0 < n - 1; i0 += CHUNK) {
+        const i1 = Math.min(n - 1, i0 + CHUNK);
+        let a = 0;
+        for (let i = i0; i <= i1; i++) a += pa[i];
+        a /= i1 - i0 + 1;
+        if (a < 0.003) continue;
+        ctx.strokeStyle = `rgba(${rgb},${a.toFixed(3)})`;
+        ctx.beginPath();
+        ctx.moveTo(px[i0] * dpr, py[i0] * dpr);
+        for (let i = i0 + 1; i <= i1; i++) ctx.lineTo(px[i] * dpr, py[i] * dpr);
+        ctx.stroke();
+      }
     };
-    const hline = (y: number, x0: number, x1: number) => {
-      ctx.beginPath();
-      for (let x = x0; ; x += TUNE.step) {
-        const xx = Math.min(x, x1);
-        const o = displace(xx, y);
-        ctx.lineTo((xx + o.x) * dpr, (y + o.y) * dpr);
-        if (xx >= x1) break;
+
+    /** Small "+" stitches where the threads cross; they ride the cloth and the threads. */
+    const drawStitches = (drape: number) => {
+      const verticals = threads.filter((t) => t.vertical);
+      const horizontals = threads.filter((t) => !t.vertical);
+      for (const h of horizontals) {
+        for (const v of verticals) {
+          if (v.pos < h.a0 || v.pos > h.a1) continue;
+          const major = v.kind === "rail" || h.kind === "nav";
+          const base = major ? railAlphaAt(h.pos) : innerAlphaAt(h.pos);
+          const a = (base / Math.max(0.001, lineA)) * stitchA * (major ? 1 : 0.7);
+          if (a < 0.01) continue;
+          const o = displace(v.pos, h.pos, drape);
+          const x = v.pos + o.x + threadOffset(v, h.pos) * o.k;
+          const y = h.pos + o.y + threadOffset(h, v.pos) * o.k;
+          const arm = major ? 4 : 2.5;
+          ctx.strokeStyle = `rgba(${rgb},${(a * sheen(o.sx, o.sy)).toFixed(3)})`;
+          ctx.beginPath();
+          ctx.moveTo((x - arm) * dpr, y * dpr);
+          ctx.lineTo((x + arm) * dpr, y * dpr);
+          ctx.moveTo(x * dpr, (y - arm) * dpr);
+          ctx.lineTo(x * dpr, (y + arm) * dpr);
+          ctx.stroke();
+        }
       }
-      ctx.stroke();
     };
 
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.lineWidth = dpr; // 1 CSS px
       ctx.lineJoin = "round";
-      // Interior grid
-      ctx.strokeStyle = innerGrad;
-      for (const x of cols) vline(x);
-      for (let i = 1; i < rowsY.length; i++) {
-        const a = innerAlphaAt(rowsY[i]);
-        if (a < 0.004) continue;
-        ctx.strokeStyle = `rgba(${rgb},${a})`;
-        hline(rowsY[i], railL, railR);
-      }
-      // The line under the nav runs full width, like the section dividers
-      if (rowsY.length) {
-        ctx.strokeStyle = `rgba(${rgb},${lineA})`;
-        hline(rowsY[0], -TUNE.step, W + TUNE.step);
-      }
-      // Rails
-      ctx.strokeStyle = railGrad;
-      vline(railL);
-      vline(railR);
+      ctx.lineCap = "round";
+      const drape = drapeAmount();
+      for (const t of threads) drawThread(t, drape);
+      drawStitches(drape);
     };
 
     /* ---------- input ---------- */
@@ -328,6 +469,8 @@ export default function ClothGrid({ className }: { className?: string }) {
       if (!Number.isNaN(pointer.lastX)) {
         const dist = Math.hypot(g.x - pointer.lastX, g.y - pointer.lastY);
         disturb(pointer.lastX, pointer.lastY, g.x, g.y, Math.min(6, dist) * TUNE.push);
+        const c = TUNE.cell;
+        pluck(pointer.lastX * c, pointer.lastY * c, g.x * c, g.y * c);
       }
       pointer.lastX = pointer.x = g.x;
       pointer.lastY = pointer.y = g.y;
@@ -360,6 +503,7 @@ export default function ClothGrid({ className }: { className?: string }) {
       while (acc >= STEP && steps < 4) {
         tug();
         stepSim();
+        stepThreads();
         acc -= STEP;
         steps++;
       }
@@ -386,6 +530,11 @@ export default function ClothGrid({ className }: { className?: string }) {
       time = 0;
       cur.fill(0);
       prev.fill(0);
+      for (const t of threads) {
+        t.u.fill(0);
+        t.v.fill(0);
+        t.active = false;
+      }
       draw();
       still = false;
     };
@@ -401,7 +550,6 @@ export default function ClothGrid({ className }: { className?: string }) {
     };
 
     resize();
-    readTheme();
     draw();
 
     const io = new IntersectionObserver((entries) => {
