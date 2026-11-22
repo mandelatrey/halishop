@@ -29,6 +29,9 @@ const TUNE = {
   damping: 0.972, // per step; lower = ripples die sooner
   push: 0.42, // how hard a moving pointer pushes the cloth
   pressDepth: 0.9, // gentle dent under a resting pointer
+  scrollPush: 0.05, // ripple strength per px scrolled
+  dotMin: 0.06, // dot radius at darkest/lightest tone, as a share of the cell
+  dotMax: 0.36,
   dprCap: 2,
 };
 
@@ -51,7 +54,7 @@ void main() {
   vec2 cell = floor(p / uCellPx);
   float tone = texture2D(uTone, (cell + 0.5) / uGrid).r;
   vec2 local = p - (cell + 0.5) * uCellPx;
-  float radius = mix(0.08, 0.44, tone) * uCellPx;
+  float radius = mix(${TUNE.dotMin.toFixed(3)}, ${TUNE.dotMax.toFixed(3)}, tone) * uCellPx;
   float cov = 1.0 - smoothstep(radius - 0.8, radius + 0.8, length(local));
   float a = cov * uAlpha * (0.5 + 0.7 * tone);
   gl_FragColor = vec4(uInk * a, a);
@@ -195,33 +198,72 @@ function webglRenderer(canvas: HTMLCanvasElement): Renderer | null {
   };
 }
 
-/** Fallback: tiny squares at this size read as dots; batched into a few fills by tone. */
+/**
+ * Fallback when WebGL is off or fails: one tiny tile per tone level holding a
+ * single round dot, used as a repeating pattern. Runs of cells at the same
+ * level are filled as one rectangle, so each cell shows exactly one dot and a
+ * frame is a few thousand rects rather than tens of thousands of arcs.
+ */
 function canvas2dRenderer(canvas: HTMLCanvasElement): Renderer | null {
   const ctx = canvas.getContext("2d");
   if (!ctx) return null;
-  const LEVELS = 8;
+  const LEVELS = 10;
   let cols = 1, rows = 1, cellPx = 1, w = 1, h = 1;
-  let ink = "20,22,26", alpha = 0.15;
+  let rgb: [number, number, number] = [0.08, 0.09, 0.1], alpha = 0.15;
+  let patterns: (CanvasPattern | null)[] = [];
+
+  const build = () => {
+    const ink = rgb.map((v) => Math.round(v * 255)).join(",");
+    patterns = [];
+    for (let l = 0; l < LEVELS; l++) {
+      const t = (l + 0.5) / LEVELS;
+      const tile = document.createElement("canvas");
+      tile.width = tile.height = cellPx;
+      const tc = tile.getContext("2d");
+      if (!tc) {
+        patterns.push(null);
+        continue;
+      }
+      const r = Math.max(0.5, (TUNE.dotMin + (TUNE.dotMax - TUNE.dotMin) * t) * cellPx);
+      tc.fillStyle = `rgba(${ink},${alpha * (0.5 + 0.7 * t)})`;
+      tc.beginPath();
+      tc.arc(cellPx / 2, cellPx / 2, r, 0, Math.PI * 2);
+      tc.fill();
+      patterns.push(ctx.createPattern(tile, "repeat"));
+    }
+  };
+
   return {
     resize(cw, ch, c, r, cp) {
-      w = cw; h = ch; cols = c; rows = r; cellPx = cp;
+      w = cw; h = ch; cols = c; rows = r;
+      if (cp !== cellPx) {
+        cellPx = cp;
+        build();
+      }
     },
-    setInk(rgb, a) {
-      ink = rgb.map((v) => Math.round(v * 255)).join(",");
+    setInk(c, a) {
+      rgb = c;
       alpha = a;
+      build();
     },
     draw(tone) {
       ctx.clearRect(0, 0, w, h);
       for (let l = 0; l < LEVELS; l++) {
-        const t = (l + 0.5) / LEVELS;
-        const size = Math.max(1, (0.16 + 0.72 * t) * cellPx);
-        const off = (cellPx - size) / 2;
-        ctx.fillStyle = `rgba(${ink},${alpha * (0.5 + 0.7 * t)})`;
+        const pat = patterns[l];
+        if (!pat) continue;
+        ctx.fillStyle = pat;
         ctx.beginPath();
         for (let y = 0; y < rows; y++) {
-          for (let x = 0; x < cols; x++) {
-            if (Math.min(LEVELS - 1, (tone[y * cols + x] * LEVELS) >> 8) !== l) continue;
-            ctx.rect(x * cellPx + off, y * cellPx + off, size, size);
+          const row = y * cols;
+          let x = 0;
+          while (x < cols) {
+            if (Math.min(LEVELS - 1, (tone[row + x] * LEVELS) >> 8) !== l) {
+              x++;
+              continue;
+            }
+            const x0 = x;
+            while (x < cols && Math.min(LEVELS - 1, (tone[row + x] * LEVELS) >> 8) === l) x++;
+            ctx.rect(x0 * cellPx, y * cellPx, (x - x0) * cellPx, cellPx);
           }
         }
         ctx.fill();
@@ -318,6 +360,31 @@ export default function ClothShader({ className }: { className?: string }) {
 
     const pointer = { x: 0, y: 0, sx: 0, sy: 0, inside: false, presence: 0, lastX: NaN, lastY: NaN };
 
+    /**
+     * Scrolling tugs the cloth: a soft, uneven line of impulses along the top
+     * of the visible part sends a gentle ripple down the fabric. Strength
+     * follows scroll speed and is spread over the next few steps.
+     */
+    let scrollEnergy = 0;
+    let lastScrollY = window.scrollY;
+    const tug = (t: number) => {
+      if (Math.abs(scrollEnergy) < 0.002) {
+        scrollEnergy = 0;
+        return;
+      }
+      const amount = scrollEnergy * 0.25;
+      scrollEnergy -= amount;
+      const topRow = Math.max(2, Math.min(rows - 3, Math.round(Math.max(0, -rect.top) / TUNE.cell) + 2));
+      for (let x = 1; x < cols - 1; x++) {
+        // Patchy along its length so it reads as fabric, not a ruler line
+        const m = 0.55 + 0.45 * noise(x * 0.045, t * 0.6);
+        const a = amount * m;
+        cur[(topRow - 1) * cols + x] -= a * 0.5;
+        cur[topRow * cols + x] -= a;
+        cur[(topRow + 1) * cols + x] -= a * 0.5;
+      }
+    };
+
     const composeTone = (t: number, withPointer: boolean) => {
       // Fold field on the coarse grid
       const cell = TUNE.cell, fs = TUNE.foldScale;
@@ -392,6 +459,12 @@ export default function ClothShader({ className }: { className?: string }) {
     };
     const onScroll = () => {
       rect = canvas.getBoundingClientRect();
+      const y = window.scrollY;
+      const dy = y - lastScrollY;
+      lastScrollY = y;
+      if (reduced.matches || rect.bottom < 0) return;
+      scrollEnergy = Math.max(-1.2, Math.min(1.2, scrollEnergy + dy * TUNE.scrollPush));
+      wake();
     };
 
     /* ---------- loop ---------- */
@@ -410,6 +483,7 @@ export default function ClothShader({ className }: { className?: string }) {
       lastT = now;
       let steps = 0;
       while (acc >= STEP && steps < 4) {
+        tug((now - start) / 1000);
         step();
         acc -= STEP;
         steps++;
