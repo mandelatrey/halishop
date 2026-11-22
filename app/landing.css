@@ -190,7 +190,11 @@
 
 .lp-hero {
   --cloth-bg: #f4efe5;       /* soft cream cloth */
-  --cloth-weave: none;       /* optional fabric texture, see below */
+  /* Fabric weave under the grid: a seamless tile cut from Poly Haven's
+     "Crepe Satin" (CC0) and lightened, made by scripts/make-weave-tile.py.
+     Set to none to turn it off. */
+  --cloth-weave: url(/landing/weave.webp);
+  --cloth-weave-size: 256px;
   --cloth-fade: 62%;         /* where the cream (and the hero's lines) start to fade */
 }
 /* Cream ground, behind the nav too; anything above the page top is off-screen */
@@ -208,8 +212,7 @@
 }
 .lp-hero::before {
   content: "";
-  /* Optional weave: set --cloth-weave to url(/landing/weave.png) (a small,
-     seamless, light-grey fabric tile); multiply keeps it inside the cream. */
+  /* Weave tile (light grey, mostly white) multiplied into the cream */
   background: var(--cloth-weave) 0 0 / var(--cloth-weave-size, 240px) repeat, var(--cloth-bg);
   background-blend-mode: multiply;
   mask-image: linear-gradient(to bottom, #000 var(--cloth-fade), transparent 100%);
