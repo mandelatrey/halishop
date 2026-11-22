@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import "./landing.css";
 import LandingMotion from "./LandingMotion";
+import ClothShader from "./ClothShader";
 import ReadTicks from "@/components/ReadTicks";
 
 export const metadata: Metadata = {
@@ -144,6 +145,7 @@ export default function Landing() {
     <LandingMotion>
       {/* ---------------- Hero ---------------- */}
       <section className="lp-hero">
+        <ClothShader className="lp-cloth" />
         <CircuitLines />
         <div className="lp-hero-copy">
           <Pill>Built for entrepreneurs</Pill>

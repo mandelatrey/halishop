@@ -114,6 +114,29 @@
 .lp-circuit circle { stroke: var(--lp-line); }
 .lp-circuit rect,
 .lp-circuit circle { fill: var(--lp-paper); }
+/* Cloth shader (ClothShader.tsx): full-bleed behind the hero, fading out at
+   the bottom so it hands over cleanly to the dark band. Ink + strength per
+   theme; keep alpha low, it should read as texture, not imagery. */
+.lp-cloth {
+  --cloth-ink: var(--color-text);
+  --cloth-alpha: 0.18;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  height: 100%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 0;
+  -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .lp-cloth { --cloth-alpha: 0.12; }
+}
+:root[data-theme="dark"] .lp-cloth { --cloth-alpha: 0.12; }
+
 /* Keep the lines to the edges so they never run through the headline */
 .lp-hero .lp-circuit {
   -webkit-mask-image: radial-gradient(ellipse 56% 62% at 50% 34%, transparent 72%, #000 100%);
