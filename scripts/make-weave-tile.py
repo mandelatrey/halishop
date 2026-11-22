@@ -7,10 +7,13 @@ Source: Poly Haven "Crepe Satin" (CC0), Diffuse map, 2K, JPG:
 
 Usage:
   python3 scripts/make-weave-tile.py crepe_satin_diff_2k.jpg public/landing/weave.webp [contrast] [brightness]
+  python3 scripts/make-weave-tile.py crepe_satin_diff_2k.jpg public/landing/weave-dark.webp [contrast] [brightness] --dark
 
   contrast   spread of the weave in grey levels (default 6.5; higher = more visible)
   brightness average grey level 0-255 (default 249; the tile is multiplied into
-             the cream, so 255 = no darkening at all)
+             the cream, so 255 = no darkening at all). With --dark the tile is
+             inverted (255 - value), so 249 becomes an average of 6 and the
+             threads lighten instead.
 
 What it does: crops a 512px patch at full size (shrinking would erase the
 weave), keeps only the fine detail (high-pass), makes it seamless one axis at a
@@ -22,9 +25,11 @@ import sys
 import numpy as np
 from PIL import Image, ImageFilter
 
-src, out = sys.argv[1], sys.argv[2]
-std_target = float(sys.argv[3]) if len(sys.argv) > 3 else 6.5
-base = float(sys.argv[4]) if len(sys.argv) > 4 else 249.0
+dark = "--dark" in sys.argv[1:]
+args = [a for a in sys.argv[1:] if not a.startswith("--")]
+src, out = args[0], args[1]
+std_target = float(args[2]) if len(args) > 2 else 6.5
+base = float(args[3]) if len(args) > 3 else 249.0
 T = 512
 im = Image.open(src).convert("L")
 W, H = im.size
@@ -60,5 +65,9 @@ tile, sy = seamless(tile, 0)
 bs = (sy, sx)
 tile = tile / tile.std() * std_target
 res = np.clip(base + tile, 0, 255).astype(np.uint8)
+if dark:
+    # Dark mode: mostly black with lighter threads, for a "screen" blend that
+    # lightens the dark cloth the way the light tile darkens the cream
+    res = 255 - res
 Image.fromarray(res, "L").save(out, quality=88, method=6)
 print("shift", bs, "mean", res.mean().round(1), "std", res.std().round(2), "min", res.min())

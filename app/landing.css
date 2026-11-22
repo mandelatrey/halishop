@@ -189,12 +189,13 @@
 .lp-dark + .lp-section::after { display: none; }
 
 .lp-hero {
-  --cloth-bg: #f4efe5;       /* soft cream cloth */
+  --cloth-bg: #f8f5ee;       /* soft cream cloth */
   /* Fabric weave under the grid: a seamless tile cut from Poly Haven's
      "Crepe Satin" (CC0) and lightened, made by scripts/make-weave-tile.py.
      Set to none to turn it off. */
   --cloth-weave: url(/landing/weave.webp);
   --cloth-weave-size: 256px;
+  --cloth-weave-blend: multiply; /* light tile darkens the cream a touch */
   --cloth-fade: 62%;         /* where the cream (and the hero's lines) start to fade */
 }
 /* Cream ground, behind the nav too; anything above the page top is off-screen */
@@ -212,9 +213,9 @@
 }
 .lp-hero::before {
   content: "";
-  /* Weave tile (light grey, mostly white) multiplied into the cream */
-  background: var(--cloth-weave) 0 0 / var(--cloth-weave-size, 240px) repeat, var(--cloth-bg);
-  background-blend-mode: multiply;
+  /* Weave tile blended into the cream (multiply) or the dark cloth (screen) */
+  background: var(--cloth-weave) 0 0 / var(--cloth-weave-size, 256px) repeat, var(--cloth-bg);
+  background-blend-mode: var(--cloth-weave-blend, multiply);
   mask-image: linear-gradient(to bottom, #000 var(--cloth-fade), transparent 100%);
 }
 @media (max-width: 719px) {
@@ -223,10 +224,19 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .lp { --lp-grid: rgb(240 228 205 / 0.13); --lp-stitch: rgb(240 228 205 / 0.32); }
-  :root:not([data-theme="light"]) .lp-hero { --cloth-bg: #171510; }
+  :root:not([data-theme="light"]) .lp-hero {
+    --cloth-bg: #171510;
+    /* Inverted tile: mostly black with lighter threads, screened in */
+    --cloth-weave: url(/landing/weave-dark.webp);
+    --cloth-weave-blend: screen;
+  }
 }
 :root[data-theme="dark"] .lp { --lp-grid: rgb(240 228 205 / 0.13); --lp-stitch: rgb(240 228 205 / 0.32); }
-:root[data-theme="dark"] .lp-hero { --cloth-bg: #171510; }
+:root[data-theme="dark"] .lp-hero {
+  --cloth-bg: #171510;
+  --cloth-weave: url(/landing/weave-dark.webp);
+  --cloth-weave-blend: screen;
+}
 
 
 .lp-hero-copy {
