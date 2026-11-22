@@ -372,6 +372,6 @@ export type ShopCard = {
   primary: string;
   inStock: number;
   from?: { price: number; currency: string };
-  /** Codes of up to three in-stock products with photos. */
-  photos: string[];
+  /** Up to three in-stock products with photos, framed as on the shop page. */
+  photos: { code: string; meta?: ImageMeta; fit?: ImageFit }[];
 };
