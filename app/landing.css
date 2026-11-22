@@ -32,8 +32,10 @@
 .lp *::before,
 .lp *::after { box-sizing: border-box; }
 
+/* Content columns sit between the page rails (see "Page grid" below), with
+   a 20px gutter inside them; on wide screens they cap at 1180px. */
 .lp-inner {
-  max-width: 1180px;
+  width: min(1180px, 100% - 2 * var(--lp-rail));
   margin: 0 auto;
   padding-left: 20px;
   padding-right: 20px;
@@ -99,6 +101,8 @@
   max-width: 1280px;
   margin: 0 auto;
   padding: 56px 20px 72px;
+  /* Keep a 20px gutter inside the rails (the hero is centred, max 1280px) */
+  padding-inline: max(20px, calc(var(--lp-rail) + 20px - max(0px, (100cqw - 1280px) / 2)));
   text-align: center;
 }
 .lp-circuit {
@@ -412,7 +416,7 @@
 .lp-stat-l { font: 400 14px/1.4 var(--f-sans); color: var(--lp-on-dark-soft); }
 
 /* ---------- Sections ---------- */
-.lp-section { padding: 88px 0 0; }
+.lp-section { padding-top: 88px; } /* top only: .lp-inner sections keep their side gutters */
 .lp-h2 {
   font: 500 clamp(24px, 3.4vw, 36px)/1.18 var(--f-sans);
   letter-spacing: -0.025em;
@@ -427,7 +431,7 @@
 
 /* Glow panel — Haali ink with blue light bleeding in from the corners */
 .lp-glow {
-  max-width: 1240px;
+  width: min(1240px, 100% - 2 * var(--lp-rail) - 24px); /* 12px inside the rails */
   margin: 0 auto;
   padding: 64px 16px 16px;
   border-radius: 20px;
@@ -549,7 +553,7 @@
 /* ---------- Closing CTA ---------- */
 .lp-final {
   position: relative;
-  max-width: 1240px;
+  width: min(1240px, 100% - 2 * var(--lp-rail) - 24px); /* 12px inside the rails */
   margin: 0 auto;
   padding: 72px 20px;
   border-radius: 20px;
@@ -575,11 +579,6 @@
   color: var(--color-mute-2);
 }
 
-/* Small screens: side gutters on the full-bleed panels */
-@media (max-width: 1279px) {
-  .lp-glow, .lp-final { margin-left: 12px; margin-right: 12px; }
-}
-
 /* ---------- Breakpoints ---------- */
 @media (min-width: 720px) {
   .lp-stats { grid-template-columns: repeat(3, 1fr); gap: 0; text-align: center; max-width: 70%; }
@@ -598,7 +597,7 @@
   .lp-hero-note {
     display: block;
     position: absolute;
-    left: 40px;
+    left: max(40px, calc(var(--lp-rail) + 24px - max(0px, (100cqw - 1280px) / 2)));
     bottom: 40px;
   }
   /* The note sits bottom-left, so tuck the dark panel up out of its way */

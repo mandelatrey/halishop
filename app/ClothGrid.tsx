@@ -20,6 +20,8 @@ import { useEffect, useRef } from "react";
  * - Stitches: small "+" marks where threads cross, riding both.
  * - Drape: on load the cloth starts rumpled and relaxes flat, swinging once
  *   past flat, in step with the hero's intro.
+ * - Swell: a few long, slow waves keep crossing the cloth, rising and falling
+ *   in gusts, so it is always gently moving; input adds on top.
  * Displacement and line strength fade towards the bottom of the hero, where
  * the CSS rails take over, so the hand-off is seamless.
  *
@@ -43,6 +45,18 @@ const TUNE = {
   pressDepth: 4, // dent under a resting pointer
   pressRadius: 14, // cells
   drift: 1.6, // px of idle drift
+  // Ambient swell: a few long, slow waves crossing the cloth, rising and
+  // falling in gusts. Slope units, like the ripples (× bend = px).
+  swell: {
+    amount: 0.16, // peak slope of the combined swell (0 = off)
+    gust: 0.45, // how much the strength breathes over time (0..1)
+    waves: [
+      // direction (x, y), wavelength px, speed px/s, share of the amount
+      { dx: 0.94, dy: 0.34, length: 780, speed: 46, share: 0.5 },
+      { dx: -0.42, dy: 0.91, length: 560, speed: 34, share: 0.32 },
+      { dx: 0.62, dy: -0.78, length: 1040, speed: 58, share: 0.28 },
+    ],
+  },
   sheen: 2.4, // how much a thread lightens/darkens with the slope under it
   thread: {
     strength: 1.6, // pluck kick (px per substep)
@@ -324,6 +338,16 @@ export default function ClothGrid({ className }: { className?: string }) {
         sx += e * dx;
         sy += e * dy;
       }
+      // Ambient swell (analytic slope of a few travelling sine waves)
+      if (swellGain > 0) {
+        for (const w of TUNE.swell.waves) {
+          const k = (2 * Math.PI) / w.length;
+          const c = Math.cos(k * (x * w.dx + y * w.dy - w.speed * time) + w.length);
+          const a = swellGain * w.share * c;
+          sx += a * w.dx;
+          sy += a * w.dy;
+        }
+      }
       // Load-time rumples: large soft folds that relax away
       if (drape !== 0) {
         const sc = TUNE.drape.scale, e = 6;
@@ -421,7 +445,13 @@ export default function ClothGrid({ className }: { className?: string }) {
       }
     };
 
+    // Swell strength for this frame: gusty, and eased in as the drape settles
+    let swellGain = 0;
     const draw = () => {
+      const sw = TUNE.swell;
+      swellGain = still
+        ? 0
+        : sw.amount * (1 - sw.gust + sw.gust * (0.5 + 0.5 * noise(time * 0.12, 4.2))) * smooth(0.4, 2.2, time);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.lineWidth = dpr; // 1 CSS px
       ctx.lineJoin = "round";
