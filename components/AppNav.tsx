@@ -3,6 +3,7 @@ import Link from "next/link";
 import AdminMenu from "./AdminMenu";
 import NavLinks from "./NavLinks";
 import ThemeSwitch from "./ThemeSwitch";
+import NavScrollState from "./NavScrollState";
 import { navFor } from "./nav-model";
 import { getCurrentUser } from "@/lib/auth";
 import "./app-nav.css";
@@ -17,6 +18,7 @@ export default async function AppNav() {
   const nav = navFor(await getCurrentUser());
   return (
     <header className={`app-nav${nav.links.length > 3 ? " app-nav-many" : ""}`}>
+      <NavScrollState />
       <div className="app-nav-inner">
         <Link href="/" className="app-nav-brand" aria-label="Haali — home">
           <Image

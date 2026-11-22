@@ -9,6 +9,15 @@
      when both are written it keeps only the last one, which Chrome ignores. */
   backdrop-filter: saturate(1.4) blur(10px);
   border-bottom: 1px solid var(--stroke-hair);
+  transition: background-color 0.25s ease, border-color 0.25s ease, backdrop-filter 0.25s ease;
+}
+/* At the top of the page the nav is see-through (the landing hero's
+   background runs up behind it); it takes its frosted background once the page
+   scrolls (data-scrolled, set by NavScrollState). */
+.app-nav:not([data-scrolled]) {
+  background-color: transparent;
+  border-bottom-color: transparent;
+  backdrop-filter: none;
 }
 .app-nav-inner {
   max-width: 1180px;
