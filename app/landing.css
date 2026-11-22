@@ -114,52 +114,77 @@
 .lp-circuit circle { stroke: var(--lp-line); }
 .lp-circuit rect,
 .lp-circuit circle { fill: var(--lp-paper); }
-/* Cloth shader (ClothShader.tsx): full-bleed behind the hero and nav. A soft
-   cream "fabric" with a light warm halftone on top; both fade out at the bottom
-   so the hero hands over cleanly to the page. Keep the ink light: it is
-   texture behind the headline, not imagery. */
-.lp-hero {
-  --cloth-bg: #f4efe5;       /* soft cream fabric */
-  --cloth-ink: #7a6a55;      /* warm taupe thread */
-  --cloth-alpha: 0.2;
-  --cloth-fade: 62%;         /* where the bottom fade starts */
+/* ---------- Page grid + hero cloth ----------
+ * Two thin rails inset from the edges run the length of the page, with
+ * full-width dividers between sections. They sit behind the content (the
+ * dark bands and panels cover them). In the hero, ClothGrid.tsx draws the
+ * rails, a faint interior grid and the line under the nav on a soft cream
+ * "cloth", and bends them with ripples; towards the hero's bottom its lines
+ * settle and fade exactly as the cream does, handing over to the CSS rails. */
+.lp {
+  position: relative;
+  isolation: isolate; /* lets the grid sit at z-index -1, under the sections */
+  --lp-rail: clamp(16px, 5vw, 72px);    /* rail inset from the page edges */
+  --lp-grid: rgb(110 98 80 / 0.24);      /* warm hairline */
 }
+.lp-rails {
+  position: absolute;
+  inset: 0 var(--lp-rail);
+  border-inline: 1px solid var(--lp-grid);
+  pointer-events: none;
+  z-index: -1;
+}
+.lp-section,
+.lp-footer { position: relative; }
+.lp-section::before,
+.lp-footer::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  top: 44px; /* midway through the gap above the section */
+  border-top: 1px solid var(--lp-grid);
+  pointer-events: none;
+  z-index: -1;
+}
+.lp-footer::before { top: 0; }
+/* The dark band already has its own edge lines */
+.lp-dark + .lp-section::before { display: none; }
+
+.lp-hero {
+  --cloth-bg: #f4efe5;       /* soft cream cloth */
+  --cloth-fade: 62%;         /* where the cream (and the hero's lines) start to fade */
+}
+/* Cream ground, behind the nav too; anything above the page top is off-screen */
+.lp-hero::before,
 .lp-cloth {
   position: absolute;
-  /* Run up behind the (transparent-at-top) sticky nav; anything above the
-     page top is simply off-canvas. */
   top: -80px;
   left: 50%;
   width: 100vw;
-  /* A canvas is a replaced element: top/bottom don't stretch it, so give it
-     an explicit height (hero + the 80px behind the nav). */
+  /* A canvas doesn't stretch with top/bottom; give both an explicit height */
   height: calc(100% + 80px);
   transform: translateX(-50%);
-  background: var(--cloth-bg);
   pointer-events: none;
   z-index: 0;
+}
+.lp-hero::before {
+  content: "";
+  background: var(--cloth-bg);
   mask-image: linear-gradient(to bottom, #000 var(--cloth-fade), transparent 100%);
 }
 @media (max-width: 719px) {
-  /* Tall, narrow hero: hold the texture further down before it fades */
+  /* Tall, narrow hero: hold the cloth further down before it fades */
   .lp-hero { --cloth-fade: 80%; }
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .lp-hero {
-    --cloth-bg: #171510; --cloth-ink: #efe6d4; --cloth-alpha: 0.1;
-  }
+  :root:not([data-theme="light"]) .lp { --lp-grid: rgb(240 228 205 / 0.13); }
+  :root:not([data-theme="light"]) .lp-hero { --cloth-bg: #171510; }
 }
-:root[data-theme="dark"] .lp-hero {
-  --cloth-bg: #171510; --cloth-ink: #efe6d4; --cloth-alpha: 0.1;
-}
+:root[data-theme="dark"] .lp { --lp-grid: rgb(240 228 205 / 0.13); }
+:root[data-theme="dark"] .lp-hero { --cloth-bg: #171510; }
 
-.lp-hero .lp-circuit rect,
-.lp-hero .lp-circuit circle { fill: var(--cloth-bg); }
-/* Keep the lines to the edges so they never run through the headline */
-.lp-hero .lp-circuit {
-  -webkit-mask-image: radial-gradient(ellipse 56% 62% at 50% 34%, transparent 72%, #000 100%);
-  mask-image: radial-gradient(ellipse 56% 62% at 50% 34%, transparent 72%, #000 100%);
-}
 
 .lp-hero-copy {
   position: relative;

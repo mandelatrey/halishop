@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import "./landing.css";
 import LandingMotion from "./LandingMotion";
-import ClothShader from "./ClothShader";
+import ClothGrid from "./ClothGrid";
 import ReadTicks from "@/components/ReadTicks";
 
 export const metadata: Metadata = {
@@ -143,10 +143,13 @@ function StatusCardMock() {
 export default function Landing() {
   return (
     <LandingMotion>
+      {/* Page grid: two rails inset from the edges (section dividers are CSS) */}
+      <div className="lp-rails" aria-hidden />
+
       {/* ---------------- Hero ---------------- */}
       <section className="lp-hero">
-        <ClothShader className="lp-cloth" />
-        <CircuitLines />
+        {/* The hero's grid, drawn on a rippling cloth */}
+        <ClothGrid className="lp-cloth" />
         <div className="lp-hero-copy">
           <Pill>Built for entrepreneurs</Pill>
           <h1 className="lp-h1">
