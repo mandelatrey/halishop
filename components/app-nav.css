@@ -86,7 +86,7 @@
 .app-nav-links a.app-nav-cta {
   margin-left: 6px;
   padding: 10px 16px;
-  border-radius: 999px;
+  border-radius: 10px;
   background: var(--color-accent-fill);
   color: #fff;
   font-weight: 500;

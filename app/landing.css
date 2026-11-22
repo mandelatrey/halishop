@@ -513,3 +513,11 @@
   .lp-motion .lp-float,
   .lp-motion .lp-hero-note { visibility: hidden; }
 }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme=dark]) .lp-h2 { color: #1f1d1e; }
+}
+:root[data-theme=light] .lp-h2 { color: #1f1d1e; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme=dark]) .lp-h2-light { color: #ffffff; }
+}
+:root[data-theme=light] .lp-h2-light { color: #ffffff; }
