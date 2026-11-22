@@ -5,6 +5,7 @@ import { findShop, getProduct, getStorefrontButtons } from "@/lib/server-store";
 import { buttonScope } from "@/lib/brand-accent";
 import { getCurrentUser } from "@/lib/auth";
 import BuyForm from "./BuyForm";
+import BackButton from "@/components/BackButton";
 import { CartButton, CartSheet } from "@/components/Cart";
 import type { Product, Shop, Storefront } from "@/lib/types";
 
@@ -40,9 +41,7 @@ function BuyerProductScreen({
   return (
     <main {...buttonScope(shop.brandKit, buttons, "by-wrap")}>
       <div className="by-toprow">
-        <Link href={`/shop/${shop.slug}`} className="by-back">
-          <span aria-hidden>←</span> Back
-        </Link>
+        <BackButton fallbackHref={`/shop/${shop.slug}`} fallbackLabel={shop.brandKit.shopName.trim()} />
         <CartButton slug={shop.slug} />
       </div>
       <CartSheet

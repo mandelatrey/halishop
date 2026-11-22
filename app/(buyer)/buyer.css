@@ -384,6 +384,11 @@ a.by-card:hover .by-card-order svg { transform: translateX(2px); }
   padding: 6px 0;
 }
 .by-back:hover { color: var(--color-text); }
+.by-back svg { transition: transform 0.15s ease; }
+.by-back:hover svg { transform: translateX(-2px); }
+.by-back:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; border-radius: 6px; }
+/* Shop page: above the shop bar */
+.by-back.by-back-shop { margin-bottom: 10px; }
 
 .by-product {
   display: grid;
